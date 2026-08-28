@@ -29,7 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.data.model.NotificationDto
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
-import com.bloodnetwork.bangladesh.ui.components.LoadingBox
+import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.theme.BloodPink
 import com.bloodnetwork.bangladesh.ui.viewmodel.NotificationsViewModel
@@ -61,7 +61,12 @@ fun NotificationsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
         },
     ) { padding ->
         if (state.isLoading && state.notifications.isEmpty()) {
-            LoadingBox(Modifier.fillMaxSize().padding(padding))
+            Column(
+                modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                repeat(5) { SkeletonCard() }
+            }
         } else {
             LazyColumn(
                 modifier = Modifier

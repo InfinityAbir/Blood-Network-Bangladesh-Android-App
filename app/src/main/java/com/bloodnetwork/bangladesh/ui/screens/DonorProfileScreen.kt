@@ -40,6 +40,7 @@ import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RowChips
+import com.bloodnetwork.bangladesh.ui.components.DonorProfileSkeleton
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.DonorViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
@@ -198,6 +199,9 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             )
         },
     ) { padding ->
+        if (state.isLoading && !initialized) {
+            DonorProfileSkeleton()
+        } else {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -323,6 +327,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     }
                 },
             )
+        }
         }
     }
 }

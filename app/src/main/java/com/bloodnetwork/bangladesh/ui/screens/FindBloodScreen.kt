@@ -39,6 +39,7 @@ import com.bloodnetwork.bangladesh.ui.components.LoadingBox
 import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RoleBadge
+import com.bloodnetwork.bangladesh.ui.components.SearchResultsSkeleton
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.viewmodel.FindBloodViewModel
@@ -149,7 +150,7 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 }
             }
             if (state.isLoading) {
-                item { LoadingBox() }
+                item { SearchResultsSkeleton() }
             } else {
                 items(state.donors, key = { it.id }) { donor ->
                     DonorCard(donor) {

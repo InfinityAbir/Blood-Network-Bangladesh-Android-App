@@ -32,6 +32,7 @@ import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.LoadingBox
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RowChips
+import com.bloodnetwork.bangladesh.ui.components.FormFieldSkeleton
 import com.bloodnetwork.bangladesh.ui.theme.AvailableGreen
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.EligibilityViewModel
@@ -61,7 +62,12 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
         },
     ) { padding ->
         if (state.isLoading) {
-            LoadingBox(Modifier.fillMaxSize().padding(padding))
+            Column(
+                modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+            ) {
+                repeat(5) { FormFieldSkeleton() }
+            }
         } else {
             LazyColumn(
                 modifier = Modifier

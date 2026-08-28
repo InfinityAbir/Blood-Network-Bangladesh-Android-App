@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bloodnetwork.bangladesh.data.model.NotificationDto
-import com.bloodnetwork.bangladesh.ui.components.LoadingBox
+import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.theme.BloodPink
 import com.bloodnetwork.bangladesh.ui.viewmodel.NotificationsViewModel
@@ -61,7 +61,9 @@ fun NotificationBottomSheet(
             }
 
             if (state.isLoading && state.notifications.isEmpty()) {
-                LoadingBox()
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    repeat(3) { SkeletonCard() }
+                }
             } else if (state.notifications.isEmpty()) {
                 Text(
                     "No notifications yet",
