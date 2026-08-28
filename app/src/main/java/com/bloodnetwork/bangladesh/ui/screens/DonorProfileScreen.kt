@@ -67,6 +67,13 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var formError by remember { mutableStateOf<String?>(null) }
 
     var initialized by remember { mutableStateOf(false) }
+    var origBloodGroup by remember { mutableStateOf<String?>(null) }
+    var origGender by remember { mutableStateOf<String?>(null) }
+    var origDateOfBirth by remember { mutableStateOf("") }
+    var origDistrictId by remember { mutableStateOf<String?>(null) }
+    var origUpazilaId by remember { mutableStateOf<String?>(null) }
+    var origArea by remember { mutableStateOf("") }
+    var origLastDonationDate by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         locVm.loadDivisions()
@@ -88,6 +95,13 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             area = p.area ?: ""
             lastDonationDate = p.lastDonationDate?.take(10) ?: ""
             districtId?.let { locVm.loadUpazilas(it) }
+            origBloodGroup = bloodGroup
+            origGender = gender
+            origDateOfBirth = dateOfBirth
+            origDistrictId = districtId
+            origUpazilaId = upazilaId
+            origArea = area
+            origLastDonationDate = lastDonationDate
         }
     }
 
@@ -102,6 +116,34 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     }
 
     val availabilityAvailable = state.profile?.availabilityStatus == AvailabilityStatus.Available
+
+    val hasChanges = state.profile != null && (
+        bloodGroup != origBloodGroup ||
+        gender != origGender ||
+        dateOfBirth != origDateOfBirth ||
+        districtId != origDistrictId ||
+        upazilaId != origUpazilaId ||
+        area != origArea ||
+        lastDonationDate != origLastDonationDate
+    )
+
+    LaunchedEffect(hasChanges) {
+        if (hasChanges && state.saved) {
+            vm.clearSaved()
+        }
+    }
+
+    LaunchedEffect(state.saved) {
+        if (state.saved) {
+            origBloodGroup = bloodGroup
+            origGender = gender
+            origDateOfBirth = dateOfBirth
+            origDistrictId = districtId
+            origUpazilaId = upazilaId
+            origArea = area
+            origLastDonationDate = lastDonationDate
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -215,6 +257,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             PrimaryButton(
                 text = "Save Donor Profile",
                 loading = state.isLoading,
+                enabled = state.profile == null || hasChanges,
                 onClick = {
                     val group = bloodGroup?.let { label -> BloodGroup.entries.firstOrNull { it.label == label } }
                     formError = when {
