@@ -60,19 +60,20 @@ fun PrimaryButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.then(if (fillMax) Modifier.fillMaxWidth() else Modifier).heightIn(min = 50.dp),
+        modifier = modifier.then(if (fillMax) Modifier.fillMaxWidth() else Modifier).heightIn(min = if (fillMax) 50.dp else 36.dp),
         enabled = enabled && !loading,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(8.dp),
+        contentPadding = if (fillMax) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 12.dp, vertical = 6.dp),
         colors = ButtonDefaults.buttonColors(containerColor = BloodRed),
     ) {
         if (loading) {
             CircularProgressIndicator(
-                modifier = Modifier.heightIn(max = 22.dp),
+                modifier = Modifier.heightIn(max = 18.dp),
                 strokeWidth = 2.dp,
                 color = MaterialTheme.colorScheme.onPrimary,
             )
         } else {
-            Text(text)
+            Text(text, style = if (fillMax) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelMedium)
         }
     }
 }
