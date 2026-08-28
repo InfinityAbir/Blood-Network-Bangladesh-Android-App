@@ -56,10 +56,11 @@ fun PrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     loading: Boolean = false,
+    fillMax: Boolean = true,
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().heightIn(min = 50.dp),
+        modifier = modifier.then(if (fillMax) Modifier.fillMaxWidth() else Modifier).heightIn(min = 50.dp),
         enabled = enabled && !loading,
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(containerColor = BloodRed),

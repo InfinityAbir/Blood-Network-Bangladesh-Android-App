@@ -179,18 +179,26 @@ fun DonorCard(donor: PublicDonorDto, onRequest: () -> Unit = {}) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
+                    .padding(top = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     RoleBadge(donor.availabilityStatus.name)
                     donor.distanceKm?.let {
                         Text("${String.format("%.1f", it)} km", style = MaterialTheme.typography.labelLarge)
                     }
                 }
                 if (donor.availabilityStatus == com.bloodnetwork.bangladesh.data.model.AvailabilityStatus.Available) {
-                    PrimaryButton(text = "Request Blood", onClick = onRequest, modifier = Modifier)
+                    PrimaryButton(
+                        text = "Request Blood",
+                        onClick = onRequest,
+                        fillMax = false,
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
                 }
             }
         }
