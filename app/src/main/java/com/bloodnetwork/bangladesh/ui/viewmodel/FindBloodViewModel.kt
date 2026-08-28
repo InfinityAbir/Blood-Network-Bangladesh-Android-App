@@ -8,6 +8,7 @@ import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class FindBloodUiState(
@@ -24,6 +25,12 @@ class FindBloodViewModel(
 
     private val _uiState = MutableStateFlow(FindBloodUiState())
     val uiState: StateFlow<FindBloodUiState> = _uiState.asStateFlow()
+
+    val isLoggedIn: StateFlow<Boolean> = repository.isLoggedIn.let { flow ->
+        MutableStateFlow(false).also { state ->
+            viewModelScope.launch { flow.collect { state.value = it } }
+        }
+    }
 
     fun search(bloodGroup: BloodGroup?, districtId: String?, upazilaId: String?) {
         _uiState.value = FindBloodUiState(isLoading = true)

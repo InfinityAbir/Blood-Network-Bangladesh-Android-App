@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,6 +40,7 @@ import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RoleBadge
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.viewmodel.FindBloodViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
 
@@ -51,6 +53,7 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
 
     val state by vm.uiState.collectAsStateWithLifecycle()
     val locState by locVm.uiState.collectAsStateWithLifecycle()
+    val isLoggedIn by vm.isLoggedIn.collectAsStateWithLifecycle()
 
     var selectedGroup by remember { mutableStateOf<String?>(null) }
     var selectedDivisionId by remember { mutableStateOf<String?>(null) }
@@ -149,7 +152,9 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 item { LoadingBox() }
             } else {
                 items(state.donors, key = { it.id }) { donor ->
-                    DonorCard(donor)
+                    DonorCard(donor) {
+                        if (isLoggedIn) onNavigate(Routes.REQUEST_BLOOD) else onNavigate(Routes.LOGIN)
+                    }
                 }
             }
         }
@@ -157,7 +162,7 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
 }
 
 @Composable
-fun DonorCard(donor: PublicDonorDto) {
+fun DonorCard(donor: PublicDonorDto, onRequest: () -> Unit = {}) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -172,12 +177,20 @@ fun DonorCard(donor: PublicDonorDto) {
                 style = MaterialTheme.typography.bodyMedium,
             )
             Row(
-                modifier = Modifier.padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                RoleBadge(donor.availabilityStatus.name)
-                donor.distanceKm?.let {
-                    Text("${String.format("%.1f", it)} km", style = MaterialTheme.typography.labelLarge)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    RoleBadge(donor.availabilityStatus.name)
+                    donor.distanceKm?.let {
+                        Text("${String.format("%.1f", it)} km", style = MaterialTheme.typography.labelLarge)
+                    }
+                }
+                if (donor.availabilityStatus == com.bloodnetwork.bangladesh.data.model.AvailabilityStatus.Available) {
+                    PrimaryButton(text = "Request Blood", onClick = onRequest, modifier = Modifier)
                 }
             }
         }
