@@ -1,0 +1,162 @@
+package com.bloodnetwork.bangladesh.data.network
+
+import com.bloodnetwork.bangladesh.data.model.AuthResponse
+import com.bloodnetwork.bangladesh.data.model.BloodGroup
+import com.bloodnetwork.bangladesh.data.model.ChatRequest
+import com.bloodnetwork.bangladesh.data.model.ChatResponse
+import com.bloodnetwork.bangladesh.data.model.BloodRequestDto
+import com.bloodnetwork.bangladesh.data.model.BloodRequestMatchDto
+import com.bloodnetwork.bangladesh.data.model.CreateBloodRequestRequest
+import com.bloodnetwork.bangladesh.data.model.CreateDonorProfileRequest
+import com.bloodnetwork.bangladesh.data.model.DistrictDto
+import com.bloodnetwork.bangladesh.data.model.DivisionDto
+import com.bloodnetwork.bangladesh.data.model.DonorProfileDto
+import com.bloodnetwork.bangladesh.data.model.EligibilityAnswerDto
+import com.bloodnetwork.bangladesh.data.model.EligibilityQuestionDto
+import com.bloodnetwork.bangladesh.data.model.EligibilityResultDto
+import com.bloodnetwork.bangladesh.data.model.FirstLoginChangeRequest
+import com.bloodnetwork.bangladesh.data.model.LoginRequest
+import com.bloodnetwork.bangladesh.data.model.MarkNotificationReadRequest
+import com.bloodnetwork.bangladesh.data.model.NotificationDto
+import com.bloodnetwork.bangladesh.data.model.PagedResult
+import com.bloodnetwork.bangladesh.data.model.PublicBloodRequestDto
+import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
+import com.bloodnetwork.bangladesh.data.model.RefreshTokenRequest
+import com.bloodnetwork.bangladesh.data.model.RegisterRequest
+import com.bloodnetwork.bangladesh.data.model.RespondToMatchRequest
+import com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest
+import com.bloodnetwork.bangladesh.data.model.UnreadCountDto
+import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
+import com.bloodnetwork.bangladesh.data.model.UpazilaDto
+import com.bloodnetwork.bangladesh.data.model.UserDto
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
+import retrofit2.http.Query
+
+interface BloodNetworkApi {
+
+    // ---- Auth ----
+    @POST("api/auth/register")
+    suspend fun register(@Body request: RegisterRequest): AuthResponse
+
+    @POST("api/auth/login")
+    suspend fun login(@Body request: LoginRequest): AuthResponse
+
+    @POST("api/auth/refresh")
+    suspend fun refreshToken(@Body request: RefreshTokenRequest): AuthResponse
+
+    @POST("api/auth/logout")
+    suspend fun logout(@Body request: RefreshTokenRequest): Unit
+
+    @POST("api/auth/first-login-change")
+    suspend fun firstLoginChange(@Body request: FirstLoginChangeRequest): Unit
+
+    @PUT("api/auth/profile")
+    suspend fun updateProfile(@Body request: FirstLoginChangeRequest): Unit
+
+    @GET("api/auth/me")
+    suspend fun me(): UserDto
+
+    // ---- Donors ----
+    @POST("api/donors/me/profile")
+    suspend fun createDonorProfile(@Body request: CreateDonorProfileRequest): DonorProfileDto
+
+    @PUT("api/donors/me/profile")
+    suspend fun updateDonorProfile(@Body request: UpdateDonorProfileRequest): DonorProfileDto
+
+    @GET("api/donors/me/profile")
+    suspend fun getMyDonorProfile(): DonorProfileDto
+
+    @PATCH("api/donors/me/availability")
+    suspend fun toggleAvailability(@Body request: ToggleAvailabilityRequest): DonorProfileDto
+
+    @GET("api/donors/search")
+    suspend fun searchDonors(
+        @Query("bloodGroup") bloodGroup: BloodGroup? = null,
+        @Query("districtId") districtId: String? = null,
+        @Query("upazilaId") upazilaId: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20,
+    ): PagedResult<PublicDonorDto>
+
+    // ---- Blood Requests ----
+    @POST("api/blood-requests")
+    suspend fun createBloodRequest(@Body request: CreateBloodRequestRequest): BloodRequestDto
+
+    @GET("api/blood-requests/{id}")
+    suspend fun getBloodRequest(@Path("id") id: String): BloodRequestDto
+
+    @GET("api/blood-requests/my")
+    suspend fun getMyBloodRequests(): List<BloodRequestDto>
+
+    @GET("api/blood-requests/open")
+    suspend fun getOpenBloodRequests(
+        @Query("bloodGroup") bloodGroup: BloodGroup? = null,
+        @Query("districtId") districtId: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20,
+    ): PagedResult<PublicBloodRequestDto>
+
+    @PATCH("api/blood-requests/{id}/cancel")
+    suspend fun cancelBloodRequest(@Path("id") id: String): Unit
+
+    @PATCH("api/blood-requests/{id}/fulfill")
+    suspend fun fulfillBloodRequest(@Path("id") id: String): Unit
+
+    // ---- Locations ----
+    @GET("api/locations/divisions")
+    suspend fun getDivisions(): List<DivisionDto>
+
+    @GET("api/locations/districts")
+    suspend fun getDistricts(@Query("divisionId") divisionId: String? = null): List<DistrictDto>
+
+    @GET("api/locations/upazilas")
+    suspend fun getUpazilas(@Query("districtId") districtId: String? = null): List<UpazilaDto>
+
+    // ---- Matches ----
+    @GET("api/matches/request/{requestId}")
+    suspend fun getMatchesForRequest(@Path("requestId") requestId: String): List<BloodRequestMatchDto>
+
+    @GET("api/matches/donor")
+    suspend fun getDonorMatches(): List<BloodRequestMatchDto>
+
+    @POST("api/matches/{matchId}/respond")
+    suspend fun respondToMatch(
+        @Path("matchId") matchId: String,
+        @Body request: RespondToMatchRequest,
+    ): BloodRequestMatchDto
+
+    @POST("api/matches/request/{requestId}/trigger-match")
+    suspend fun triggerMatch(@Path("requestId") requestId: String): Unit
+
+    // ---- Notifications ----
+    @GET("api/notifications")
+    suspend fun getNotifications(): List<NotificationDto>
+
+    @GET("api/notifications/unread-count")
+    suspend fun getUnreadCount(): UnreadCountDto
+
+    @POST("api/notifications/{notificationId}/read")
+    suspend fun markNotificationRead(
+        @Path("notificationId") notificationId: String,
+        @Body request: MarkNotificationReadRequest,
+    ): NotificationDto
+
+    @POST("api/notifications/read-all")
+    suspend fun markAllNotificationsRead(): Unit
+
+    // ---- Eligibility (public) ----
+    @GET("api/ai/eligibility/questions")
+    suspend fun getEligibilityQuestions(): List<EligibilityQuestionDto>
+
+    @POST("api/ai/eligibility/check")
+    suspend fun checkEligibility(@Body answers: List<EligibilityAnswerDto>): EligibilityResultDto
+
+    // ---- AI chatbot (proxies Groq server-side; no API key in the app) ----
+    @POST("api/chat")
+    suspend fun chat(@Body request: ChatRequest): ChatResponse
+}

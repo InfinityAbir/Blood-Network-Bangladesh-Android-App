@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Network security configuration: cleartext is never allowed (HTTPS only)
+    and only the platform's system-trusted CAs are used. This protects against
+    man-in-the-middle attacks using a user-installed CA certificate.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

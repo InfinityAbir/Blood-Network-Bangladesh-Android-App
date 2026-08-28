@@ -1,0 +1,130 @@
+package com.bloodnetwork.bangladesh.ui.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
+import com.bloodnetwork.bangladesh.data.model.AvailabilityStatus
+import com.bloodnetwork.bangladesh.data.model.BloodGroup
+import com.bloodnetwork.bangladesh.data.model.CreateDonorProfileRequest
+import com.bloodnetwork.bangladesh.data.model.DonorProfileDto
+import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+data class DonorUiState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val profile: DonorProfileDto? = null,
+    val hasProfile: Boolean = false,
+    val saved: Boolean = false,
+)
+
+class DonorViewModel(
+    private val repository: BloodNetworkRepository,
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(DonorUiState())
+    val uiState: StateFlow<DonorUiState> = _uiState.asStateFlow()
+
+    fun loadProfile() {
+        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+        viewModelScope.launch {
+            try {
+                val profile = repository.getMyDonorProfile()
+                _uiState.value = DonorUiState(
+                    profile = profile,
+                    hasProfile = true,
+                )
+            } catch (e: com.bloodnetwork.bangladesh.data.network.ApiException) {
+                if (e.code == 404) {
+                    _uiState.value = DonorUiState(hasProfile = false, error = null)
+                } else {
+                    _uiState.value = DonorUiState(hasProfile = false, error = e.message)
+                }
+            } catch (e: Exception) {
+                val msg = e.message ?: ""
+                val isNotFound = msg.contains("404", ignoreCase = true) ||
+                        msg.contains("not found", ignoreCase = true) ||
+                        msg.contains("No donor profile", ignoreCase = true)
+                _uiState.value = DonorUiState(
+                    hasProfile = false,
+                    error = if (isNotFound) null else msg.ifBlank { "Failed to load profile" },
+                )
+            }
+        }
+    }
+
+    fun saveOrUpdate(
+        bloodGroup: BloodGroup,
+        gender: String?,
+        dateOfBirth: String?,
+        districtId: String,
+        upazilaId: String,
+        area: String?,
+        lastDonationDate: String?,
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            try {
+                val result = if (_uiState.value.hasProfile || _uiState.value.profile != null) {
+                    repository.updateDonorProfile(
+                        UpdateDonorProfileRequest(
+                            bloodGroup = bloodGroup,
+                            gender = gender,
+                            dateOfBirth = dateOfBirth,
+                            districtId = districtId,
+                            upazilaId = upazilaId,
+                            area = area,
+                            lastDonationDate = lastDonationDate,
+                        )
+                    )
+                } else {
+                    repository.createDonorProfile(
+                        CreateDonorProfileRequest(
+                            bloodGroup = bloodGroup,
+                            gender = gender,
+                            dateOfBirth = dateOfBirth,
+                            districtId = districtId,
+                            upazilaId = upazilaId,
+                            area = area,
+                            lastDonationDate = lastDonationDate,
+                        )
+                    )
+                }
+                _uiState.value = DonorUiState(
+                    profile = result,
+                    hasProfile = true,
+                    saved = true,
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Failed to save profile",
+                )
+            }
+        }
+    }
+
+    fun updateAvailability(status: AvailabilityStatus) {
+        viewModelScope.launch {
+            if (_uiState.value.profile == null && !_uiState.value.hasProfile) {
+                _uiState.value = _uiState.value.copy(error = "Please save your donor profile first")
+                return@launch
+            }
+            try {
+                val profile = repository.toggleAvailability(com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest(status))
+                _uiState.value = _uiState.value.copy(profile = profile, error = null, hasProfile = true)
+            } catch (e: com.bloodnetwork.bangladesh.data.network.ApiException) {
+                _uiState.value = _uiState.value.copy(error = "[${e.code}] ${e.message}")
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(error = e.message ?: "Failed to update availability")
+            }
+        }
+    }
+
+    fun clearSaved() {
+        _uiState.value = _uiState.value.copy(saved = false)
+    }
+}
