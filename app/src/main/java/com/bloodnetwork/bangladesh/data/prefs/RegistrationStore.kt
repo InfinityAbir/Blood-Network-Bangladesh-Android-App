@@ -14,20 +14,23 @@ private val Context.registrationDataStore by preferencesDataStore(name = "regist
 class RegistrationStore(private val context: Context) {
 
     private object Keys {
-        val FULL_NAME = stringPreferencesKey("full_name")
+        val FIRST_NAME = stringPreferencesKey("first_name")
+        val LAST_NAME = stringPreferencesKey("last_name")
         val PHONE_NUMBER = stringPreferencesKey("phone_number")
         val PASSWORD = stringPreferencesKey("password")
     }
 
     data class RegistrationData(
-        val fullName: String = "",
+        val firstName: String = "",
+        val lastName: String = "",
         val phoneNumber: String = "",
         val password: String = "",
     )
 
     val data: Flow<RegistrationData> = context.registrationDataStore.data.map { prefs ->
         RegistrationData(
-            fullName = prefs[Keys.FULL_NAME] ?: "",
+            firstName = prefs[Keys.FIRST_NAME] ?: "",
+            lastName = prefs[Keys.LAST_NAME] ?: "",
             phoneNumber = prefs[Keys.PHONE_NUMBER] ?: "",
             password = prefs[Keys.PASSWORD] ?: "",
         )
@@ -35,7 +38,8 @@ class RegistrationStore(private val context: Context) {
 
     suspend fun save(data: RegistrationData) {
         context.registrationDataStore.edit { prefs ->
-            prefs[Keys.FULL_NAME] = data.fullName
+            prefs[Keys.FIRST_NAME] = data.firstName
+            prefs[Keys.LAST_NAME] = data.lastName
             prefs[Keys.PHONE_NUMBER] = data.phoneNumber
             prefs[Keys.PASSWORD] = data.password
         }

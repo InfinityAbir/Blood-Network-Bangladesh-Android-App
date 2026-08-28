@@ -60,8 +60,8 @@ fun RegisterScreen(
     LaunchedEffect(savedData) {
         if (!initialized) {
             initialized = true
-            firstName = savedData.fullName.substringBefore(" ").ifBlank { "" }
-            lastName = savedData.fullName.substringAfter(" ").ifBlank { "" }
+            firstName = savedData.firstName
+            lastName = savedData.lastName
             phone = savedData.phoneNumber
             password = savedData.password
         }
