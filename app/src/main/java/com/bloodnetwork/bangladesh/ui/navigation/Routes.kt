@@ -11,4 +11,6 @@ object Routes {
     const val DONOR_DASHBOARD = "donor_dashboard"
     const val DONOR_PROFILE = "donor_profile"
     const val CHATBOT = "chatbot"
+    const val EDIT_PROFILE = "edit_profile"
+    const val ADMIN_DASHBOARD = "admin_dashboard"
 }

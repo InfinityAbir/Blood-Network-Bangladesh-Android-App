@@ -66,6 +66,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var upazilaId by remember { mutableStateOf<String?>(null) }
     var upazilaName by remember { mutableStateOf<String?>(null) }
     var area by remember { mutableStateOf("") }
+    var customAddress by remember { mutableStateOf("") }
     var lastDonationDate by remember { mutableStateOf("") }
     var formError by remember { mutableStateOf<String?>(null) }
 
@@ -90,6 +91,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             upazilaId = upazilaId ?: "",
             upazilaName = upazilaName ?: "",
             area = area,
+            customAddress = customAddress,
             lastDonationDate = lastDonationDate,
         ))
     }
@@ -113,6 +115,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 upazilaId = p.upazilaId.takeIf { it.isNotBlank() }
                 upazilaName = p.upazilaName
                 area = p.area ?: ""
+                customAddress = p.customAddress ?: ""
                 lastDonationDate = p.lastDonationDate?.take(10) ?: ""
                 districtId?.let { locVm.loadUpazilas(it) }
                 origBloodGroup = bloodGroup
@@ -135,6 +138,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             upazilaId = draftData.upazilaId.ifBlank { null }
             upazilaName = draftData.upazilaName.ifBlank { null }
             area = draftData.area
+            customAddress = draftData.customAddress
             lastDonationDate = draftData.lastDonationDate
             districtId?.let { locVm.loadUpazilas(it) }
             origBloodGroup = bloodGroup
@@ -269,6 +273,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 },
             )
             LabeledTextField(area, { area = it; saveDraft() }, "Area (optional)")
+            LabeledTextField(customAddress, { customAddress = it; saveDraft() }, "Custom Address (if not in dropdown)")
             DatePickerField(lastDonationDate, { lastDonationDate = it; saveDraft() }, "Last Donation Date")
 
             if (state.profile != null) {
@@ -322,6 +327,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                             districtId = districtId!!,
                             upazilaId = upazilaId!!,
                             area = area,
+                            customAddress = customAddress.ifBlank { null },
                             lastDonationDate = lastDonationDate.ifBlank { null },
                         )
                     }

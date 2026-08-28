@@ -28,7 +28,14 @@ import com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest
 import com.bloodnetwork.bangladesh.data.model.UnreadCountDto
 import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UpazilaDto
+import com.bloodnetwork.bangladesh.data.model.UpdateProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UserDto
+import com.bloodnetwork.bangladesh.data.model.AdminDashboardStats
+import com.bloodnetwork.bangladesh.data.model.AdminUserDto
+import com.bloodnetwork.bangladesh.data.model.AdminReportDto
+import com.bloodnetwork.bangladesh.data.model.AdminAuditLogDto
+import com.bloodnetwork.bangladesh.data.model.ToggleUserActiveRequest
+import com.bloodnetwork.bangladesh.data.model.ResolveReportRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.PATCH
@@ -56,7 +63,7 @@ interface BloodNetworkApi {
     suspend fun firstLoginChange(@Body request: FirstLoginChangeRequest): Unit
 
     @PUT("api/auth/profile")
-    suspend fun updateProfile(@Body request: FirstLoginChangeRequest): Unit
+    suspend fun updateProfile(@Body request: UpdateProfileRequest): UserDto
 
     @GET("api/auth/me")
     suspend fun me(): UserDto
@@ -159,4 +166,42 @@ interface BloodNetworkApi {
     // ---- AI chatbot (proxies Groq server-side; no API key in the app) ----
     @POST("api/chat")
     suspend fun chat(@Body request: ChatRequest): ChatResponse
+
+    // ---- Admin ----
+    @GET("admin/dashboard")
+    suspend fun getAdminDashboard(): AdminDashboardStats
+
+    @GET("admin/users")
+    suspend fun getAdminUsers(
+        @Query("search") search: String? = null,
+        @Query("role") role: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20,
+    ): PagedResult<AdminUserDto>
+
+    @POST("admin/users/{userId}/toggle-active")
+    suspend fun toggleUserActive(
+        @Path("userId") userId: String,
+        @Body request: ToggleUserActiveRequest,
+    ): AdminUserDto
+
+    @GET("admin/reports")
+    suspend fun getAdminReports(
+        @Query("status") status: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20,
+    ): PagedResult<AdminReportDto>
+
+    @POST("admin/reports/{reportId}/resolve")
+    suspend fun resolveReport(
+        @Path("reportId") reportId: String,
+        @Body request: ResolveReportRequest,
+    ): AdminReportDto
+
+    @GET("admin/audit-logs")
+    suspend fun getAdminAuditLogs(
+        @Query("entityType") entityType: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20,
+    ): PagedResult<AdminAuditLogDto>
 }

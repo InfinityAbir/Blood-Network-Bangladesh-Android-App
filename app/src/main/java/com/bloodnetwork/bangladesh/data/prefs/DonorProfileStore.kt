@@ -22,6 +22,7 @@ class DonorProfileStore(private val context: Context) {
         val UPAZILA_ID = stringPreferencesKey("upazila_id")
         val UPAZILA_NAME = stringPreferencesKey("upazila_name")
         val AREA = stringPreferencesKey("area")
+        val CUSTOM_ADDRESS = stringPreferencesKey("custom_address")
         val LAST_DONATION_DATE = stringPreferencesKey("last_donation_date")
     }
 
@@ -36,6 +37,7 @@ class DonorProfileStore(private val context: Context) {
         val upazilaId: String = "",
         val upazilaName: String = "",
         val area: String = "",
+        val customAddress: String = "",
         val lastDonationDate: String = "",
     )
 
@@ -51,6 +53,7 @@ class DonorProfileStore(private val context: Context) {
             upazilaId = prefs[Keys.UPAZILA_ID] ?: "",
             upazilaName = prefs[Keys.UPAZILA_NAME] ?: "",
             area = prefs[Keys.AREA] ?: "",
+            customAddress = prefs[Keys.CUSTOM_ADDRESS] ?: "",
             lastDonationDate = prefs[Keys.LAST_DONATION_DATE] ?: "",
         )
     }
@@ -67,6 +70,7 @@ class DonorProfileStore(private val context: Context) {
             prefs[Keys.UPAZILA_ID] = data.upazilaId
             prefs[Keys.UPAZILA_NAME] = data.upazilaName
             prefs[Keys.AREA] = data.area
+            prefs[Keys.CUSTOM_ADDRESS] = data.customAddress
             prefs[Keys.LAST_DONATION_DATE] = data.lastDonationDate
         }
     }

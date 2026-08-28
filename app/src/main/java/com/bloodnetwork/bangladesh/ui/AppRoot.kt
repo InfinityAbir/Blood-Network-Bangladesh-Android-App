@@ -26,6 +26,8 @@ import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.screens.ChatbotScreen
 import com.bloodnetwork.bangladesh.ui.screens.DonorDashboardScreen
 import com.bloodnetwork.bangladesh.ui.screens.DonorProfileScreen
+import com.bloodnetwork.bangladesh.ui.screens.AdminDashboardScreen
+import com.bloodnetwork.bangladesh.ui.screens.EditProfileScreen
 import com.bloodnetwork.bangladesh.ui.screens.EligibilityScreen
 import com.bloodnetwork.bangladesh.ui.screens.FindBloodScreen
 import com.bloodnetwork.bangladesh.ui.screens.LandingScreen
@@ -83,7 +85,11 @@ fun AppRoot(repository: BloodNetworkRepository) {
                     LoginScreen(
                         onNavigate = navController::navigate,
                         vm = authVm,
-                        onLoggedIn = { navController.navigate(Routes.DONOR_DASHBOARD) { popUpTo(Routes.LANDING) { inclusive = true } } },
+                        onLoggedIn = {
+                            val user = authVm.uiState.value.user
+                            val dest = if (user?.role == com.bloodnetwork.bangladesh.data.model.UserRole.Admin) Routes.ADMIN_DASHBOARD else Routes.DONOR_DASHBOARD
+                            navController.navigate(dest) { popUpTo(Routes.LANDING) { inclusive = true } }
+                        },
                         onBack = { navController.popBackStack() },
                     )
                 }
@@ -91,7 +97,11 @@ fun AppRoot(repository: BloodNetworkRepository) {
                     RegisterScreen(
                         onNavigate = navController::navigate,
                         vm = authVm,
-                        onRegistered = { navController.navigate(Routes.DONOR_DASHBOARD) { popUpTo(Routes.LANDING) { inclusive = true } } },
+                        onRegistered = {
+                            val user = authVm.uiState.value.user
+                            val dest = if (user?.role == com.bloodnetwork.bangladesh.data.model.UserRole.Admin) Routes.ADMIN_DASHBOARD else Routes.DONOR_DASHBOARD
+                            navController.navigate(dest) { popUpTo(Routes.LANDING) { inclusive = true } }
+                        },
                         onBack = { navController.popBackStack() },
                     )
                 }
@@ -125,6 +135,12 @@ fun AppRoot(repository: BloodNetworkRepository) {
                 composable(Routes.CHATBOT) {
                     val vm: ChatbotViewModel = viewModel(factory = factory)
                     ChatbotScreen(onBack = { navController.popBackStack() }, vm = vm)
+                }
+                composable(Routes.EDIT_PROFILE) {
+                    EditProfileScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                }
+                composable(Routes.ADMIN_DASHBOARD) {
+                    AdminDashboardScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
                 }
             }
         }

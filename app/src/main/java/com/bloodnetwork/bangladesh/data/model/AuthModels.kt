@@ -54,6 +54,14 @@ data class FirstLoginChangeRequest(
 )
 
 @Serializable
+data class UpdateProfileRequest(
+    @SerialName("currentPassword") val currentPassword: String,
+    @SerialName("newEmail") val newEmail: String? = null,
+    @SerialName("newPhoneNumber") val newPhoneNumber: String? = null,
+    @SerialName("newPassword") val newPassword: String? = null,
+)
+
+@Serializable
 data class ApiError(
     @SerialName("message") val message: String? = null,
 )

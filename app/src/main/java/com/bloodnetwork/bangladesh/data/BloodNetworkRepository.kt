@@ -24,7 +24,14 @@ import com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest
 import com.bloodnetwork.bangladesh.data.model.UnreadCountDto
 import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UpazilaDto
+import com.bloodnetwork.bangladesh.data.model.UpdateProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UserDto
+import com.bloodnetwork.bangladesh.data.model.AdminDashboardStats
+import com.bloodnetwork.bangladesh.data.model.AdminUserDto
+import com.bloodnetwork.bangladesh.data.model.AdminReportDto
+import com.bloodnetwork.bangladesh.data.model.AdminAuditLogDto
+import com.bloodnetwork.bangladesh.data.model.ToggleUserActiveRequest
+import com.bloodnetwork.bangladesh.data.model.ResolveReportRequest
 import com.bloodnetwork.bangladesh.data.network.BloodNetworkApi
 import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
 import com.bloodnetwork.bangladesh.data.prefs.EligibilityStore
@@ -141,4 +148,15 @@ class BloodNetworkRepository(
     val donorProfileData: Flow<DonorProfileStore.DonorProfileData> = donorProfileStore.data
     suspend fun saveDonorProfileData(data: DonorProfileStore.DonorProfileData) = donorProfileStore.save(data)
     suspend fun clearDonorProfileData() = donorProfileStore.clear()
+
+    // ---- Profile ----
+    suspend fun updateProfile(request: UpdateProfileRequest): UserDto = api.updateProfile(request)
+
+    // ---- Admin ----
+    suspend fun getAdminDashboard(): AdminDashboardStats = api.getAdminDashboard()
+    suspend fun getAdminUsers(search: String? = null, role: String? = null, page: Int = 1, pageSize: Int = 20) = api.getAdminUsers(search, role, page, pageSize)
+    suspend fun toggleUserActive(userId: String, isActive: Boolean): AdminUserDto = api.toggleUserActive(userId, ToggleUserActiveRequest(isActive))
+    suspend fun getAdminReports(status: String? = null, page: Int = 1, pageSize: Int = 20) = api.getAdminReports(status, page, pageSize)
+    suspend fun resolveReport(reportId: String, status: String, resolution: String? = null): AdminReportDto = api.resolveReport(reportId, ResolveReportRequest(status, resolution))
+    suspend fun getAdminAuditLogs(entityType: String? = null, page: Int = 1, pageSize: Int = 20) = api.getAdminAuditLogs(entityType, page, pageSize)
 }

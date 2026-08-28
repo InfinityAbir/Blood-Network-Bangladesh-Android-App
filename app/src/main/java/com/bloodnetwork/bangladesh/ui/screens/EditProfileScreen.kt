@@ -1,0 +1,117 @@
+package com.bloodnetwork.bangladesh.ui.screens
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bloodnetwork.bangladesh.ui.LocalVmFactory
+import com.bloodnetwork.bangladesh.ui.components.ErrorText
+import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
+import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
+import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+import com.bloodnetwork.bangladesh.ui.viewmodel.EditProfileViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
+    val factory = LocalVmFactory.current!!
+    val vm: EditProfileViewModel = viewModel(factory = factory)
+    val state by vm.uiState.collectAsStateWithLifecycle()
+
+    var newPhone by remember { mutableStateOf("") }
+    var newEmail by remember { mutableStateOf("") }
+    var currentPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmNewPassword by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf<String?>(null) }
+
+    val hasChanges = newPhone.isNotBlank() || newEmail.isNotBlank() || newPassword.isNotBlank()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Edit Profile") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text("Change Phone Number", style = MaterialTheme.typography.titleMedium)
+            LabeledTextField(newPhone, { newPhone = it }, "New Phone Number (optional)",
+                keyboardType = KeyboardType.Phone)
+
+            Text("Change Email", style = MaterialTheme.typography.titleMedium)
+            LabeledTextField(newEmail, { newEmail = it }, "New Email (optional)",
+                keyboardType = KeyboardType.Email)
+
+            Text("Change Password", style = MaterialTheme.typography.titleMedium)
+            LabeledTextField(currentPassword, { currentPassword = it }, "Current Password",
+                isPassword = true)
+            LabeledTextField(newPassword, { newPassword = it }, "New Password (optional)",
+                isPassword = true)
+            LabeledTextField(confirmNewPassword, { confirmNewPassword = it }, "Confirm New Password",
+                isPassword = true)
+
+            localError?.let { ErrorText(it) }
+            state.error?.let { ErrorText(it) }
+
+            if (state.success) {
+                Text("Profile updated successfully", color = BloodRed, style = MaterialTheme.typography.labelLarge)
+            }
+
+            PrimaryButton(
+                text = "Update Profile",
+                loading = state.isLoading,
+                enabled = hasChanges && currentPassword.isNotBlank(),
+                onClick = {
+                    localError = when {
+                        currentPassword.isBlank() -> "Enter current password"
+                        newPassword.isNotBlank() && newPassword != confirmNewPassword -> "Passwords do not match"
+                        newPassword.isNotBlank() && newPassword.length < 8 -> "Password must be at least 8 characters"
+                        else -> null
+                    }
+                    if (localError == null) {
+                        vm.updateProfile(
+                            currentPassword = currentPassword,
+                            newPhone = newPhone.ifBlank { null },
+                            newEmail = newEmail.ifBlank { null },
+                            newPassword = newPassword.ifBlank { null },
+                        )
+                    }
+                },
+            )
+        }
+    }
+}

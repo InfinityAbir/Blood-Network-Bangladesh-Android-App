@@ -82,6 +82,7 @@ class DonorViewModel(
         districtId: String,
         upazilaId: String,
         area: String?,
+        customAddress: String?,
         lastDonationDate: String?,
     ) {
         viewModelScope.launch {
@@ -96,6 +97,7 @@ class DonorViewModel(
                             districtId = districtId,
                             upazilaId = upazilaId,
                             area = area,
+                            customAddress = customAddress,
                             lastDonationDate = lastDonationDate,
                         )
                     )
@@ -108,6 +110,7 @@ class DonorViewModel(
                             districtId = districtId,
                             upazilaId = upazilaId,
                             area = area,
+                            customAddress = customAddress,
                             lastDonationDate = lastDonationDate,
                         )
                     )

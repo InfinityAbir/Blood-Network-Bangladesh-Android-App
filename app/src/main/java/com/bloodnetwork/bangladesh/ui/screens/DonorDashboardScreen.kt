@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -57,6 +58,7 @@ private val actions = listOf(
     DashboardAction("Donate Blood", "Check eligibility and become a donor", Icons.Filled.WaterDrop, Routes.ELIGIBILITY),
     DashboardAction("Request Blood", "Create a new blood request", Icons.Filled.HealthAndSafety, Routes.REQUEST_BLOOD),
     DashboardAction("My Donor Profile", "Manage your donor profile and availability", Icons.Filled.Person, Routes.DONOR_PROFILE),
+    DashboardAction("Edit Profile", "Change your phone, email or password", Icons.Filled.Settings, Routes.EDIT_PROFILE),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
