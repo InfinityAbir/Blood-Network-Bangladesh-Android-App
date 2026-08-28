@@ -36,7 +36,7 @@ class AuthViewModel(
         }
         viewModelScope.launch {
             val saved = repository.registrationData.first()
-            if (saved.fullName.isNotEmpty() || saved.phoneNumber.isNotEmpty()) {
+            if (saved.firstName.isNotEmpty() || saved.phoneNumber.isNotEmpty()) {
                 _registrationData.value = saved
             }
         }
