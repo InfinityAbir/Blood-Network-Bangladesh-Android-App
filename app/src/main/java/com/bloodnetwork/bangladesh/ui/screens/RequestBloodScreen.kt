@@ -71,6 +71,8 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var additionalInfo by remember { mutableStateOf("") }
     var formError by remember { mutableStateOf<String?>(null) }
 
+    val requiredFilled = bloodGroup != null && units.toIntOrNull() != null && hospitalName.isNotBlank() && districtId != null && upazilaId != null && requiredBy.isNotBlank() && contactPhone.length >= 10
+
     LaunchedEffect(Unit) {
         locVm.loadDivisions()
         vm.loadMyRequests()
@@ -184,6 +186,7 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             PrimaryButton(
                 text = "Submit Request",
                 loading = state.isLoading,
+                enabled = requiredFilled,
                 onClick = {
                     val group = bloodGroup?.let { label -> BloodGroup.entries.firstOrNull { it.label == label } }
                     formError = when {

@@ -17,6 +17,7 @@ data class EligibilityUiState(
     val answers: Map<Int, String> = emptyMap(),
     val result: EligibilityResultDto? = null,
     val error: String? = null,
+    val lastCheckedAnswers: Map<Int, String>? = null,
 )
 
 class EligibilityViewModel(
@@ -51,7 +52,7 @@ class EligibilityViewModel(
         viewModelScope.launch {
             val payload = state.questions.map { EligibilityAnswerDto(it.id, answers[it.id] ?: "") }
             runCatching { repository.checkEligibility(payload) }
-                .onSuccess { _uiState.value = _uiState.value.copy(result = it, isLoading = false) }
+                .onSuccess { _uiState.value = _uiState.value.copy(result = it, isLoading = false, lastCheckedAnswers = answers) }
                 .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.message) }
         }
     }

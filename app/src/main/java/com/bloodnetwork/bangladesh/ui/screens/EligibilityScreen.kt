@@ -45,6 +45,9 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
 
     LaunchedEffect(Unit) { vm.loadQuestions() }
 
+    val allAnswered = state.questions.isNotEmpty() && state.questions.all { state.answers.containsKey(it.id) }
+    val hasChanges = state.lastCheckedAnswers == null || state.answers != state.lastCheckedAnswers
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -80,7 +83,7 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 }
                 item {
                     ErrorText(state.error)
-                    PrimaryButton(text = "Check Eligibility", onClick = { vm.checkEligibility() }, loading = state.isLoading)
+                    PrimaryButton(text = "Check Eligibility", onClick = { vm.checkEligibility() }, loading = state.isLoading, enabled = allAnswered && hasChanges)
                 }
                 state.result?.let { result ->
                     item {

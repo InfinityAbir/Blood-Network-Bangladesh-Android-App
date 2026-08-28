@@ -60,6 +60,8 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var selectedDistrictName by remember { mutableStateOf<String?>(null) }
     var selectedUpazilaName by remember { mutableStateOf<String?>(null) }
 
+    val hasCriteria = selectedGroup != null || selectedDistrictId != null
+
     LaunchedEffect(Unit) { locVm.loadDivisions() }
 
     Scaffold(
@@ -135,7 +137,7 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                         BloodGroup.entries.firstOrNull { it.label == label }
                     }
                     vm.search(group, selectedDistrictId, selectedUpazilaId)
-                })
+                }, enabled = hasCriteria)
                 ErrorText(state.error)
             }
             item {
