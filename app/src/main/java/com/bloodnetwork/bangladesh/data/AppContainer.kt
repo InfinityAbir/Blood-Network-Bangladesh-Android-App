@@ -4,6 +4,9 @@ import android.content.Context
 import com.bloodnetwork.bangladesh.data.network.ApiClient
 import com.bloodnetwork.bangladesh.data.network.AuthInterceptor
 import com.bloodnetwork.bangladesh.data.network.BloodNetworkApi
+import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
+import com.bloodnetwork.bangladesh.data.prefs.EligibilityStore
+import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.data.prefs.TokenStore
 
 /**
@@ -16,6 +19,12 @@ class AppContainer(context: Context) {
 
     val tokenStore: TokenStore by lazy { TokenStore(appContext) }
 
+    val eligibilityStore: EligibilityStore by lazy { EligibilityStore(appContext) }
+
+    val registrationStore: RegistrationStore by lazy { RegistrationStore(appContext) }
+
+    val donorProfileStore: DonorProfileStore by lazy { DonorProfileStore(appContext) }
+
     val authInterceptor: AuthInterceptor by lazy { AuthInterceptor(tokenStore) }
 
     private val baseUrl: String =
@@ -26,6 +35,6 @@ class AppContainer(context: Context) {
     }
 
     val repository: BloodNetworkRepository by lazy {
-        BloodNetworkRepository(api, tokenStore)
+        BloodNetworkRepository(api, tokenStore, eligibilityStore, registrationStore, donorProfileStore)
     }
 }

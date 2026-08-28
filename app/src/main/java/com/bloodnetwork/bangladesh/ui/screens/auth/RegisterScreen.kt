@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.ui.components.ErrorText
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
@@ -43,6 +44,8 @@ fun RegisterScreen(
     onBack: () -> Unit,
 ) {
     val state by vm.uiState.collectAsStateWithLifecycle()
+    val savedData by vm.registrationData.collectAsStateWithLifecycle()
+
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -52,6 +55,17 @@ fun RegisterScreen(
     var localError by remember { mutableStateOf<String?>(null) }
     var phoneError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
+    var initialized by remember { mutableStateOf(false) }
+
+    LaunchedEffect(savedData) {
+        if (!initialized) {
+            initialized = true
+            firstName = savedData.fullName.substringBefore(" ").ifBlank { "" }
+            lastName = savedData.fullName.substringAfter(" ").ifBlank { "" }
+            phone = savedData.phoneNumber
+            password = savedData.password
+        }
+    }
 
     LaunchedEffect(state.isLoggedIn) {
         if (state.isLoggedIn) onRegistered()
@@ -86,15 +100,15 @@ fun RegisterScreen(
                 text = "Register to donate or request blood",
                 style = MaterialTheme.typography.titleLarge,
             )
-            LabeledTextField(firstName, { firstName = it }, "First Name",
+            LabeledTextField(firstName, { firstName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = it, lastName = lastName, phoneNumber = phone, password = password)) }, "First Name",
                 leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) })
-            LabeledTextField(lastName, { lastName = it }, "Last Name")
-            LabeledTextField(phone, { phone = it; phoneError = false; localError = null }, "Phone Number",
+            LabeledTextField(lastName, { lastName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = it, phoneNumber = phone, password = password)) }, "Last Name")
+            LabeledTextField(phone, { phone = it; phoneError = false; localError = null; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = lastName, phoneNumber = it, password = password)) }, "Phone Number",
                 keyboardType = KeyboardType.Phone, isError = phoneError,
                 leadingIcon = { Icon(Icons.Filled.Phone, contentDescription = null) })
             LabeledTextField(email, { email = it; emailError = false; localError = null }, "Email (optional)",
                 keyboardType = KeyboardType.Email, isError = emailError)
-            LabeledTextField(password, { password = it }, "Password",
+            LabeledTextField(password, { password = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = lastName, phoneNumber = phone, password = it)) }, "Password",
                 isPassword = true,
                 leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) })
             LabeledTextField(confirm, { confirm = it }, "Confirm Password",

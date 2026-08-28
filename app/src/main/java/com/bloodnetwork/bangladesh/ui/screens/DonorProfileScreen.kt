@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.data.model.AvailabilityStatus
 import com.bloodnetwork.bangladesh.data.model.BloodGroup
+import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.BloodGroupChips
 import com.bloodnetwork.bangladesh.ui.components.DatePickerField
@@ -52,6 +53,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
 
     val state by vm.uiState.collectAsStateWithLifecycle()
     val locState by locVm.uiState.collectAsStateWithLifecycle()
+    val draftData by vm.draftData.collectAsStateWithLifecycle()
 
     var bloodGroup by remember { mutableStateOf<String?>(null) }
     var gender by remember { mutableStateOf<String?>(null) }
@@ -75,6 +77,22 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var origArea by remember { mutableStateOf("") }
     var origLastDonationDate by remember { mutableStateOf("") }
 
+    fun saveDraft() {
+        vm.saveDraftData(DonorProfileStore.DonorProfileData(
+            bloodGroup = bloodGroup ?: "",
+            gender = gender ?: "",
+            dateOfBirth = dateOfBirth,
+            divisionId = divisionId ?: "",
+            divisionName = divisionName ?: "",
+            districtId = districtId ?: "",
+            districtName = districtName ?: "",
+            upazilaId = upazilaId ?: "",
+            upazilaName = upazilaName ?: "",
+            area = area,
+            lastDonationDate = lastDonationDate,
+        ))
+    }
+
     LaunchedEffect(Unit) {
         locVm.loadDivisions()
         locVm.loadAllDistricts()
@@ -82,18 +100,41 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     }
 
     LaunchedEffect(state.profile) {
-        val p = state.profile ?: return@LaunchedEffect
-        if (!initialized) {
+        val p = state.profile
+        if (p != null) {
+            if (!initialized) {
+                initialized = true
+                bloodGroup = p.bloodGroup.label
+                gender = p.gender
+                dateOfBirth = p.dateOfBirth?.take(10) ?: ""
+                districtId = p.districtId.takeIf { it.isNotBlank() }
+                districtName = p.districtName
+                upazilaId = p.upazilaId.takeIf { it.isNotBlank() }
+                upazilaName = p.upazilaName
+                area = p.area ?: ""
+                lastDonationDate = p.lastDonationDate?.take(10) ?: ""
+                districtId?.let { locVm.loadUpazilas(it) }
+                origBloodGroup = bloodGroup
+                origGender = gender
+                origDateOfBirth = dateOfBirth
+                origDistrictId = districtId
+                origUpazilaId = upazilaId
+                origArea = area
+                origLastDonationDate = lastDonationDate
+            }
+        } else if (!initialized && draftData.bloodGroup.isNotEmpty()) {
             initialized = true
-            bloodGroup = p.bloodGroup.label
-            gender = p.gender
-            dateOfBirth = p.dateOfBirth?.take(10) ?: ""
-            districtId = p.districtId.takeIf { it.isNotBlank() }
-            districtName = p.districtName
-            upazilaId = p.upazilaId.takeIf { it.isNotBlank() }
-            upazilaName = p.upazilaName
-            area = p.area ?: ""
-            lastDonationDate = p.lastDonationDate?.take(10) ?: ""
+            bloodGroup = draftData.bloodGroup.ifBlank { null }
+            gender = draftData.gender.ifBlank { null }
+            dateOfBirth = draftData.dateOfBirth
+            divisionId = draftData.divisionId.ifBlank { null }
+            divisionName = draftData.divisionName.ifBlank { null }
+            districtId = draftData.districtId.ifBlank { null }
+            districtName = draftData.districtName.ifBlank { null }
+            upazilaId = draftData.upazilaId.ifBlank { null }
+            upazilaName = draftData.upazilaName.ifBlank { null }
+            area = draftData.area
+            lastDonationDate = draftData.lastDonationDate
             districtId?.let { locVm.loadUpazilas(it) }
             origBloodGroup = bloodGroup
             origGender = gender
@@ -169,7 +210,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             BloodGroupChips(
                 options = BloodGroup.entries.map { it.label },
                 selected = bloodGroup,
-                onSelect = { bloodGroup = it },
+                onSelect = { bloodGroup = it; saveDraft() },
             )
 
             Text("Gender", style = MaterialTheme.typography.titleMedium)
@@ -177,10 +218,10 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 options = listOf("Male", "Female", "Other"),
                 selected = gender ?: "",
                 labelOf = { it },
-                onSelect = { gender = it },
+                onSelect = { gender = it; saveDraft() },
             )
 
-            DatePickerField(dateOfBirth, { dateOfBirth = it }, "Date of Birth")
+            DatePickerField(dateOfBirth, { dateOfBirth = it; saveDraft() }, "Date of Birth")
 
             Text("Division", style = MaterialTheme.typography.titleMedium)
             PickerField(
@@ -195,6 +236,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     upazilaId = null
                     upazilaName = null
                     if (d != null) locVm.loadDistricts(d.id)
+                    saveDraft()
                 },
             )
             Text("District", style = MaterialTheme.typography.titleMedium)
@@ -208,6 +250,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     upazilaId = null
                     upazilaName = null
                     if (d != null) locVm.loadUpazilas(d.id)
+                    saveDraft()
                 },
             )
             Text("Upazila / Area", style = MaterialTheme.typography.titleMedium)
@@ -218,10 +261,11 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     val u = locState.upazilas.firstOrNull { it.name == name }
                     upazilaName = name
                     upazilaId = u?.id
+                    saveDraft()
                 },
             )
-            LabeledTextField(area, { area = it }, "Area (optional)")
-            DatePickerField(lastDonationDate, { lastDonationDate = it }, "Last Donation Date")
+            LabeledTextField(area, { area = it; saveDraft() }, "Area (optional)")
+            DatePickerField(lastDonationDate, { lastDonationDate = it; saveDraft() }, "Last Donation Date")
 
             if (state.profile != null) {
                 Row(

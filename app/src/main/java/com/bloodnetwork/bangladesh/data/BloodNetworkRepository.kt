@@ -26,12 +26,18 @@ import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UpazilaDto
 import com.bloodnetwork.bangladesh.data.model.UserDto
 import com.bloodnetwork.bangladesh.data.network.BloodNetworkApi
+import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
+import com.bloodnetwork.bangladesh.data.prefs.EligibilityStore
+import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.data.prefs.TokenStore
 import kotlinx.coroutines.flow.Flow
 
 class BloodNetworkRepository(
     private val api: BloodNetworkApi,
     private val tokenStore: TokenStore,
+    private val eligibilityStore: EligibilityStore,
+    private val registrationStore: RegistrationStore,
+    private val donorProfileStore: DonorProfileStore,
 ) {
 
     val isLoggedIn: Flow<Boolean> = tokenStore.isLoggedIn
@@ -42,12 +48,14 @@ class BloodNetworkRepository(
     suspend fun login(phone: String, password: String): AuthResponse {
         val auth = api.login(LoginRequest(phoneNumber = phone, password = password))
         tokenStore.saveSession(auth)
+        registrationStore.clear()
         return auth
     }
 
     suspend fun register(request: RegisterRequest): AuthResponse {
         val auth = api.register(request)
         tokenStore.saveSession(auth)
+        registrationStore.clear()
         return auth
     }
 
@@ -118,4 +126,19 @@ class BloodNetworkRepository(
 
     // ---- AI Chatbot ----
     suspend fun chat(request: ChatRequest): String = api.chat(request).reply
+
+    // ---- Eligibility Store ----
+    val eligibilityAnswers: Flow<Map<Int, String>> = eligibilityStore.answers
+    suspend fun saveEligibilityAnswers(answers: Map<Int, String>) = eligibilityStore.saveAnswers(answers)
+    suspend fun clearEligibilityAnswers() = eligibilityStore.clearAnswers()
+
+    // ---- Registration Store ----
+    val registrationData: Flow<RegistrationStore.RegistrationData> = registrationStore.data
+    suspend fun saveRegistrationData(data: RegistrationStore.RegistrationData) = registrationStore.save(data)
+    suspend fun clearRegistrationData() = registrationStore.clear()
+
+    // ---- Donor Profile Store ----
+    val donorProfileData: Flow<DonorProfileStore.DonorProfileData> = donorProfileStore.data
+    suspend fun saveDonorProfileData(data: DonorProfileStore.DonorProfileData) = donorProfileStore.save(data)
+    suspend fun clearDonorProfileData() = donorProfileStore.clear()
 }

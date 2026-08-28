@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.data.model.UserDto
+import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class AuthUiState(
@@ -23,12 +25,26 @@ class AuthViewModel(
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
+    private val _registrationData = MutableStateFlow(RegistrationStore.RegistrationData())
+    val registrationData: StateFlow<RegistrationStore.RegistrationData> = _registrationData.asStateFlow()
+
     final val loggedInState = MutableStateFlow(false)
 
     init {
         viewModelScope.launch {
             repository.isLoggedIn.collect { loggedInState.value = it }
         }
+        viewModelScope.launch {
+            val saved = repository.registrationData.first()
+            if (saved.fullName.isNotEmpty() || saved.phoneNumber.isNotEmpty()) {
+                _registrationData.value = saved
+            }
+        }
+    }
+
+    fun saveRegistrationData(data: RegistrationStore.RegistrationData) {
+        _registrationData.value = data
+        viewModelScope.launch { repository.saveRegistrationData(data) }
     }
 
     fun login(phone: String, password: String) {

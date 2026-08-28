@@ -9,6 +9,7 @@ import com.bloodnetwork.bangladesh.data.model.EligibilityResultDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class EligibilityUiState(
@@ -27,6 +28,15 @@ class EligibilityViewModel(
     private val _uiState = MutableStateFlow(EligibilityUiState())
     val uiState: StateFlow<EligibilityUiState> = _uiState.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            val saved = repository.eligibilityAnswers.first()
+            if (saved.isNotEmpty()) {
+                _uiState.value = _uiState.value.copy(answers = saved, lastCheckedAnswers = saved)
+            }
+        }
+    }
+
     fun loadQuestions() {
         _uiState.value = _uiState.value.copy(isLoading = true)
         viewModelScope.launch {
@@ -37,7 +47,9 @@ class EligibilityViewModel(
     }
 
     fun setAnswer(questionId: Int, answer: String) {
-        _uiState.value = _uiState.value.copy(answers = _uiState.value.answers + (questionId to answer))
+        val newAnswers = _uiState.value.answers + (questionId to answer)
+        _uiState.value = _uiState.value.copy(answers = newAnswers)
+        viewModelScope.launch { repository.saveEligibilityAnswers(newAnswers) }
     }
 
     fun checkEligibility() {
@@ -59,5 +71,6 @@ class EligibilityViewModel(
 
     fun reset() {
         _uiState.value = EligibilityUiState(questions = _uiState.value.questions)
+        viewModelScope.launch { repository.clearEligibilityAnswers() }
     }
 }

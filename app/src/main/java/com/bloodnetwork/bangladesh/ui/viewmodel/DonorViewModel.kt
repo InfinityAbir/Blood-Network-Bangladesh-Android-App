@@ -8,9 +8,11 @@ import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.CreateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.DonorProfileDto
 import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
+import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class DonorUiState(
@@ -27,6 +29,23 @@ class DonorViewModel(
 
     private val _uiState = MutableStateFlow(DonorUiState())
     val uiState: StateFlow<DonorUiState> = _uiState.asStateFlow()
+
+    private val _draftData = MutableStateFlow(DonorProfileStore.DonorProfileData())
+    val draftData: StateFlow<DonorProfileStore.DonorProfileData> = _draftData.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            val saved = repository.donorProfileData.first()
+            if (saved.bloodGroup.isNotEmpty()) {
+                _draftData.value = saved
+            }
+        }
+    }
+
+    fun saveDraftData(data: DonorProfileStore.DonorProfileData) {
+        _draftData.value = data
+        viewModelScope.launch { repository.saveDonorProfileData(data) }
+    }
 
     fun loadProfile() {
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
@@ -98,6 +117,7 @@ class DonorViewModel(
                     hasProfile = true,
                     saved = true,
                 )
+                repository.clearDonorProfileData()
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
