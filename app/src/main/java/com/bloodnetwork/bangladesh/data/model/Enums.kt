@@ -33,7 +33,7 @@ enum class UserRole {
 }
 
 enum class VerificationStatus {
-    Pending, Verified, Rejected
+    Unverified, Pending, Verified, Rejected
 }
 
 enum class NotificationType {
