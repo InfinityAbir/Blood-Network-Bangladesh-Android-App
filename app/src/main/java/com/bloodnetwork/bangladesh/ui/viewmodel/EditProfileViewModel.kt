@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.data.model.UpdateProfileRequest
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,7 +37,7 @@ class EditProfileViewModel(
                 )
             }
                 .onSuccess { _uiState.value = EditProfileUiState(success = true) }
-                .onFailure { e -> _uiState.value = EditProfileUiState(error = e.message ?: "Update failed") }
+                .onFailure { e -> _uiState.value = EditProfileUiState(error = e.toDisplayMessage("Update failed")) }
         }
     }
 }

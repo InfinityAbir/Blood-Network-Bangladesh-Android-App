@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -61,7 +62,7 @@ class FindBloodViewModel(
                 .onFailure { e ->
                     _uiState.value = FindBloodUiState(
                         searched = true,
-                        error = e.message ?: "Search failed",
+                        error = e.toDisplayMessage("Search failed"),
                     )
                 }
         }

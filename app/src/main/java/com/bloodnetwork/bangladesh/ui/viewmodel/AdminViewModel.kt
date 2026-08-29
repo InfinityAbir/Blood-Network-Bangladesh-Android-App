@@ -8,6 +8,7 @@ import com.bloodnetwork.bangladesh.data.model.AdminDashboardStats
 import com.bloodnetwork.bangladesh.data.model.AdminUserDto
 import com.bloodnetwork.bangladesh.data.model.AdminReportDto
 import com.bloodnetwork.bangladesh.data.model.AdminAuditLogDto
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,7 +70,7 @@ class AdminViewModel(
                     )
                 }
                 .onFailure { e ->
-                    _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.message ?: "Failed to load admin data")
+                    _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load admin data"))
                 }
         }
     }
@@ -84,7 +85,7 @@ class AdminViewModel(
         viewModelScope.launch {
             runCatching { repository.getAdminAnalytics() }
                 .onSuccess { analytics -> _uiState.value = _uiState.value.copy(isAnalyticsLoading = false, analytics = analytics) }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isAnalyticsLoading = false, analyticsError = e.message ?: "Failed to load analytics") }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isAnalyticsLoading = false, analyticsError = e.toDisplayMessage("Failed to load analytics")) }
         }
     }
 
@@ -100,7 +101,7 @@ class AdminViewModel(
                         usersPage = 1, usersHasMore = result.items.size < result.totalCount,
                     )
                 }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.message ?: "Failed to load users") }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load users")) }
         }
     }
 
@@ -138,7 +139,7 @@ class AdminViewModel(
                         reportsPage = 1, reportsHasMore = result.items.size < result.totalCount,
                     )
                 }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.message ?: "Failed to load reports") }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load reports")) }
         }
     }
 
@@ -176,7 +177,7 @@ class AdminViewModel(
                         auditLogsPage = 1, auditLogsHasMore = result.items.size < result.totalCount,
                     )
                 }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.message ?: "Failed to load logs") }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load logs")) }
         }
     }
 
@@ -212,7 +213,7 @@ class AdminViewModel(
                         successMessage = if (isActive) "User activated" else "User deactivated",
                     )
                 }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(error = e.message ?: "Action failed") }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(error = e.toDisplayMessage("Action failed")) }
         }
     }
 
@@ -225,7 +226,7 @@ class AdminViewModel(
                         successMessage = "Donor $status",
                     )
                 }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(error = e.message ?: "Action failed") }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(error = e.toDisplayMessage("Action failed")) }
         }
     }
 
@@ -238,7 +239,7 @@ class AdminViewModel(
                         successMessage = "Report $status",
                     )
                 }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(error = e.message ?: "Action failed") }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(error = e.toDisplayMessage("Action failed")) }
         }
     }
 }

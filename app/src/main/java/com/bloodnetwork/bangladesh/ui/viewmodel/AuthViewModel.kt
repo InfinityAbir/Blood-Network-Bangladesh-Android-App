@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.data.model.UserDto
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -162,7 +163,7 @@ class AuthViewModel(
                     _uiState.value = _uiState.value.copy(user = user)
                     onSuccess()
                 }
-                .onFailure { e -> onError(e.message ?: "Update failed") }
+                .onFailure { e -> onError(e.toDisplayMessage("Update failed")) }
         }
     }
 
@@ -180,10 +181,9 @@ class AuthViewModel(
     }
 
     private fun Throwable.toUserMessage(): String {
-        val raw = message ?: return "Something went wrong"
-        if (raw.contains("408") || raw.contains("timeout")) return "Connection timeout. Please try again."
-        if (raw.contains("401")) return "Invalid phone number or password."
-        if (this is com.bloodnetwork.bangladesh.data.network.ApiException) return message
-        return raw
+        if (this is com.bloodnetwork.bangladesh.data.network.ApiException && code == 401) {
+            return "Invalid phone number or password."
+        }
+        return toDisplayMessage("Something went wrong. Please try again.")
     }
 }

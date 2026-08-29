@@ -8,6 +8,7 @@ import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.CreateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.DonorProfileDto
 import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -63,13 +64,9 @@ class DonorViewModel(
                     _uiState.value = DonorUiState(hasProfile = false, error = e.message)
                 }
             } catch (e: Exception) {
-                val msg = e.message ?: ""
-                val isNotFound = msg.contains("404", ignoreCase = true) ||
-                        msg.contains("not found", ignoreCase = true) ||
-                        msg.contains("No donor profile", ignoreCase = true)
                 _uiState.value = DonorUiState(
                     hasProfile = false,
-                    error = if (isNotFound) null else msg.ifBlank { "Failed to load profile" },
+                    error = e.toDisplayMessage("Failed to load profile"),
                 )
             }
         }
@@ -124,7 +121,7 @@ class DonorViewModel(
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = e.message ?: "Failed to save profile",
+                    error = e.toDisplayMessage("Failed to save profile"),
                 )
             }
         }
@@ -141,9 +138,9 @@ class DonorViewModel(
                 val profile = repository.toggleAvailability(com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest(status))
                 _uiState.value = _uiState.value.copy(profile = profile, error = null, hasProfile = true)
             } catch (e: com.bloodnetwork.bangladesh.data.network.ApiException) {
-                _uiState.value = _uiState.value.copy(error = "[${e.code}] ${e.message}")
+                _uiState.value = _uiState.value.copy(error = e.message)
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message ?: "Failed to update availability")
+                _uiState.value = _uiState.value.copy(error = e.toDisplayMessage("Failed to update availability"))
             }
         }
     }

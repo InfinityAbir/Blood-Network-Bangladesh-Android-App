@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.data.model.DeveloperInfoDto
 import com.bloodnetwork.bangladesh.data.model.UpdateDeveloperInfoRequest
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +31,7 @@ class AboutViewModel(
         viewModelScope.launch {
             runCatching { repository.getDeveloperInfo() }
                 .onSuccess { info -> _uiState.value = _uiState.value.copy(isLoading = false, info = info) }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.message ?: "Failed to load") }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to load")) }
         }
     }
 
@@ -42,7 +43,7 @@ class AboutViewModel(
                     _uiState.value = _uiState.value.copy(isSaving = false, info = info)
                     onSuccess()
                 }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isSaving = false, saveError = e.message ?: "Failed to save") }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isSaving = false, saveError = e.toDisplayMessage("Failed to save")) }
         }
     }
 }

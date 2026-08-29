@@ -7,6 +7,7 @@ import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.BloodRequestDto
 import com.bloodnetwork.bangladesh.data.model.CreateBloodRequestRequest
 import com.bloodnetwork.bangladesh.data.model.Urgency
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,7 +69,7 @@ class RequestBloodViewModel(
                     loadMyRequests()
                 }
                 .onFailure { e ->
-                    _uiState.value = _uiState.value.copy(isLoading = false, error = e.message ?: "Failed to submit request")
+                    _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to submit request"))
                 }
         }
     }

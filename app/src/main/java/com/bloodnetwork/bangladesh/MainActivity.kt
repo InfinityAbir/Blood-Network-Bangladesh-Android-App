@@ -15,9 +15,10 @@ import com.bloodnetwork.bangladesh.ui.LocalThemeStore
 import com.bloodnetwork.bangladesh.ui.theme.BloodNetworkTheme
 
 class MainActivity : ComponentActivity() {
+    private val container by lazy { (application as BloodNetworkApp).container }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val container = (application as BloodNetworkApp).container
         setContent {
             val themeMode by container.themeStore.mode.collectAsStateWithLifecycle()
             CompositionLocalProvider(LocalThemeStore provides container.themeStore) {
@@ -30,6 +31,16 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // SignalR's own automatic reconnect gives up after enough failed attempts (e.g. the
+        // app sat backgrounded long enough for Android to kill the socket) — a harmless no-op
+        // if already connected, a fresh connection attempt otherwise.
+        if (container.tokenStore.isLoggedInSync()) {
+            container.notificationSocket.start()
         }
     }
 }

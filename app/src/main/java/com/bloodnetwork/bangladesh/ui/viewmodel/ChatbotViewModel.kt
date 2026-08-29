@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.data.model.ChatMessage
 import com.bloodnetwork.bangladesh.data.model.ChatRequest
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -60,7 +61,7 @@ class ChatbotViewModel(
                     val current = _uiState.value.messages.toMutableList()
                     if (current.isNotEmpty() && current.last().loading) current.removeAt(current.size - 1)
                     current.add(ChatUiMessage(role = "assistant", content = "Sorry, I couldn't reach the service. Please try again."))
-                    _uiState.value = _uiState.value.copy(messages = current, isLoading = false, error = e.message)
+                    _uiState.value = _uiState.value.copy(messages = current, isLoading = false, error = e.toDisplayMessage("Failed to get a response"))
                 }
         }
     }

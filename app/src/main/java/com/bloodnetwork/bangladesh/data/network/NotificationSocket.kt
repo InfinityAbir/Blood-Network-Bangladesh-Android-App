@@ -20,13 +20,14 @@ data class LiveNotification(
 /**
  * Thin wrapper over the backend's `/hubs/notifications` SignalR hub for realtime
  * notification + unread-count pushes, so the app doesn't have to poll. Started when the
- * user logs in, stopped on logout (see AuthViewModel's isLoggedIn collector).
+ * user logs in, stopped on logout (see AuthViewModel's isLoggedIn collector) — and
+ * re-poked on every app foreground (see MainActivity.onStart) since SignalR's own
+ * automatic reconnect eventually gives up if the app sits backgrounded long enough for
+ * Android to kill the socket.
  *
- * NOTE: the exact SignalR Java client API (RxJava3 `Single` for the token provider, the
- * `on(event, callback, PayloadClass)` overload) is written to the published client docs
- * but has not been compiled in this environment (no JDK/Android SDK here) — verify it
- * builds once you have Android Studio, since this is the one piece of this session's
- * work that couldn't be checked by actually compiling it.
+ * REST calls (getNotifications/getUnreadCount) never depend on this — this is a live
+ * enhancement, not the primary data path, so a dropped socket degrades to "not instant"
+ * rather than "broken".
  */
 class NotificationSocket(
     baseApiUrl: String,
@@ -47,7 +48,13 @@ class NotificationSocket(
 
         val hub = HubConnectionBuilder.create(hubUrl)
             .withAccessTokenProvider(Single.defer { Single.just(tokenStore.currentAccessTokenSync().orEmpty()) })
+            .withAutomaticReconnect()
             .build()
+
+        hub.onClosed { error ->
+            Log.w(TAG, "Notification hub closed${if (error != null) ": ${error.message}" else " (all reconnect attempts exhausted)"}")
+            connection = null
+        }
 
         hub.on(
             "ReceiveNotification",

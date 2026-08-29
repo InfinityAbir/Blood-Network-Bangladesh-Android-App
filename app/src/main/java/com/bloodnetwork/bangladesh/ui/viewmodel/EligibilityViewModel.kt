@@ -6,6 +6,7 @@ import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.data.model.EligibilityAnswerDto
 import com.bloodnetwork.bangladesh.data.model.EligibilityQuestionDto
 import com.bloodnetwork.bangladesh.data.model.EligibilityResultDto
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,7 +43,7 @@ class EligibilityViewModel(
         viewModelScope.launch {
             runCatching { repository.getEligibilityQuestions() }
                 .onSuccess { _uiState.value = _uiState.value.copy(isLoading = false, questions = it) }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.message) }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to load eligibility questions")) }
         }
     }
 
@@ -65,7 +66,7 @@ class EligibilityViewModel(
             val payload = state.questions.map { EligibilityAnswerDto(it.id, answers[it.id] ?: "") }
             runCatching { repository.checkEligibility(payload) }
                 .onSuccess { _uiState.value = _uiState.value.copy(result = it, isLoading = false, lastCheckedAnswers = answers) }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.message) }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to check eligibility")) }
         }
     }
 

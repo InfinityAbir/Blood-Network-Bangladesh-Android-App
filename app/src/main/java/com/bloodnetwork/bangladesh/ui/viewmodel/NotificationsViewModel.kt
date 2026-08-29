@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.data.model.NotificationDto
 import com.bloodnetwork.bangladesh.data.model.NotificationType
+import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,7 +69,7 @@ class NotificationsViewModel(
                         typeFilter = type,
                     )
                 }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.message) }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load notifications")) }
         }
     }
 
