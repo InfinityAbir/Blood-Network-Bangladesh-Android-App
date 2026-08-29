@@ -60,13 +60,17 @@ import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AdminViewModel
+import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     val factory = LocalVmFactory.current!!
     val vm: AdminViewModel = viewModel(factory = factory)
+    val authVm: AuthViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
+    val authState by authVm.uiState.collectAsStateWithLifecycle()
+    val currentUserId = authState.user?.id
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("") }
@@ -213,10 +217,11 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                                             }
                                         }
                                     }
+                                    val isSelf = currentUserId != null && user.id == currentUserId
                                     if (user.isActive) {
-                                        CompactOutlinedButton("Deactivate", onClick = { vm.toggleActive(user.id, false) })
+                                        CompactOutlinedButton("Deactivate", onClick = { vm.toggleActive(user.id, false) }, enabled = !isSelf)
                                     } else {
-                                        CompactFilledButton("Activate", onClick = { vm.toggleActive(user.id, true) })
+                                        CompactFilledButton("Activate", onClick = { vm.toggleActive(user.id, true) }, enabled = !isSelf)
                                     }
                                 }
                             }
@@ -276,9 +281,10 @@ private fun VerifyPill(status: String) {
 }
 
 @Composable
-private fun CompactFilledButton(text: String, onClick: () -> Unit) {
+private fun CompactFilledButton(text: String, onClick: () -> Unit, enabled: Boolean = true) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(containerColor = BloodRed),
         shape = RoundedCornerShape(50),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
@@ -287,9 +293,10 @@ private fun CompactFilledButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CompactOutlinedButton(text: String, onClick: () -> Unit) {
+private fun CompactOutlinedButton(text: String, onClick: () -> Unit, enabled: Boolean = true) {
     OutlinedButton(
         onClick = onClick,
+        enabled = enabled,
         shape = RoundedCornerShape(50),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
         modifier = Modifier.height(32.dp),
