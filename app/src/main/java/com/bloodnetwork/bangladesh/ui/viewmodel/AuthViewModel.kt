@@ -142,6 +142,7 @@ class AuthViewModel(
         newEmail: String?,
         newPhoneNumber: String?,
         newPassword: String?,
+        newPhotoUrl: String? = null,
         onSuccess: () -> Unit,
         onError: (String) -> Unit,
     ) {
@@ -153,6 +154,7 @@ class AuthViewModel(
                         newEmail = newEmail,
                         newPhoneNumber = newPhoneNumber,
                         newPassword = newPassword,
+                        newPhotoUrl = newPhotoUrl,
                     )
                 )
             }
@@ -162,6 +164,19 @@ class AuthViewModel(
                 }
                 .onFailure { e -> onError(e.message ?: "Update failed") }
         }
+    }
+
+    /** Photo-only update — doesn't require the current password (see backend AuthService). */
+    fun updatePhoto(photoUrl: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        updateProfile(
+            currentPassword = "",
+            newEmail = null,
+            newPhoneNumber = null,
+            newPassword = null,
+            newPhotoUrl = photoUrl,
+            onSuccess = onSuccess,
+            onError = onError,
+        )
     }
 
     private fun Throwable.toUserMessage(): String {

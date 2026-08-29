@@ -106,6 +106,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.security.crypto)
     implementation(libs.signalr)
+    implementation(libs.coil.compose)
 
     debugImplementation(libs.androidx.ui.tooling)
 }

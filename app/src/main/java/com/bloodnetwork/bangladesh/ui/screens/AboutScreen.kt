@@ -147,9 +147,7 @@ private fun AboutContent(
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Box(modifier = Modifier.size(72.dp).clip(CircleShape).background(BloodRed.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
-                Icon(Icons.Filled.Person, contentDescription = null, tint = BloodRed, modifier = Modifier.size(36.dp))
-            }
+            com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = info.photoUrl, size = 72.dp)
             Spacer(Modifier.height(4.dp))
             Text(info.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Text(info.role, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -228,6 +226,7 @@ private fun EditDeveloperInfoDialog(
     var phone by remember { mutableStateOf(info.phone ?: "") }
     var linkedIn by remember { mutableStateOf(info.linkedInUrl ?: "") }
     var github by remember { mutableStateOf(info.githubUrl ?: "") }
+    var photoUrl by remember { mutableStateOf(info.photoUrl ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -246,6 +245,7 @@ private fun EditDeveloperInfoDialog(
                 OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Phone") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = linkedIn, onValueChange = { linkedIn = it }, label = { Text("LinkedIn URL") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = github, onValueChange = { github = it }, label = { Text("GitHub URL") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = photoUrl, onValueChange = { photoUrl = it }, label = { Text("Photo URL") }, singleLine = true, modifier = Modifier.fillMaxWidth())
             }
         },
         confirmButton = {
@@ -257,6 +257,7 @@ private fun EditDeveloperInfoDialog(
                             name = name.trim(), role = role.trim(),
                             email = email.ifBlank { null }, phone = phone.ifBlank { null },
                             linkedInUrl = linkedIn.ifBlank { null }, githubUrl = github.ifBlank { null },
+                            photoUrl = photoUrl.ifBlank { null },
                         ),
                     )
                 },

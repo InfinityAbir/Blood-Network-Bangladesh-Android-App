@@ -149,7 +149,7 @@ fun AppRoot(repository: BloodNetworkRepository) {
                     ChatbotScreen(onBack = { navController.popBackStack() }, vm = vm)
                 }
                 composable(Routes.EDIT_PROFILE) {
-                    EditProfileScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                    EditProfileScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() }, authVm = authVm)
                 }
                 composable(Routes.ADMIN_DASHBOARD) {
                     AdminDashboardScreen(

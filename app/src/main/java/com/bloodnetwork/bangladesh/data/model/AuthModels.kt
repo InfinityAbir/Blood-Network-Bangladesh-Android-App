@@ -42,6 +42,7 @@ data class UserDto(
     @SerialName("isPhoneVerified") val isPhoneVerified: Boolean = false,
     @SerialName("mustChangePassword") val mustChangePassword: Boolean = false,
     @SerialName("createdAt") val createdAt: String = "",
+    @SerialName("photoUrl") val photoUrl: String? = null,
 ) {
     val fullName: String get() = "$firstName $lastName"
 }
@@ -59,6 +60,7 @@ data class UpdateProfileRequest(
     @SerialName("newEmail") val newEmail: String? = null,
     @SerialName("newPhoneNumber") val newPhoneNumber: String? = null,
     @SerialName("newPassword") val newPassword: String? = null,
+    @SerialName("newPhotoUrl") val newPhotoUrl: String? = null,
 )
 
 @Serializable

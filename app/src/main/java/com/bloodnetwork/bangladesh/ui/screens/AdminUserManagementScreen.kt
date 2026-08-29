@@ -170,12 +170,15 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                     ) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text("${user.firstName} ${user.lastName}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1)
-                                    Spacer(Modifier.height(2.dp))
-                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                        Icon(Icons.Filled.Phone, contentDescription = null, modifier = Modifier.width(12.dp).height(12.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        Text(user.phoneNumber, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                    com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = user.photoUrl, size = 36.dp)
+                                    Column {
+                                        Text("${user.firstName} ${user.lastName}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                                        Spacer(Modifier.height(2.dp))
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            Icon(Icons.Filled.Phone, contentDescription = null, modifier = Modifier.width(12.dp).height(12.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(user.phoneNumber, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
                                     }
                                 }
                                 RoleBadge(user.role.name)

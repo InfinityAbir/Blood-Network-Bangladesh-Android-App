@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Blood Network BD</string>
-    <string name="base_api_url">https://blood-network-bangladesh.onrender.com/</string>
+    <string name="base_api_url">https://blood-network-api.onrender.com/</string>
 </resources>

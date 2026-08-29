@@ -32,6 +32,7 @@ data class AdminUserDto(
     @SerialName("donorVerificationStatus") val donorVerificationStatus: String? = null,
     @SerialName("lastLoginAt") val lastLoginAt: String? = null,
     @SerialName("createdAt") val createdAt: String = "",
+    @SerialName("photoUrl") val photoUrl: String? = null,
 )
 
 @Serializable

@@ -201,17 +201,22 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
 fun DonorCard(donor: PublicDonorDto, onRequest: () -> Unit = {}) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(donor.firstName, style = MaterialTheme.typography.titleMedium)
-                Text(donor.bloodGroup.label, color = BloodRed, style = MaterialTheme.typography.titleMedium)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = donor.photoUrl, size = 44.dp)
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(donor.firstName, style = MaterialTheme.typography.titleMedium)
+                        Text(donor.bloodGroup.label, color = BloodRed, style = MaterialTheme.typography.titleMedium)
+                    }
+                    Text(
+                        text = listOfNotNull(donor.districtName, donor.upazilaName).joinToString(", "),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
-            Text(
-                text = listOfNotNull(donor.districtName, donor.upazilaName).joinToString(", "),
-                style = MaterialTheme.typography.bodyMedium,
-            )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
