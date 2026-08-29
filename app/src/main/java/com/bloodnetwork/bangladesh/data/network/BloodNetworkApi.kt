@@ -222,8 +222,9 @@ interface BloodNetworkApi {
     suspend fun getAdminUsers(
         @Query("search") search: String? = null,
         @Query("role") role: String? = null,
+        @Query("isActive") isActive: Boolean? = null,
         @Query("page") page: Int = 1,
-        @Query("pageSize") pageSize: Int = 20,
+        @Query("pageSize") pageSize: Int = 10,
     ): PagedResult<AdminUserDto>
 
     @POST("api/admin/users/{userId}/toggle-active")
@@ -242,7 +243,7 @@ interface BloodNetworkApi {
     suspend fun getAdminReports(
         @Query("status") status: String? = null,
         @Query("page") page: Int = 1,
-        @Query("pageSize") pageSize: Int = 20,
+        @Query("pageSize") pageSize: Int = 10,
     ): PagedResult<AdminReportDto>
 
     @POST("api/admin/reports/{reportId}/resolve")
@@ -255,6 +256,6 @@ interface BloodNetworkApi {
     suspend fun getAdminAuditLogs(
         @Query("entityType") entityType: String? = null,
         @Query("page") page: Int = 1,
-        @Query("pageSize") pageSize: Int = 20,
+        @Query("pageSize") pageSize: Int = 10,
     ): PagedResult<AdminAuditLogDto>
 }

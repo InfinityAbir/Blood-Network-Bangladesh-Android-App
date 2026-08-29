@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-private const val PAGE_SIZE = 20
+private const val PAGE_SIZE = 10
 
 data class AdminUiState(
     val isLoading: Boolean = false,
@@ -25,14 +25,20 @@ data class AdminUiState(
     val analyticsError: String? = null,
     val users: List<AdminUserDto> = emptyList(),
     val usersPage: Int = 1,
+    val usersPageSize: Int = PAGE_SIZE,
+    val usersTotalCount: Int = 0,
     val usersHasMore: Boolean = false,
     val usersLoadingMore: Boolean = false,
     val reports: List<AdminReportDto> = emptyList(),
     val reportsPage: Int = 1,
+    val reportsPageSize: Int = PAGE_SIZE,
+    val reportsTotalCount: Int = 0,
     val reportsHasMore: Boolean = false,
     val reportsLoadingMore: Boolean = false,
     val auditLogs: List<AdminAuditLogDto> = emptyList(),
     val auditLogsPage: Int = 1,
+    val auditLogsPageSize: Int = PAGE_SIZE,
+    val auditLogsTotalCount: Int = 0,
     val auditLogsHasMore: Boolean = false,
     val auditLogsLoadingMore: Boolean = false,
     val error: String? = null,
@@ -48,8 +54,12 @@ class AdminViewModel(
 
     private var usersSearch: String? = null
     private var usersRole: String? = null
+    private var usersIsActive: Boolean? = null
+    private var usersPageSize: Int = PAGE_SIZE
     private var reportsStatus: String? = null
+    private var reportsPageSize: Int = PAGE_SIZE
     private var auditEntityType: String? = null
+    private var auditPageSize: Int = PAGE_SIZE
 
     init { loadDashboard() }
 
@@ -89,25 +99,44 @@ class AdminViewModel(
         }
     }
 
-    fun loadUsers(search: String? = usersSearch, role: String? = usersRole) {
+    fun loadUsers(search: String? = usersSearch, role: String? = usersRole, isActive: Boolean? = usersIsActive, pageSize: Int? = null) {
         usersSearch = search
         usersRole = role
+        usersIsActive = isActive
+        if (pageSize != null) usersPageSize = pageSize
         _uiState.value = _uiState.value.copy(isLoading = true)
         viewModelScope.launch {
-            runCatching { repository.getAdminUsers(search, role, page = 1, pageSize = PAGE_SIZE) }
+            runCatching { repository.getAdminUsers(search, role, isActive, page = 1, pageSize = usersPageSize) }
                 .onSuccess { result ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false, isRefreshing = false, users = result.items,
-                        usersPage = 1, usersHasMore = result.items.size < result.totalCount,
+                        usersPage = 1, usersPageSize = usersPageSize, usersTotalCount = result.totalCount,
+                        usersHasMore = result.items.size < result.totalCount,
                     )
                 }
                 .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load users")) }
         }
     }
 
+    fun gotoUsersPage(page: Int, pageSize: Int? = null) {
+        if (pageSize != null) usersPageSize = pageSize
+        _uiState.value = _uiState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            runCatching { repository.getAdminUsers(usersSearch, usersRole, usersIsActive, page = page, pageSize = usersPageSize) }
+                .onSuccess { result ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false, users = result.items,
+                        usersPage = page, usersPageSize = usersPageSize, usersTotalCount = result.totalCount,
+                        usersHasMore = result.items.size < result.totalCount,
+                    )
+                }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to load users")) }
+        }
+    }
+
     fun refreshUsers() {
         _uiState.value = _uiState.value.copy(isRefreshing = true)
-        loadUsers(usersSearch, usersRole)
+        loadUsers(usersSearch, usersRole, usersIsActive)
     }
 
     fun loadMoreUsers() {
@@ -116,7 +145,7 @@ class AdminViewModel(
         val nextPage = state.usersPage + 1
         _uiState.value = state.copy(usersLoadingMore = true)
         viewModelScope.launch {
-            runCatching { repository.getAdminUsers(usersSearch, usersRole, page = nextPage, pageSize = PAGE_SIZE) }
+            runCatching { repository.getAdminUsers(usersSearch, usersRole, usersIsActive, page = nextPage, pageSize = PAGE_SIZE) }
                 .onSuccess { result ->
                     val merged = _uiState.value.users + result.items
                     _uiState.value = _uiState.value.copy(

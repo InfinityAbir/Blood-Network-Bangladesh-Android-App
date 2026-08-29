@@ -246,10 +246,10 @@ class BloodNetworkRepository(
     // ---- Developer info ----
     suspend fun getDeveloperInfo(): DeveloperInfoDto = api.getDeveloperInfo()
     suspend fun updateDeveloperInfo(request: UpdateDeveloperInfoRequest): DeveloperInfoDto = api.updateDeveloperInfo(request)
-    suspend fun getAdminUsers(search: String? = null, role: String? = null, page: Int = 1, pageSize: Int = 20) = api.getAdminUsers(search, role, page, pageSize)
+    suspend fun getAdminUsers(search: String? = null, role: String? = null, isActive: Boolean? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminUsers(search, role, isActive, page, pageSize)
     suspend fun toggleUserActive(userId: String, isActive: Boolean): AdminUserDto = api.toggleUserActive(userId, ToggleUserActiveRequest(isActive))
     suspend fun verifyDonor(userId: String, status: String): AdminUserDto = api.verifyDonor(userId, VerifyDonorRequest(status))
-    suspend fun getAdminReports(status: String? = null, page: Int = 1, pageSize: Int = 20) = api.getAdminReports(status, page, pageSize)
+    suspend fun getAdminReports(status: String? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminReports(status, page, pageSize)
     suspend fun resolveReport(reportId: String, status: String, resolution: String? = null): AdminReportDto = api.resolveReport(reportId, ResolveReportRequest(status, resolution))
-    suspend fun getAdminAuditLogs(entityType: String? = null, page: Int = 1, pageSize: Int = 20) = api.getAdminAuditLogs(entityType, page, pageSize)
+    suspend fun getAdminAuditLogs(entityType: String? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminAuditLogs(entityType, page, pageSize)
 }

@@ -4,16 +4,20 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Minimal clean design: solid red background is provided by adaptive-icon background (#C62828).
+         Foreground: centered white water-drop with a minimal red medical cross (+). -->
     <group
-        android:scaleX="0.6"
-        android:scaleY="0.6"
-        android:translateX="21.6"
-        android:translateY="21.6">
+        android:scaleX="0.62"
+        android:scaleY="0.62"
+        android:translateX="20.52"
+        android:translateY="20.52">
+        <!-- White water-drop shape, centered -->
         <path
             android:fillColor="#FFFFFF"
-            android:pathData="M54,48 C46,32 32,32 32,50 C32,62 44,72 54,76 C64,72 76,62 76,50 C76,32 62,32 54,48 Z" />
+            android:pathData="M54,44 C46,30 32,30 32,48 C32,60 42,70 54,74 C66,70 76,60 76,48 C76,30 62,30 54,44 Z" />
+        <!-- Red medical cross (+) inside the drop - minimal, clean, centered -->
         <path
-            android:fillColor="#FFCDD2"
-            android:pathData="M54,34 C50,28 44,26 42,28 C48,30 52,34 54,40 C56,34 60,30 66,28 C64,26 58,28 54,34 Z" />
+            android:fillColor="#C62828"
+            android:pathData="M52,50 H56 V54 H62 V58 H56 V62 H52 V58 H46 V54 H52 Z" />
     </group>
 </vector>
