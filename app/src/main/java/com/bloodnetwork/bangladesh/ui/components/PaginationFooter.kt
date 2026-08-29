@@ -10,8 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.FirstPage
-import androidx.compose.material.icons.filled.LastPage
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -19,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,10 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.DropdownMenu
 
 @Composable
 fun PaginationFooter(
@@ -64,12 +59,12 @@ fun PaginationFooter(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
+            TextButton(
                 onClick = { onPageChange(1) },
                 enabled = page > 1,
                 modifier = Modifier.padding(0.dp)
             ) {
-                Icon(Icons.Filled.FirstPage, contentDescription = "First page")
+                Text("<<", style = MaterialTheme.typography.labelMedium)
             }
             IconButton(
                 onClick = { onPageChange(page - 1) },
@@ -96,11 +91,11 @@ fun PaginationFooter(
             ) {
                 Icon(Icons.Filled.ChevronRight, contentDescription = "Next page")
             }
-            IconButton(
+            TextButton(
                 onClick = { onPageChange(totalPages) },
                 enabled = page < totalPages
             ) {
-                Icon(Icons.Filled.LastPage, contentDescription = "Last page")
+                Text(">>", style = MaterialTheme.typography.labelMedium)
             }
         }
         PageSizeDropdown(

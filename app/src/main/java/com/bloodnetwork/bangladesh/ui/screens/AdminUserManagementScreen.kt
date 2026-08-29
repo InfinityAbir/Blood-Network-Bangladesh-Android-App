@@ -158,14 +158,14 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                             FilterChip(
                                 selected = selectedStatus == "Active",
                                 onClick = { selectedStatus = "Active"; vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, true) },
-                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(androidx.compose.material.icons.Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(14.dp)); Text("Active", style = MaterialTheme.typography.labelSmall) } },
+                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)); Text("Active", style = MaterialTheme.typography.labelSmall) } },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF2E7D32), selectedLabelColor = Color.White),
                             )
                             FilterChip(
                                 selected = selectedStatus == "Deactive",
                                 onClick = { selectedStatus = "Deactive"; vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, false) },
-                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(androidx.compose.material.icons.Icons.Filled.Block, contentDescription = null, modifier = Modifier.size(14.dp)); Text("Deactive", style = MaterialTheme.typography.labelSmall) } },
+                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(14.dp)); Text("Deactive", style = MaterialTheme.typography.labelSmall) } },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFC62828), selectedLabelColor = Color.White),
                             )
