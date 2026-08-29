@@ -95,4 +95,30 @@ class NotificationsViewModel(
             )
         }
     }
+
+    fun deleteNotification(id: String) {
+        val removed = _uiState.value.notifications.find { it.id == id } ?: return
+        _uiState.value = _uiState.value.copy(
+            notifications = _uiState.value.notifications.filter { it.id != id },
+            unreadCount = if (!removed.isRead) (_uiState.value.unreadCount - 1).coerceAtLeast(0) else _uiState.value.unreadCount,
+        )
+        viewModelScope.launch {
+            runCatching { repository.deleteNotification(id) }
+                .onFailure {
+                    _uiState.value = _uiState.value.copy(
+                        notifications = (_uiState.value.notifications + removed).sortedByDescending { it.createdAt },
+                        unreadCount = if (!removed.isRead) _uiState.value.unreadCount + 1 else _uiState.value.unreadCount,
+                    )
+                }
+        }
+    }
+
+    fun clearAll() {
+        val previous = _uiState.value.notifications
+        _uiState.value = _uiState.value.copy(notifications = emptyList(), unreadCount = 0)
+        viewModelScope.launch {
+            runCatching { repository.clearAllNotifications() }
+                .onFailure { _uiState.value = _uiState.value.copy(notifications = previous, unreadCount = previous.count { !it.isRead }) }
+        }
+    }
 }

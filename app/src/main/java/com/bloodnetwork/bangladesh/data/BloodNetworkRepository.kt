@@ -142,6 +142,8 @@ class BloodNetworkRepository(
     suspend fun getUnreadCount(): UnreadCountDto = api.getUnreadCount()
     suspend fun markNotificationRead(id: String) = api.markNotificationRead(id, com.bloodnetwork.bangladesh.data.model.MarkNotificationReadRequest(isRead = true))
     suspend fun markAllNotificationsRead() = api.markAllNotificationsRead()
+    suspend fun deleteNotification(id: String) = api.deleteNotification(id)
+    suspend fun clearAllNotifications() = api.clearAllNotifications()
 
     // ---- Eligibility ----
     suspend fun getEligibilityQuestions(): List<EligibilityQuestionDto> = api.getEligibilityQuestions()

@@ -41,6 +41,7 @@ import com.bloodnetwork.bangladesh.data.model.ToggleUserActiveRequest
 import com.bloodnetwork.bangladesh.data.model.VerifyDonorRequest
 import com.bloodnetwork.bangladesh.data.model.ResolveReportRequest
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -159,6 +160,12 @@ interface BloodNetworkApi {
 
     @POST("api/notifications/read-all")
     suspend fun markAllNotificationsRead(): Unit
+
+    @DELETE("api/notifications/clear-all")
+    suspend fun clearAllNotifications(): Unit
+
+    @DELETE("api/notifications/{notificationId}")
+    suspend fun deleteNotification(@Path("notificationId") notificationId: String): Unit
 
     // ---- Eligibility (public) ----
     // ---- Developer info (public "About" content, admin-editable) ----

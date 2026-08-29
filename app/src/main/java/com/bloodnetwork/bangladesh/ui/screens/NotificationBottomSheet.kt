@@ -2,11 +2,14 @@ package com.bloodnetwork.bangladesh.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,24 +24,41 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bloodtype
+import androidx.compose.material.icons.filled.Campaign
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.NotificationsNone
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SyncAlt
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -51,7 +71,16 @@ import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.theme.BloodPink
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.NotificationsViewModel
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
+import kotlinx.coroutines.delay
 
+private const val SWIPE_EXIT_DURATION_MS = 220
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationBottomSheet(
     vm: NotificationsViewModel,
@@ -59,8 +88,25 @@ fun NotificationBottomSheet(
     onNavigate: (String) -> Unit = {},
 ) {
     val state by vm.uiState.collectAsStateWithLifecycle()
+    var showClearAllConfirm by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { vm.load() }
+
+    if (showClearAllConfirm) {
+        AlertDialog(
+            onDismissRequest = { showClearAllConfirm = false },
+            title = { Text("Clear all notifications?") },
+            text = { Text("This removes every notification from your list. This can't be undone.") },
+            confirmButton = {
+                TextButton(onClick = { vm.clearAll(); showClearAllConfirm = false }) {
+                    Text("Clear all", color = BloodRed)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearAllConfirm = false }) { Text("Cancel") }
+            },
+        )
+    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -107,14 +153,23 @@ fun NotificationBottomSheet(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Text("Notifications", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = onDismiss) {
+                                Icon(Icons.Filled.Close, contentDescription = "Close", modifier = Modifier.size(20.dp))
+                            }
+                        }
+                        if (state.notifications.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
                                 if (state.unreadCount > 0) {
                                     TextButton(onClick = { vm.markAllRead() }) {
                                         Text("Mark all read", style = MaterialTheme.typography.labelSmall)
                                     }
                                 }
-                                IconButton(onClick = onDismiss) {
-                                    Icon(Icons.Filled.Close, contentDescription = "Close", modifier = Modifier.size(20.dp))
+                                TextButton(onClick = { showClearAllConfirm = true }) {
+                                    Text("Clear all", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                                 }
                             }
                         }
@@ -144,13 +199,17 @@ fun NotificationBottomSheet(
                                 modifier = Modifier.fillMaxWidth().weight(1f),
                             ) {
                                 items(state.notifications, key = { it.id }) { n ->
-                                    NotificationSheetCard(n, onClick = {
-                                        vm.markRead(n.id)
-                                        if (n.type == NotificationType.Availability) {
-                                            onDismiss()
-                                            onNavigate(Routes.FIND_BLOOD)
-                                        }
-                                    })
+                                    NotificationListItem(
+                                        n = n,
+                                        onClick = {
+                                            vm.markRead(n.id)
+                                            if (n.type == NotificationType.Availability) {
+                                                onDismiss()
+                                                onNavigate(Routes.FIND_BLOOD)
+                                            }
+                                        },
+                                        onDelete = { vm.deleteNotification(n.id) },
+                                    )
                                 }
                             }
                         }
@@ -161,31 +220,143 @@ fun NotificationBottomSheet(
     }
 }
 
+private fun notificationIconFor(type: NotificationType): ImageVector = when (type) {
+    NotificationType.BloodRequestMatch -> Icons.Filled.Bloodtype
+    NotificationType.RequestUpdate -> Icons.Filled.SyncAlt
+    NotificationType.DonorAccepted -> Icons.Filled.CheckCircle
+    NotificationType.DonorDeclined -> Icons.Filled.HourglassEmpty
+    NotificationType.ProfileReminder -> Icons.Filled.Person
+    NotificationType.Availability -> Icons.Filled.WaterDrop
+    NotificationType.System -> Icons.Filled.Campaign
+}
+
+private fun cleanNotificationMessage(title: String, message: String): String {
+    var text = message.trim()
+    text = Regex("^Hi\\s+[^,]+,\\s*", RegexOption.IGNORE_CASE).replaceFirst(text, "")
+    if (text.startsWith(title.trim(), ignoreCase = true)) {
+        text = text.substring(title.trim().length).trimStart()
+    }
+    text = text.replaceFirstChar { if (it.isLowerCase()) it.uppercase() else it.toString() }
+    return text.ifBlank { message.trim() }
+}
+
+private fun relativeTime(iso: String): String {
+    if (iso.isBlank()) return ""
+    val then = try {
+        Instant.parse(iso)
+    } catch (e: DateTimeParseException) {
+        return iso
+    }
+    val seconds = Duration.between(then, Instant.now()).seconds.coerceAtLeast(0)
+    return when {
+        seconds < 60 -> "Just now"
+        seconds < 3600 -> "${seconds / 60}m ago"
+        seconds < 86400 -> "${seconds / 3600}h ago"
+        seconds < 604800 -> "${seconds / 86400}d ago"
+        else -> then.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("MMM d, yyyy · h:mm a"))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LazyItemScope.NotificationListItem(n: NotificationDto, onClick: () -> Unit, onDelete: () -> Unit) {
+    var visible by remember { mutableStateOf(true) }
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value != SwipeToDismissBoxValue.Settled) visible = false
+            true
+        },
+    )
+    LaunchedEffect(visible) {
+        if (!visible) {
+            delay(SWIPE_EXIT_DURATION_MS.toLong())
+            onDelete()
+        }
+    }
+    AnimatedVisibility(
+        visible = visible,
+        exit = shrinkVertically(animationSpec = tween(SWIPE_EXIT_DURATION_MS)) + fadeOut(animationSpec = tween(SWIPE_EXIT_DURATION_MS / 2)),
+        modifier = Modifier.animateItem(),
+    ) {
+        SwipeToDismissBox(
+            state = dismissState,
+            backgroundContent = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.errorContainer)
+                        .padding(horizontal = 20.dp),
+                    contentAlignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd,
+                ) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onErrorContainer)
+                }
+            },
+        ) {
+            NotificationSheetCard(n, onClick = onClick)
+        }
+    }
+}
+
 @Composable
 fun NotificationSheetCard(n: NotificationDto, onClick: () -> Unit = {}) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = if (n.isRead) MaterialTheme.colorScheme.surface else BloodPink,
+            containerColor = if (n.isRead) MaterialTheme.colorScheme.surface else BloodPink.copy(alpha = 0.35f),
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (n.isRead) 1.dp else 0.dp),
     ) {
-        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = n.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (n.isRead) MaterialTheme.colorScheme.onSurface else BloodRed,
-                    modifier = Modifier.weight(1f),
+        Row(
+            modifier = Modifier.padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(if (n.isRead) MaterialTheme.colorScheme.surfaceVariant else BloodRed.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    notificationIconFor(n.type),
+                    contentDescription = null,
+                    tint = if (n.isRead) MaterialTheme.colorScheme.onSurfaceVariant else BloodRed,
+                    modifier = Modifier.size(20.dp),
                 )
-                if (n.type == NotificationType.Availability) {
-                    AvailabilityPill(n.metadataAvailabilityStatus())
-                }
             }
-            Text(n.message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
-            if (n.createdAt.isNotBlank()) {
-                Text(n.createdAt, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = n.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (!n.isRead) {
+                        Box(modifier = Modifier.size(7.dp).clip(CircleShape).background(BloodRed))
+                    }
+                    if (n.type == NotificationType.Availability) {
+                        AvailabilityPill(n.metadataAvailabilityStatus())
+                    }
+                }
+                Text(
+                    text = cleanNotificationMessage(n.title, n.message),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (n.createdAt.isNotBlank()) {
+                    Text(
+                        text = relativeTime(n.createdAt),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    )
+                }
             }
         }
     }
