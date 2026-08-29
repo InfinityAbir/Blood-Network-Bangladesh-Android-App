@@ -53,7 +53,8 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun BloodNetworkTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: com.bloodnetwork.bangladesh.data.prefs.ThemeMode? = null,
+    darkTheme: Boolean = themeMode?.let { it == com.bloodnetwork.bangladesh.data.prefs.ThemeMode.Dark } ?: isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
     MaterialTheme(

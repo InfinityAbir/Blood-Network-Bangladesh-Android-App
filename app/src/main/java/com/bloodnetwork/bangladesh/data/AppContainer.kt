@@ -8,6 +8,7 @@ import com.bloodnetwork.bangladesh.data.network.NotificationSocket
 import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
 import com.bloodnetwork.bangladesh.data.prefs.EligibilityStore
 import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
+import com.bloodnetwork.bangladesh.data.prefs.ThemeStore
 import com.bloodnetwork.bangladesh.data.prefs.TokenStore
 
 /**
@@ -25,6 +26,8 @@ class AppContainer(context: Context) {
     val registrationStore: RegistrationStore by lazy { RegistrationStore(appContext) }
 
     val donorProfileStore: DonorProfileStore by lazy { DonorProfileStore(appContext) }
+
+    val themeStore: ThemeStore by lazy { ThemeStore(appContext) }
 
     val authInterceptor: AuthInterceptor by lazy { AuthInterceptor(tokenStore) }
 

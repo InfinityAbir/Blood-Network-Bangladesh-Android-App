@@ -69,6 +69,7 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
             TopAppBar(
                 title = { Text("Admin Dashboard") },
                 actions = {
+                    com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton()
                     BadgedBox(
                         badge = {
                             if (notifState.unreadCount > 0) {

@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -59,14 +60,18 @@ fun LandingScreen(onNavigate: (String) -> Unit) {
         contentVisible = true
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton(
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp),
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
         Icon(
             imageVector = Icons.Filled.Bloodtype,
             contentDescription = null,
@@ -115,6 +120,7 @@ fun LandingScreen(onNavigate: (String) -> Unit) {
         Spacer(Modifier.height(12.dp))
         AnimatedSlideIn(visible = contentVisible, delay = 900) {
             SecondaryButton("Create Account", onClick = { onNavigate(Routes.REGISTER) })
+        }
         }
     }
 }

@@ -95,6 +95,7 @@ fun DonorDashboardScreen(
             TopAppBar(
                 title = { Text("Blood Network BD") },
                 actions = {
+                    com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton()
                     BadgedBox(
                         badge = {
                             if (notifState.unreadCount > 0) {
