@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -97,11 +96,7 @@ fun DonorDashboardScreen(
                 actions = {
                     com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton()
                     BadgedBox(
-                        badge = {
-                            if (notifState.unreadCount > 0) {
-                                Badge { Text("${notifState.unreadCount}") }
-                            }
-                        },
+                        badge = { com.bloodnetwork.bangladesh.ui.components.AnimatedCountBadge(notifState.unreadCount) },
                     ) {
                         IconButton(onClick = { showNotifSheet = true }) {
                             Icon(

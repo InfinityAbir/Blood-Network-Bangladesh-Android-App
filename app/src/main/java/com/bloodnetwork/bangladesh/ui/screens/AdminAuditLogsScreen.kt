@@ -152,8 +152,9 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     }
                 }
             } else {
-                items(state.auditLogs) { log ->
+                items(state.auditLogs, key = { it.id }) { log ->
                     AuditLogCard(
+                        modifier = Modifier.animateItem(),
                         userName = log.userName ?: "System",
                         action = log.action,
                         entityType = log.entityType,
@@ -181,9 +182,10 @@ private fun AuditLogCard(
     ipAddress: String?,
     metadata: String?,
     createdAt: String,
+    modifier: Modifier = Modifier,
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),

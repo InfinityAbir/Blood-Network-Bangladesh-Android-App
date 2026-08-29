@@ -119,7 +119,7 @@ fun ChatbotScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(state.messages, key = { it.hashCode() }) { msg ->
-                        ChatBubble(msg)
+                        ChatBubble(msg, modifier = Modifier.animateItem())
                     }
                 }
             }
@@ -128,10 +128,10 @@ fun ChatbotScreen(
 }
 
 @Composable
-fun ChatBubble(msg: ChatUiMessage) {
+fun ChatBubble(msg: ChatUiMessage, modifier: Modifier = Modifier) {
     val isUser = msg.role == "user"
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
     ) {
         Surface(

@@ -284,7 +284,7 @@ fun LazyItemScope.NotificationListItem(n: NotificationDto, onClick: () -> Unit, 
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(MaterialTheme.shapes.medium)
                         .background(MaterialTheme.colorScheme.errorContainer)
                         .padding(horizontal = 20.dp),
                     contentAlignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd,
@@ -300,10 +300,14 @@ fun LazyItemScope.NotificationListItem(n: NotificationDto, onClick: () -> Unit, 
 
 @Composable
 fun NotificationSheetCard(n: NotificationDto, onClick: () -> Unit = {}) {
+    // Opaque, not BloodPink.copy(alpha = ...): this card sits in front of the swipe-to-dismiss
+    // background (the red Delete icon), and a translucent container lets that bleed through
+    // even at rest, not just mid-swipe.
+    val unreadContainer = androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.surface, BloodPink, 0.35f)
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
-            containerColor = if (n.isRead) MaterialTheme.colorScheme.surface else BloodPink.copy(alpha = 0.35f),
+            containerColor = if (n.isRead) MaterialTheme.colorScheme.surface else unreadContainer,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (n.isRead) 1.dp else 0.dp),
     ) {

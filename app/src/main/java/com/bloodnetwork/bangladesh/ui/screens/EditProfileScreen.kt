@@ -91,7 +91,7 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: 
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .imePadding()
-                .padding(16.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
@@ -138,10 +138,20 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: 
             }
 
             Text("Change Phone Number", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Current: ${authState.user?.phoneNumber ?: "—"}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             LabeledTextField(newPhone, { newPhone = it }, "New Phone Number (optional)",
                 keyboardType = KeyboardType.Phone)
 
             Text("Change Email", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Current: ${authState.user?.email?.takeIf { it.isNotBlank() } ?: "Not set"}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             LabeledTextField(newEmail, { newEmail = it }, "New Email (optional)",
                 keyboardType = KeyboardType.Email)
 

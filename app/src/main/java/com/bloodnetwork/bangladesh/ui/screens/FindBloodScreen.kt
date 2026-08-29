@@ -182,7 +182,7 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
                 item { SearchResultsSkeleton() }
             } else {
                 items(state.donors, key = { it.id }) { donor ->
-                    DonorCard(donor) {
+                    DonorCard(donor, modifier = Modifier.animateItem()) {
                         val districtId = donor.districtId
                         val upazilaId = donor.upazilaId
                         if (districtId != null && upazilaId != null) {
@@ -216,8 +216,8 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
 }
 
 @Composable
-fun DonorCard(donor: PublicDonorDto, onRequest: () -> Unit = {}) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+fun DonorCard(donor: PublicDonorDto, modifier: Modifier = Modifier, onRequest: () -> Unit = {}) {
+    Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = donor.photoUrl, size = 44.dp)

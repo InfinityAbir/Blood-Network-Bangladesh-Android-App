@@ -97,7 +97,7 @@ fun RegisterScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .imePadding()
-                .padding(24.dp),
+                .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 88.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(

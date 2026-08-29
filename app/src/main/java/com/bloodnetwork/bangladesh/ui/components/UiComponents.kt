@@ -3,6 +3,7 @@ package com.bloodnetwork.bangladesh.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -378,20 +379,29 @@ fun DatePickerField(
     val month = (parts.getOrNull(1)?.toIntOrNull() ?: (today.get(java.util.Calendar.MONTH) + 1)) - 1
     val day = parts.getOrNull(2)?.toIntOrNull() ?: today.get(java.util.Calendar.DAY_OF_MONTH)
 
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label) },
-        placeholder = { Text(placeholder) },
-        modifier = modifier.fillMaxWidth(),
-        singleLine = true,
-        readOnly = true,
-        trailingIcon = {
-            IconButton(onClick = { showDialog = true }) {
-                Icon(Icons.Filled.ArrowDropDown, contentDescription = "Pick date")
-            }
-        },
-    )
+    Box(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            placeholder = { Text(placeholder) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            readOnly = true,
+            trailingIcon = {
+                IconButton(onClick = { showDialog = true }) {
+                    Icon(Icons.Filled.ArrowDropDown, contentDescription = "Pick date")
+                }
+            },
+        )
+        // readOnly text fields don't open a keyboard, so tapping anywhere in the box (not
+        // just the trailing icon) should open the picker — overlay a click target on top.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { showDialog = true },
+        )
+    }
 
     if (showDialog) {
         val state = rememberDatePickerState(

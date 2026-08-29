@@ -160,9 +160,9 @@ fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     }
                 }
             } else {
-                items(state.reports) { report ->
+                items(state.reports, key = { it.id }) { report ->
                     Card(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().animateItem(),
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),

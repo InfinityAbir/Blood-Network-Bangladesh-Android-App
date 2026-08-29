@@ -109,7 +109,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp)
                 .verticalScroll(rememberScrollState())
                 .imePadding(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
