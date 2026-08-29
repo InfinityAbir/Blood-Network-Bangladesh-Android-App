@@ -74,8 +74,15 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
 
     var searchQuery by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("") }
+    var selectedStatus by remember { mutableStateOf("") } // All | Active | Deactive
 
-    LaunchedEffect(Unit) { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }) }
+    fun isActiveFilter(): Boolean? = when (selectedStatus) {
+        "Active" -> true
+        "Deactive" -> false
+        else -> null
+    }
+
+    LaunchedEffect(Unit) { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, isActiveFilter()) }
 
     Scaffold(
         topBar = {
@@ -90,16 +97,6 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
         },
     ) { padding ->
         val listState = rememberLazyListState()
-        val shouldLoadMore by remember {
-            derivedStateOf {
-                val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                val total = listState.layoutInfo.totalItemsCount
-                total > 0 && last >= total - 3
-            }
-        }
-        LaunchedEffect(shouldLoadMore, state.usersHasMore) {
-            if (shouldLoadMore && state.usersHasMore) vm.loadMoreUsers()
-        }
 
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
@@ -123,24 +120,57 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                         shape = RoundedCornerShape(12.dp),
                     )
                     Button(
-                        onClick = { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }) },
+                        onClick = { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, isActiveFilter()) },
                         colors = ButtonDefaults.buttonColors(containerColor = BloodRed),
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
                     ) { Text("Search", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold) }
                 }
             }
+            // --- Professional two-row filter groups: Role + Status ---
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(
-                        selected = selectedRole == "", onClick = { selectedRole = ""; vm.loadUsers(searchQuery.ifBlank { null }, null) },
-                        label = { Text("All", style = MaterialTheme.typography.labelSmall) },
-                        shape = RoundedCornerShape(50),
-                        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White),
-                    )
-                    FilterChip(selected = selectedRole == "Donor", onClick = { selectedRole = "Donor"; vm.loadUsers(searchQuery.ifBlank { null }, "Donor") }, label = { Text("Donor", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
-                    FilterChip(selected = selectedRole == "Requester", onClick = { selectedRole = "Requester"; vm.loadUsers(searchQuery.ifBlank { null }, "Requester") }, label = { Text("Requester", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
-                    FilterChip(selected = selectedRole == "Admin", onClick = { selectedRole = "Admin"; vm.loadUsers(searchQuery.ifBlank { null }, "Admin") }, label = { Text("Admin", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    // Role row
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Role", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(48.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
+                            FilterChip(
+                                selected = selectedRole == "", onClick = { selectedRole = ""; vm.loadUsers(searchQuery.ifBlank { null }, null, isActiveFilter()) },
+                                label = { Text("All", style = MaterialTheme.typography.labelSmall) },
+                                shape = RoundedCornerShape(50),
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White),
+                            )
+                            FilterChip(selected = selectedRole == "Donor", onClick = { selectedRole = "Donor"; vm.loadUsers(searchQuery.ifBlank { null }, "Donor", isActiveFilter()) }, label = { Text("Donor", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                            FilterChip(selected = selectedRole == "Requester", onClick = { selectedRole = "Requester"; vm.loadUsers(searchQuery.ifBlank { null }, "Requester", isActiveFilter()) }, label = { Text("Requester", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                            FilterChip(selected = selectedRole == "Admin", onClick = { selectedRole = "Admin"; vm.loadUsers(searchQuery.ifBlank { null }, "Admin", isActiveFilter()) }, label = { Text("Admin", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                        }
+                    }
+                    // Status row - modern, clean with icons
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text("Status", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(48.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
+                            FilterChip(
+                                selected = selectedStatus == "", onClick = { selectedStatus = ""; vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, null) },
+                                label = { Text("All", style = MaterialTheme.typography.labelSmall) },
+                                shape = RoundedCornerShape(50),
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White),
+                            )
+                            FilterChip(
+                                selected = selectedStatus == "Active",
+                                onClick = { selectedStatus = "Active"; vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, true) },
+                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(androidx.compose.material.icons.Icons.Filled.CheckCircle, contentDescription = null, modifier = Modifier.size(14.dp)); Text("Active", style = MaterialTheme.typography.labelSmall) } },
+                                shape = RoundedCornerShape(50),
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF2E7D32), selectedLabelColor = Color.White),
+                            )
+                            FilterChip(
+                                selected = selectedStatus == "Deactive",
+                                onClick = { selectedStatus = "Deactive"; vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, false) },
+                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(androidx.compose.material.icons.Icons.Filled.Block, contentDescription = null, modifier = Modifier.size(14.dp)); Text("Deactive", style = MaterialTheme.typography.labelSmall) } },
+                                shape = RoundedCornerShape(50),
+                                colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFC62828), selectedLabelColor = Color.White),
+                            )
+                        }
+                    }
                 }
             }
             val errorMsg = state.error
@@ -152,7 +182,7 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("Failed to load users", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                             Text(errorMsg, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Button(onClick = { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }) }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) { Text("Retry", style = MaterialTheme.typography.labelSmall) }
+                            Button(onClick = { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, isActiveFilter()) }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) { Text("Retry", style = MaterialTheme.typography.labelSmall) }
                         }
                     }
                 }
@@ -226,6 +256,19 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                                 }
                             }
                         }
+                    }
+                }
+                // Pagination footer - keep cards, only swap bar (Showing X to Y + << < 1 > >> + 10|20|50|100)
+                if (state.users.isNotEmpty() && !state.isLoading) {
+                    item {
+                        com.bloodnetwork.bangladesh.ui.components.PaginationFooter(
+                            page = state.usersPage,
+                            pageSize = state.usersPageSize,
+                            totalCount = state.usersTotalCount,
+                            label = "users",
+                            onPageChange = { newPage -> vm.gotoUsersPage(newPage) },
+                            onPageSizeChange = { newSize -> vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, isActiveFilter(), newSize) }
+                        )
                     }
                 }
                 if (state.usersLoadingMore) {

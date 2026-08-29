@@ -173,9 +173,21 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
                     vm.search(group, selectedDistrictId, selectedUpazilaId)
                 }, enabled = hasCriteria)
             }
-            item {
-                if (state.searched && state.totalCount > 0) {
-                    Text("${state.totalCount} donor(s) found", style = MaterialTheme.typography.titleSmall)
+            if (state.searched && !state.isLoading && state.totalCount > 0) {
+                item {
+                    val end = state.donors.size
+                    val start = if (end == 0) 0 else 1
+                    Text(
+                        "Showing $start to $end of ${state.totalCount} donors",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                item {
+                    if (state.searched && state.totalCount > 0) {
+                        Text("${state.totalCount} donor(s) found", style = MaterialTheme.typography.titleSmall)
+                    }
                 }
             }
             if (state.isLoading) {
