@@ -32,10 +32,33 @@ class EligibilityViewModel(
 
     init {
         viewModelScope.launch {
-            val saved = repository.eligibilityAnswers.first()
-            if (saved.isNotEmpty()) {
-                _uiState.value = _uiState.value.copy(answers = saved, lastCheckedAnswers = saved)
+            // Per-user bundle: each user (and guest) has isolated answers+result.
+            // This survives logout/login for same user, but is never shown to other users.
+            val bundle = repository.getEligibilityBundle()
+            var answers = bundle.answers
+            var result = bundle.result
+            var lastChecked = bundle.lastCheckedAnswers
+
+            // If local per-user bundle is empty and user is authenticated, try server (cross-device / website parity).
+            if ((answers.isEmpty() && result == null) && repository.isLoggedInSync()) {
+                val server = repository.getEligibilityState()
+                if (server != null) {
+                    val serverAnswers = server.answers.associate { it.questionId to it.answer }
+                    answers = serverAnswers
+                    result = server.result
+                    lastChecked = serverAnswers
+                    // Cache server state locally for same user
+                    repository.saveEligibilityAnswers(serverAnswers)
+                    repository.saveEligibilityResult(server.result)
+                    repository.saveEligibilityLastCheckedAnswers(serverAnswers)
+                }
             }
+
+            _uiState.value = _uiState.value.copy(
+                answers = answers,
+                result = result,
+                lastCheckedAnswers = lastChecked
+            )
         }
     }
 
@@ -66,13 +89,30 @@ class EligibilityViewModel(
         viewModelScope.launch {
             val payload = state.questions.map { EligibilityAnswerDto(it.id, answers[it.id] ?: "") }
             runCatching { repository.checkEligibility(payload) }
-                .onSuccess { _uiState.value = _uiState.value.copy(result = it, isChecking = false, lastCheckedAnswers = answers) }
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(result = it, isChecking = false, lastCheckedAnswers = answers)
+                    // Persist so result survives navigation / process death and user can review score again.
+                    repository.saveEligibilityResult(it)
+                    repository.saveEligibilityLastCheckedAnswers(answers)
+                }
                 .onFailure { e -> _uiState.value = _uiState.value.copy(isChecking = false, error = e.toDisplayMessage("Failed to check eligibility")) }
         }
     }
 
     fun reset() {
         _uiState.value = EligibilityUiState(questions = _uiState.value.questions)
-        viewModelScope.launch { repository.clearEligibilityAnswers() }
+        viewModelScope.launch {
+            repository.clearEligibilityAll()
+            if (repository.isLoggedInSync()) repository.clearServerEligibilityState()
+        }
+    }
+
+    fun clearResult() {
+        _uiState.value = _uiState.value.copy(result = null, lastCheckedAnswers = null)
+        viewModelScope.launch {
+            repository.clearEligibilityResult()
+            repository.clearEligibilityLastCheckedAnswers()
+            if (repository.isLoggedInSync()) repository.clearServerEligibilityState()
+        }
     }
 }

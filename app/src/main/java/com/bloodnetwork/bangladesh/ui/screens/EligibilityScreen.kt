@@ -55,6 +55,9 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     LaunchedEffect(Unit) { vm.loadQuestions() }
 
     val allAnswered = state.questions.isNotEmpty() && state.questions.all { state.answers.containsKey(it.id) }
+    // hasChanges is kept only for a subtle stale-result hint; it no longer gates the Check button.
+    // Button stays enabled whenever all questions are answered so user can re-check their score
+    // and the persisted result remains visible across navigation / process death.
     val hasChanges = state.lastCheckedAnswers == null || state.answers != state.lastCheckedAnswers
     val snackbarHostState = remember { SnackbarHostState() }
     val listState = rememberLazyListState()
@@ -113,16 +116,18 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     }
                 }
                 item {
-                    PrimaryButton(text = "Check Eligibility", onClick = { vm.checkEligibility() }, loading = state.isChecking, enabled = allAnswered && hasChanges)
+                    PrimaryButton(text = "Check Eligibility", onClick = { vm.checkEligibility() }, loading = state.isChecking, enabled = allAnswered)
                 }
                 state.result?.let { result ->
                     item {
                         ResultCard(result)
                     }
-                    if (!hasChanges) {
+                    // Keep result visible; allow re-check without requiring a change.
+                    // Show a subtle hint only when answers have changed since last check.
+                    if (hasChanges && state.lastCheckedAnswers != null) {
                         item {
                             Text(
-                                "Change any answer above to check again.",
+                                "Answers changed — tap Check Eligibility again to update your score.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

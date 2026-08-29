@@ -66,7 +66,11 @@ class BloodNetworkRepository(
     suspend fun login(phone: String, password: String): AuthResponse {
         val auth = api.login(LoginRequest(phoneNumber = phone, password = password))
         tokenStore.saveSession(auth)
+        // Eligibility is now per-user (keyed by userId), so no need to clear it on login —
+        // each user sees only their own bundle (guest="guest", user="id"). This preserves
+        // a user's own answers+result across logout/login while still isolating from other users.
         registrationStore.clear()
+        donorProfileStore.clear()
         return auth
     }
 
@@ -74,6 +78,7 @@ class BloodNetworkRepository(
         val auth = api.register(request)
         tokenStore.saveSession(auth)
         registrationStore.clear()
+        donorProfileStore.clear()
         return auth
     }
 
@@ -85,9 +90,8 @@ class BloodNetworkRepository(
             runCatching { api.logout(RefreshTokenRequest(refreshToken)) }
         }
         tokenStore.clear()
-        // These stores are keyed by device, not by account, so a next user signing in on the
-        // same device must not see the previous account's local drafts.
-        eligibilityStore.clearAnswers()
+        // Registration/donor drafts are device-keyed and cleared on logout to prevent next user seeing previous draft.
+        // Eligibility is per-user (guest vs userId) so we KEEP it — same user logging back in will find their own bundle.
         registrationStore.clear()
         donorProfileStore.clear()
     }
@@ -155,13 +159,61 @@ class BloodNetworkRepository(
     suspend fun checkEligibility(answers: List<EligibilityAnswerDto>): EligibilityResultDto =
         api.checkEligibility(answers)
 
+    suspend fun getEligibilityState(): com.bloodnetwork.bangladesh.data.model.EligibilityStateDto? =
+        try { api.getEligibilityState() } catch (_: Exception) { null }
+    suspend fun clearServerEligibilityState() {
+        try { api.clearEligibilityState() } catch (_: Exception) { }
+    }
+
     // ---- AI Chatbot ----
     suspend fun chat(request: ChatRequest): String = api.chat(request).reply
 
-    // ---- Eligibility Store ----
+    // ---- Eligibility Store — per-user (guest="guest", authenticated=userId) ----
+    // Legacy flows (guest only) kept for one migration release; new code uses per-user bundle.
     val eligibilityAnswers: Flow<Map<String, String>> = eligibilityStore.answers
-    suspend fun saveEligibilityAnswers(answers: Map<String, String>) = eligibilityStore.saveAnswers(answers)
-    suspend fun clearEligibilityAnswers() = eligibilityStore.clearAnswers()
+    val eligibilityResult: Flow<EligibilityResultDto?> = eligibilityStore.result
+    val eligibilityLastCheckedAnswers: Flow<Map<String, String>?> = eligibilityStore.lastCheckedAnswers
+    val eligibilityOwnerId: Flow<String?> = eligibilityStore.ownerUserId
+
+    suspend fun getEligibilityBundle() = eligibilityStore.getBundle(tokenStore.currentUserId.first())
+
+    suspend fun saveEligibilityAnswers(answers: Map<String, String>) {
+        eligibilityStore.saveAnswers(tokenStore.currentUserId.first(), answers)
+    }
+
+    suspend fun saveEligibilityResult(result: EligibilityResultDto) {
+        eligibilityStore.saveResult(tokenStore.currentUserId.first(), result)
+    }
+
+    suspend fun saveEligibilityLastCheckedAnswers(answers: Map<String, String>) {
+        eligibilityStore.saveLastCheckedAnswers(tokenStore.currentUserId.first(), answers)
+    }
+
+    suspend fun clearEligibilityAnswers() {
+        eligibilityStore.clearAnswersForUser(tokenStore.currentUserId.first())
+    }
+
+    suspend fun clearEligibilityResult() {
+        // clear only result/lastChecked for current user, keep answers if needed; use bundle copy
+        val bundle = eligibilityStore.getBundle(tokenStore.currentUserId.first())
+        eligibilityStore.saveBundleForCurrentUser(bundle.copy(result = null, lastCheckedAnswers = null), tokenStore.currentUserId.first())
+    }
+
+    suspend fun clearEligibilityLastCheckedAnswers() {
+        val bundle = eligibilityStore.getBundle(tokenStore.currentUserId.first())
+        eligibilityStore.saveBundleForCurrentUser(bundle.copy(lastCheckedAnswers = null), tokenStore.currentUserId.first())
+    }
+
+    suspend fun clearEligibilityAll() {
+        // Only clear current user's bundle, not all users, to preserve other users' data.
+        eligibilityStore.clearForUser(tokenStore.currentUserId.first())
+    }
+
+    suspend fun clearAllEligibilityForAllUsers() = eligibilityStore.clearAll()
+
+    suspend fun clearEligibilityIfOwnerMismatch() {
+        // No-op now that store is per-user; isolation is automatic. Kept for ViewModel compat.
+    }
 
     // ---- Admin: Eligibility Questions ----
     suspend fun getAdminEligibilityQuestions(): List<com.bloodnetwork.bangladesh.data.model.AdminEligibilityQuestionDto> =

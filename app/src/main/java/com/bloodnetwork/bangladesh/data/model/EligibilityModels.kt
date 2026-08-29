@@ -82,3 +82,10 @@ data class SaveEligibilityQuestionRequest(
 data class ToggleEligibilityQuestionActiveRequest(
     @SerialName("isActive") val isActive: Boolean,
 )
+
+@Serializable
+data class EligibilityStateDto(
+    @SerialName("answers") val answers: List<EligibilityAnswerDto> = emptyList(),
+    @SerialName("result") val result: EligibilityResultDto = EligibilityResultDto(),
+    @SerialName("updatedAt") val updatedAt: String = "",
+)

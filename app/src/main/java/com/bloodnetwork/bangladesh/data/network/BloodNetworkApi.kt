@@ -184,6 +184,12 @@ interface BloodNetworkApi {
     @POST("api/ai/eligibility/check")
     suspend fun checkEligibility(@Body answers: List<EligibilityAnswerDto>): EligibilityResultDto
 
+    @GET("api/ai/eligibility/state")
+    suspend fun getEligibilityState(): EligibilityStateDto?
+
+    @DELETE("api/ai/eligibility/state")
+    suspend fun clearEligibilityState(): Unit
+
     // ---- Eligibility (admin) ----
     @GET("api/admin/eligibility-questions")
     suspend fun getAdminEligibilityQuestions(): List<AdminEligibilityQuestionDto>
