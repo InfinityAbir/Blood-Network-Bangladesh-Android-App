@@ -300,21 +300,38 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             DatePickerField(lastDonationDate, { lastDonationDate = it; saveDraft() }, "Last Donation Date")
 
             if (state.profile != null) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column {
-                        Text("Available to donate", style = MaterialTheme.typography.titleMedium)
-                        Text("Current: ${state.profile?.availabilityStatus?.name ?: "Unknown"}", style = MaterialTheme.typography.bodySmall)
+                val isRecentlyDonated = state.profile?.availabilityStatus == AvailabilityStatus.RecentlyDonated
+                val eligibleAgainOn = remember(state.profile?.lastDonationDate) {
+                    state.profile?.lastDonationDate?.take(10)?.let { dateStr ->
+                        runCatching { java.time.LocalDate.parse(dateStr).plusDays(90) }.getOrNull()
                     }
-                    Switch(
-                        checked = availabilityAvailable,
-                        onCheckedChange = { checked ->
-                            vm.updateAvailability(if (checked) AvailabilityStatus.Available else AvailabilityStatus.Unavailable)
-                        },
-                    )
+                }
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column {
+                            Text("Available to donate", style = MaterialTheme.typography.titleMedium)
+                            Text("Current: ${state.profile?.availabilityStatus?.name ?: "Unknown"}", style = MaterialTheme.typography.bodySmall)
+                        }
+                        Switch(
+                            checked = availabilityAvailable,
+                            enabled = !isRecentlyDonated,
+                            onCheckedChange = { checked ->
+                                vm.updateAvailability(if (checked) AvailabilityStatus.Available else AvailabilityStatus.Unavailable)
+                            },
+                        )
+                    }
+                    if (isRecentlyDonated) {
+                        Text(
+                            text = "Donors need a 90-day gap between donations." + (eligibleAgainOn?.let { " Available again on $it." } ?: ""),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
                 }
             }
 
