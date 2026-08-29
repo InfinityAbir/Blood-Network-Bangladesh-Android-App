@@ -64,6 +64,7 @@ import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.RowChips
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AdminEligibilityViewModel
 
@@ -89,15 +90,15 @@ fun AdminEligibilityQuestionsScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Eligibility Questions") },
+                title = { Text(tr("Eligibility Questions", "যোগ্যতা প্রশ্নাবলী")) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showCreateDialog = true }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Add question")
+                        Icon(Icons.Filled.Add, contentDescription = tr("Add question", "প্রশ্ন যোগ করুন"))
                     }
                 },
             )
@@ -117,8 +118,8 @@ fun AdminEligibilityQuestionsScreen(onBack: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Text("No questions yet", style = MaterialTheme.typography.titleMedium)
-                Text("Tap + to add the first eligibility question.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(tr("No questions yet", "এখনও কোনো প্রশ্ন নেই"), style = MaterialTheme.typography.titleMedium)
+                Text(tr("Tap + to add the first eligibility question.", "প্রথম যোগ্যতা প্রশ্ন যোগ করতে + বাটনে ট্যাপ করুন।"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             LazyColumn(
@@ -160,15 +161,15 @@ fun AdminEligibilityQuestionsScreen(onBack: () -> Unit) {
     deleteTarget?.let { q ->
         AlertDialog(
             onDismissRequest = { deleteTarget = null },
-            title = { Text("Delete this question?") },
-            text = { Text("\"${q.questionEn}\" will be permanently removed. This can't be undone.") },
+            title = { Text(tr("Delete this question?", "এই প্রশ্নটি মুছে ফেলবেন?")) },
+            text = { Text("\"${q.questionEn}\" " + tr("will be permanently removed. This can't be undone.", "স্থায়ীভাবে মুছে ফেলা হবে। এই কাজটি আর ফেরানো যাবে না।")) },
             confirmButton = {
                 TextButton(onClick = { vm.delete(q.id); deleteTarget = null }) {
-                    Text("Delete", color = BloodRed)
+                    Text(tr("Delete", "মুছুন"), color = BloodRed)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { deleteTarget = null }) { Text("Cancel") }
+                TextButton(onClick = { deleteTarget = null }) { Text(tr("Cancel", "বাতিল")) }
             },
         )
     }
@@ -195,22 +196,22 @@ private fun QuestionAdminCard(
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),
                 )
-                StatusPill(if (q.isActive) "Active" else "Inactive", q.isActive)
+                StatusPill(if (q.isActive) tr("Active", "সক্রিয়") else tr("Inactive", "নিষ্ক্রিয়"), q.isActive)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TagPill(if (q.questionType == "number") "Number${q.unit?.let { " ($it)" } ?: ""}" else "Yes / No")
-                if (q.isCritical) TagPill("Critical", BloodRed)
+                TagPill(if (q.questionType == "number") "${tr("Number", "সংখ্যা")}${q.unit?.let { " ($it)" } ?: ""}" else tr("Yes / No", "হ্যাঁ / না"))
+                if (q.isCritical) TagPill(tr("Critical", "জরুরি"), BloodRed)
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(if (q.isActive) "Deactivate" else "Activate", style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(end = 4.dp))
+                Text(if (q.isActive) tr("Deactivate", "নিষ্ক্রিয় করুন") else tr("Activate", "সক্রিয় করুন"), style = MaterialTheme.typography.labelSmall, modifier = Modifier.padding(end = 4.dp))
                 Switch(checked = q.isActive, onCheckedChange = { onToggleActive() })
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = onEdit) { Icon(Icons.Filled.Edit, contentDescription = "Edit") }
-                IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = BloodRed) }
+                IconButton(onClick = onEdit) { Icon(Icons.Filled.Edit, contentDescription = tr("Edit", "সম্পাদনা")) }
+                IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, contentDescription = tr("Delete", "মুছুন"), tint = BloodRed) }
             }
         }
     }
@@ -278,15 +279,15 @@ private fun EligibilityQuestionEditDialog(
     if (showDiscardConfirm) {
         AlertDialog(
             onDismissRequest = { showDiscardConfirm = false },
-            title = { Text("Discard changes?") },
-            text = { Text("Your edits to this question haven't been saved.") },
+            title = { Text(tr("Discard changes?", "পরিবর্তন বাতিল করবেন?")) },
+            text = { Text(tr("Your edits to this question haven't been saved.", "এই প্রশ্নে করা পরিবর্তনগুলো সংরক্ষিত হয়নি।")) },
             confirmButton = {
                 TextButton(onClick = { showDiscardConfirm = false; onDismiss() }) {
-                    Text("Discard", color = BloodRed)
+                    Text(tr("Discard", "বাতিল করুন"), color = BloodRed)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDiscardConfirm = false }) { Text("Keep Editing") }
+                TextButton(onClick = { showDiscardConfirm = false }) { Text(tr("Keep Editing", "সম্পাদনা চালিয়ে যান")) }
             },
         )
     }
@@ -301,7 +302,7 @@ private fun EligibilityQuestionEditDialog(
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Text(
-                    if (existing == null) "Add Question" else "Edit Question",
+                    if (existing == null) tr("Add Question", "প্রশ্ন যোগ করুন") else tr("Edit Question", "প্রশ্ন সম্পাদনা করুন"),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(20.dp),
@@ -313,56 +314,60 @@ private fun EligibilityQuestionEditDialog(
                         .padding(horizontal = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    LabeledTextField(questionEn, { questionEn = it }, "Question (English)", singleLine = false)
-                    LabeledTextField(questionBn, { questionBn = it }, "Question (Bengali script)", singleLine = false)
-                    LabeledTextField(questionBanglish, { questionBanglish = it }, "Question (Banglish)", singleLine = false)
+                    LabeledTextField(questionEn, { questionEn = it }, tr("Question (English)", "প্রশ্ন (ইংরেজি)"), singleLine = false)
+                    LabeledTextField(questionBn, { questionBn = it }, tr("Question (Bengali script)", "প্রশ্ন (বাংলা লিপি)"), singleLine = false)
+                    LabeledTextField(questionBanglish, { questionBanglish = it }, tr("Question (Banglish)", "প্রশ্ন (বাংলিশ)"), singleLine = false)
 
-                    Text("Answer type", style = MaterialTheme.typography.labelLarge)
+                    Text(tr("Answer type", "উত্তরের ধরন"), style = MaterialTheme.typography.labelLarge)
+                    val numberTypeLabel = tr("Number", "সংখ্যা")
+                    val yesNoTypeLabel = tr("Yes / No", "হ্যাঁ / না")
                     RowChips(
                         options = listOf("number", "yesno"),
                         selected = questionType,
-                        labelOf = { if (it == "number") "Number" else "Yes / No" },
+                        labelOf = { if (it == "number") numberTypeLabel else yesNoTypeLabel },
                         onSelect = { questionType = it },
                     )
 
                     if (questionType == "number") {
-                        LabeledTextField(unit, { unit = it }, "Unit (optional, e.g. kg)")
+                        LabeledTextField(unit, { unit = it }, tr("Unit (optional, e.g. kg)", "একক (ঐচ্ছিক, যেমন কেজি)"))
                         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            LabeledTextField(minValue, { minValue = it.filter { c -> c.isDigit() } }, "Min to pass (optional)", keyboardType = KeyboardType.Number, modifier = Modifier.weight(1f))
-                            LabeledTextField(maxValue, { maxValue = it.filter { c -> c.isDigit() } }, "Max to pass (optional)", keyboardType = KeyboardType.Number, modifier = Modifier.weight(1f))
+                            LabeledTextField(minValue, { minValue = it.filter { c -> c.isDigit() } }, tr("Min to pass (optional)", "পাসের সর্বনিম্ন মান (ঐচ্ছিক)"), keyboardType = KeyboardType.Number, modifier = Modifier.weight(1f))
+                            LabeledTextField(maxValue, { maxValue = it.filter { c -> c.isDigit() } }, tr("Max to pass (optional)", "পাসের সর্বোচ্চ মান (ঐচ্ছিক)"), keyboardType = KeyboardType.Number, modifier = Modifier.weight(1f))
                         }
                     } else {
-                        Text("Which answer passes?", style = MaterialTheme.typography.labelLarge)
+                        Text(tr("Which answer passes?", "কোন উত্তরে পাস হবে?"), style = MaterialTheme.typography.labelLarge)
+                        val yesPassesLabel = tr("\"Yes\" passes", "\"হ্যাঁ\" দিলে পাস")
+                        val noPassesLabel = tr("\"No\" passes", "\"না\" দিলে পাস")
                         RowChips(
                             options = listOf(false, true),
                             selected = passOnYes,
-                            labelOf = { if (it) "\"Yes\" passes" else "\"No\" passes" },
+                            labelOf = { if (it) yesPassesLabel else noPassesLabel },
                             onSelect = { passOnYes = it },
                         )
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Critical", style = MaterialTheme.typography.titleSmall)
-                            Text("Failing this alone makes the donor ineligible", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(tr("Critical", "জরুরি"), style = MaterialTheme.typography.titleSmall)
+                            Text(tr("Failing this alone makes the donor ineligible", "শুধু এতে ব্যর্থ হলেও দাতা অযোগ্য বিবেচিত হবেন"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         Switch(checked = isCritical, onCheckedChange = { isCritical = it })
                     }
 
-                    LabeledTextField(displayOrder, { displayOrder = it.filter { c -> c.isDigit() } }, "Display order", keyboardType = KeyboardType.Number)
+                    LabeledTextField(displayOrder, { displayOrder = it.filter { c -> c.isDigit() } }, tr("Display order", "প্রদর্শনের ক্রম"), keyboardType = KeyboardType.Number)
 
-                    Text("Messages shown to the donor", style = MaterialTheme.typography.labelLarge)
-                    LabeledTextField(passMessageEn, { passMessageEn = it }, "Pass message (English)", singleLine = false)
-                    LabeledTextField(passMessageBn, { passMessageBn = it }, "Pass message (Bengali)", singleLine = false)
-                    LabeledTextField(failMessageEn, { failMessageEn = it }, "Fail message (English) — use {value} for the answer", singleLine = false)
-                    LabeledTextField(failMessageBn, { failMessageBn = it }, "Fail message (Bengali) — use {value} for the answer", singleLine = false)
+                    Text(tr("Messages shown to the donor", "দাতাকে দেখানো বার্তা"), style = MaterialTheme.typography.labelLarge)
+                    LabeledTextField(passMessageEn, { passMessageEn = it }, tr("Pass message (English)", "পাসের বার্তা (ইংরেজি)"), singleLine = false)
+                    LabeledTextField(passMessageBn, { passMessageBn = it }, tr("Pass message (Bengali)", "পাসের বার্তা (বাংলা)"), singleLine = false)
+                    LabeledTextField(failMessageEn, { failMessageEn = it }, tr("Fail message (English) — use {value} for the answer", "ব্যর্থতার বার্তা (ইংরেজি) — উত্তরের জন্য {value} ব্যবহার করুন"), singleLine = false)
+                    LabeledTextField(failMessageBn, { failMessageBn = it }, tr("Fail message (Bengali) — use {value} for the answer", "ব্যর্থতার বার্তা (বাংলা) — উত্তরের জন্য {value} ব্যবহার করুন"), singleLine = false)
                     Spacer(Modifier.height(4.dp))
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(20.dp),
                     horizontalArrangement = Arrangement.End,
                 ) {
-                    OutlinedButton(onClick = requestClose, enabled = !isSaving) { Text("Cancel") }
+                    OutlinedButton(onClick = requestClose, enabled = !isSaving) { Text(tr("Cancel", "বাতিল")) }
                     Spacer(Modifier.width(12.dp))
                     Button(
                         enabled = canSave && !isSaving,
@@ -391,7 +396,7 @@ private fun EligibilityQuestionEditDialog(
                         if (isSaving) {
                             CircularProgressIndicator(modifier = Modifier.padding(2.dp), color = MaterialTheme.colorScheme.onPrimary)
                         } else {
-                            Text("Save")
+                            Text(tr("Save", "সংরক্ষণ করুন"))
                         }
                     }
                 }

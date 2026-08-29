@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AdminViewModel
 
@@ -81,10 +82,10 @@ fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Report Management", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
+                title = { Text(tr("Report Management", "রিপোর্ট ব্যবস্থাপনা"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -116,19 +117,19 @@ fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 8.dp)) {
                     item {
-                        FilterChip(selected = selectedStatus == "", onClick = { selectedStatus = ""; vm.loadReports(null) }, label = { Text("All", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                        FilterChip(selected = selectedStatus == "", onClick = { selectedStatus = ""; vm.loadReports(null) }, label = { Text(tr("All", "সব"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
                     }
                     item {
-                        FilterChip(selected = selectedStatus == "Open", onClick = { selectedStatus = "Open"; vm.loadReports("Open") }, label = { Text("Open", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                        FilterChip(selected = selectedStatus == "Open", onClick = { selectedStatus = "Open"; vm.loadReports("Open") }, label = { Text(tr("Open", "খোলা"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
                     }
                     item {
-                        FilterChip(selected = selectedStatus == "UnderReview", onClick = { selectedStatus = "UnderReview"; vm.loadReports("UnderReview") }, label = { Text("Review", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                        FilterChip(selected = selectedStatus == "UnderReview", onClick = { selectedStatus = "UnderReview"; vm.loadReports("UnderReview") }, label = { Text(tr("Review", "পর্যালোচনা"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
                     }
                     item {
-                        FilterChip(selected = selectedStatus == "Resolved", onClick = { selectedStatus = "Resolved"; vm.loadReports("Resolved") }, label = { Text("Resolved", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                        FilterChip(selected = selectedStatus == "Resolved", onClick = { selectedStatus = "Resolved"; vm.loadReports("Resolved") }, label = { Text(tr("Resolved", "সমাধান হয়েছে"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
                     }
                     item {
-                        FilterChip(selected = selectedStatus == "Dismissed", onClick = { selectedStatus = "Dismissed"; vm.loadReports("Dismissed") }, label = { Text("Dismissed", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                        FilterChip(selected = selectedStatus == "Dismissed", onClick = { selectedStatus = "Dismissed"; vm.loadReports("Dismissed") }, label = { Text(tr("Dismissed", "খারিজ"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
                     }
                 }
             }
@@ -139,9 +140,9 @@ fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 item {
                     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Failed to load reports", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
+                            Text(tr("Failed to load reports", "রিপোর্ট লোড করা যায়নি"), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                             Text(errorMsg, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Button(onClick = { vm.loadReports(selectedStatus.ifBlank { null }) }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50)) { Text("Retry", style = MaterialTheme.typography.labelSmall) }
+                            Button(onClick = { vm.loadReports(selectedStatus.ifBlank { null }) }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50)) { Text(tr("Retry", "আবার চেষ্টা করুন"), style = MaterialTheme.typography.labelSmall) }
                         }
                     }
                 }
@@ -153,8 +154,8 @@ fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                                 Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
                                     Icon(Icons.Filled.Report, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
-                                Text("No reports", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                                Text("Reports filed by users will appear here", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(tr("No reports", "কোনো রিপোর্ট নেই"), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                Text(tr("Reports filed by users will appear here", "ব্যবহারকারীদের দাখিল করা রিপোর্ট এখানে দেখা যাবে"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -194,27 +195,27 @@ fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                                 report.reviewedByName?.let {
                                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                         Icon(Icons.Filled.Gavel, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        Text("Reviewed by $it", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text(tr("Reviewed by $it", "$it দ্বারা পর্যালোচিত"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 }
                                 report.resolution?.let {
                                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                         Icon(Icons.Filled.Gavel, contentDescription = null, modifier = Modifier.size(12.dp), tint = Color(0xFF2E7D32))
-                                        Text("Resolution: $it", style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32), fontWeight = FontWeight.Medium)
+                                        Text(tr("Resolution: $it", "সমাধান: $it"), style = MaterialTheme.typography.bodySmall, color = Color(0xFF2E7D32), fontWeight = FontWeight.Medium)
                                     }
                                 }
                             }
                             if (report.status == "Open" || report.status == "UnderReview") {
                                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
-                                    CompactOutlinedReportButton("Dismiss", onClick = {
+                                    CompactOutlinedReportButton(tr("Dismiss", "খারিজ করুন"), onClick = {
                                         resolveTargetId = report.id
                                         resolveStatus = "Dismissed"
                                         resolutionNote = ""
                                         showResolveDialog = true
                                     })
-                                    CompactFilledReportButton("Resolve", onClick = {
+                                    CompactFilledReportButton(tr("Resolve", "সমাধান করুন"), onClick = {
                                         resolveTargetId = report.id
                                         resolveStatus = "Resolved"
                                         resolutionNote = ""
@@ -236,12 +237,12 @@ fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     if (showResolveDialog) {
         AlertDialog(
             onDismissRequest = { showResolveDialog = false },
-            title = { Text("Resolve Report", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
+            title = { Text(tr("Resolve Report", "রিপোর্ট সমাধান করুন"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
             text = {
                 OutlinedTextField(
                     value = resolutionNote,
                     onValueChange = { resolutionNote = it },
-                    label = { Text("Resolution notes (optional)", style = MaterialTheme.typography.bodySmall) },
+                    label = { Text(tr("Resolution notes (optional)", "সমাধানের নোট (ঐচ্ছিক)"), style = MaterialTheme.typography.bodySmall) },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     minLines = 2,
@@ -251,10 +252,10 @@ fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 Button(onClick = {
                     vm.resolveReport(resolveTargetId, resolveStatus, resolutionNote.ifBlank { null })
                     showResolveDialog = false
-                }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50)) { Text("Submit", style = MaterialTheme.typography.labelSmall) }
+                }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50)) { Text(tr("Submit", "জমা দিন"), style = MaterialTheme.typography.labelSmall) }
             },
             dismissButton = {
-                TextButton(onClick = { showResolveDialog = false }) { Text("Cancel", style = MaterialTheme.typography.labelSmall) }
+                TextButton(onClick = { showResolveDialog = false }) { Text(tr("Cancel", "বাতিল"), style = MaterialTheme.typography.labelSmall) }
             },
         )
     }
@@ -269,8 +270,15 @@ private fun ReportStatusPill(status: String) {
         "Dismissed" -> Color(0xFF616161).copy(alpha = 0.12f) to Color(0xFF616161)
         else -> BloodRed.copy(alpha = 0.1f) to BloodRed
     }
+    val displayText = when (status) {
+        "Open" -> tr("Open", "খোলা")
+        "UnderReview" -> tr("Under Review", "পর্যালোচনাধীন")
+        "Resolved" -> tr("Resolved", "সমাধান হয়েছে")
+        "Dismissed" -> tr("Dismissed", "খারিজ")
+        else -> status
+    }
     Box(modifier = Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 10.dp, vertical = 5.dp)) {
-        Text(status, style = MaterialTheme.typography.labelSmall, color = fg, fontWeight = FontWeight.SemiBold, maxLines = 1)
+        Text(displayText, style = MaterialTheme.typography.labelSmall, color = fg, fontWeight = FontWeight.SemiBold, maxLines = 1)
     }
 }
 

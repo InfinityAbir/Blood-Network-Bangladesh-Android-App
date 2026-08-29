@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.HourglassEmpty
+import androidx.compose.material.icons.filled.NotificationImportant
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SyncAlt
@@ -67,6 +68,7 @@ import com.bloodnetwork.bangladesh.data.model.NotificationDto
 import com.bloodnetwork.bangladesh.data.model.NotificationType
 import com.bloodnetwork.bangladesh.data.model.metadataAvailabilityStatus
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.theme.BloodPink
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
@@ -95,15 +97,15 @@ fun NotificationBottomSheet(
     if (showClearAllConfirm) {
         AlertDialog(
             onDismissRequest = { showClearAllConfirm = false },
-            title = { Text("Clear all notifications?") },
-            text = { Text("This removes every notification from your list. This can't be undone.") },
+            title = { Text(tr("Clear all notifications?", "সব নোটিফিকেশন মুছে ফেলবেন?")) },
+            text = { Text(tr("This removes every notification from your list. This can't be undone.", "এতে আপনার তালিকা থেকে সব নোটিফিকেশন মুছে যাবে। এটি ফিরিয়ে আনা যাবে না।")) },
             confirmButton = {
                 TextButton(onClick = { vm.clearAll(); showClearAllConfirm = false }) {
-                    Text("Clear all", color = BloodRed)
+                    Text(tr("Clear all", "সব মুছুন"), color = BloodRed)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showClearAllConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showClearAllConfirm = false }) { Text(tr("Cancel", "বাতিল")) }
             },
         )
     }
@@ -152,9 +154,9 @@ fun NotificationBottomSheet(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text("Notifications", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                            Text(tr("Notifications", "নোটিফিকেশন"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                             IconButton(onClick = onDismiss) {
-                                Icon(Icons.Filled.Close, contentDescription = "Close", modifier = Modifier.size(20.dp))
+                                Icon(Icons.Filled.Close, contentDescription = tr("Close", "বন্ধ করুন"), modifier = Modifier.size(20.dp))
                             }
                         }
                         if (state.notifications.isNotEmpty()) {
@@ -165,11 +167,11 @@ fun NotificationBottomSheet(
                             ) {
                                 if (state.unreadCount > 0) {
                                     TextButton(onClick = { vm.markAllRead() }) {
-                                        Text("Mark all read", style = MaterialTheme.typography.labelSmall)
+                                        Text(tr("Mark all read", "সব পঠিত হিসেবে চিহ্নিত করুন"), style = MaterialTheme.typography.labelSmall)
                                     }
                                 }
                                 TextButton(onClick = { showClearAllConfirm = true }) {
-                                    Text("Clear all", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                                    Text(tr("Clear all", "সব মুছুন"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                                 }
                             }
                         }
@@ -190,8 +192,8 @@ fun NotificationBottomSheet(
                                 Box(modifier = Modifier.size(56.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
                                     Icon(Icons.Filled.NotificationsNone, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(28.dp))
                                 }
-                                Text("No notifications yet", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                                Text("You're all caught up", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(tr("No notifications yet", "এখনো কোনো নোটিফিকেশন নেই"), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                                Text(tr("You're all caught up", "আপনি সব দেখে ফেলেছেন"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         } else {
                             LazyColumn(
@@ -228,6 +230,7 @@ private fun notificationIconFor(type: NotificationType): ImageVector = when (typ
     NotificationType.ProfileReminder -> Icons.Filled.Person
     NotificationType.Availability -> Icons.Filled.WaterDrop
     NotificationType.System -> Icons.Filled.Campaign
+    NotificationType.NewRequestPendingReview -> Icons.Filled.NotificationImportant
 }
 
 private fun cleanNotificationMessage(title: String, message: String): String {
@@ -240,6 +243,7 @@ private fun cleanNotificationMessage(title: String, message: String): String {
     return text.ifBlank { message.trim() }
 }
 
+@Composable
 private fun relativeTime(iso: String): String {
     if (iso.isBlank()) return ""
     val then = try {
@@ -249,10 +253,10 @@ private fun relativeTime(iso: String): String {
     }
     val seconds = Duration.between(then, Instant.now()).seconds.coerceAtLeast(0)
     return when {
-        seconds < 60 -> "Just now"
-        seconds < 3600 -> "${seconds / 60}m ago"
-        seconds < 86400 -> "${seconds / 3600}h ago"
-        seconds < 604800 -> "${seconds / 86400}d ago"
+        seconds < 60 -> tr("Just now", "এইমাত্র")
+        seconds < 3600 -> tr("${seconds / 60}m ago", "${seconds / 60} মিনিট আগে")
+        seconds < 86400 -> tr("${seconds / 3600}h ago", "${seconds / 3600} ঘণ্টা আগে")
+        seconds < 604800 -> tr("${seconds / 86400}d ago", "${seconds / 86400} দিন আগে")
         else -> then.atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("MMM d, yyyy · h:mm a"))
     }
 }
@@ -289,7 +293,7 @@ fun LazyItemScope.NotificationListItem(n: NotificationDto, onClick: () -> Unit, 
                         .padding(horizontal = 20.dp),
                     contentAlignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd,
                 ) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.onErrorContainer)
+                    Icon(Icons.Filled.Delete, contentDescription = tr("Delete", "মুছুন"), tint = MaterialTheme.colorScheme.onErrorContainer)
                 }
             },
         ) {

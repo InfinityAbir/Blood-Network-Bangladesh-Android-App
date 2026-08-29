@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.NotificationsViewModel
@@ -65,13 +66,14 @@ data class DashboardAction(
     val route: String,
 )
 
-private val actions = listOf(
-    DashboardAction("Find Blood", "Search for donors by blood group and location", Icons.Filled.Search, Routes.FIND_BLOOD),
-    DashboardAction("Donate Blood", "Check eligibility and become a donor", Icons.Filled.WaterDrop, Routes.ELIGIBILITY),
-    DashboardAction("Request Blood", "Create a new blood request", Icons.Filled.HealthAndSafety, Routes.REQUEST_BLOOD),
-    DashboardAction("My Donor Profile", "Manage your donor profile and availability", Icons.Filled.Person, Routes.DONOR_PROFILE),
-    DashboardAction("Edit Profile", "Change your phone, email or password", Icons.Filled.Settings, Routes.EDIT_PROFILE),
-    DashboardAction("About", "Meet the developer behind this app", Icons.Filled.Info, Routes.ABOUT),
+@Composable
+private fun dashboardActions(): List<DashboardAction> = listOf(
+    DashboardAction(tr("Find Blood", "রক্ত খুঁজুন"), tr("Search for donors by blood group and location", "রক্তের গ্রুপ ও এলাকা অনুযায়ী দাতা খুঁজুন"), Icons.Filled.Search, Routes.FIND_BLOOD),
+    DashboardAction(tr("Donate Blood", "রক্ত দিন"), tr("Check eligibility and become a donor", "যোগ্যতা যাচাই করুন এবং দাতা হয়ে উঠুন"), Icons.Filled.WaterDrop, Routes.ELIGIBILITY),
+    DashboardAction(tr("Request Blood", "রক্তের অনুরোধ করুন"), tr("Create a new blood request", "নতুন রক্তের অনুরোধ তৈরি করুন"), Icons.Filled.HealthAndSafety, Routes.REQUEST_BLOOD),
+    DashboardAction(tr("My Donor Profile", "আমার দাতা প্রোফাইল"), tr("Manage your donor profile and availability", "আপনার দাতা প্রোফাইল ও সহজলভ্যতা পরিচালনা করুন"), Icons.Filled.Person, Routes.DONOR_PROFILE),
+    DashboardAction(tr("Edit Profile", "প্রোফাইল সম্পাদনা করুন"), tr("Change your phone, email or password", "আপনার ফোন, ইমেইল বা পাসওয়ার্ড পরিবর্তন করুন"), Icons.Filled.Settings, Routes.EDIT_PROFILE),
+    DashboardAction(tr("About", "সম্পর্কে"), tr("Meet the developer behind this app", "এই অ্যাপের পেছনের ডেভেলপারের সাথে পরিচিত হন"), Icons.Filled.Info, Routes.ABOUT),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,14 +88,16 @@ fun DonorDashboardScreen(
     val notifVm: NotificationsViewModel = viewModel(factory = factory)
     val notifState by notifVm.uiState.collectAsStateWithLifecycle()
     var showNotifSheet by remember { mutableStateOf(false) }
+    val actions = dashboardActions()
 
     LaunchedEffect(Unit) { notifVm.loadUnreadCount() }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Blood Network BD") },
+                title = { Text(tr("Blood Network BD", "ব্লাড নেটওয়ার্ক বিডি")) },
                 actions = {
+                    com.bloodnetwork.bangladesh.ui.components.LanguageToggleButton()
                     com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton()
                     BadgedBox(
                         badge = { com.bloodnetwork.bangladesh.ui.components.AnimatedCountBadge(notifState.unreadCount) },
@@ -101,7 +105,7 @@ fun DonorDashboardScreen(
                         IconButton(onClick = { showNotifSheet = true }) {
                             Icon(
                                 Icons.Filled.Notifications,
-                                contentDescription = "Notifications",
+                                contentDescription = tr("Notifications", "নোটিফিকেশন"),
                             )
                         }
                     }
@@ -109,7 +113,7 @@ fun DonorDashboardScreen(
                     IconButton(onClick = onLogout) {
                         Icon(
                             Icons.Filled.Logout,
-                            contentDescription = "Logout",
+                            contentDescription = tr("Logout", "লগ আউট"),
                         )
                     }
                     Spacer(Modifier.width(4.dp))
@@ -134,7 +138,7 @@ fun DonorDashboardScreen(
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
-                    text = "Welcome${state.user?.let { ", ${it.firstName}" } ?: ""}",
+                    text = "${tr("Welcome", "স্বাগতম")}${state.user?.let { ", ${it.firstName}" } ?: ""}",
                     style = MaterialTheme.typography.headlineSmall,
                 )
             }

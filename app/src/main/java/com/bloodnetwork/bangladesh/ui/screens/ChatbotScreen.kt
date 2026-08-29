@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.ChatbotViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.ChatUiMessage
@@ -56,10 +57,10 @@ fun ChatbotScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("AI Assistant") },
+                title = { Text(tr("AI Assistant", "এআই সহকারী")) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -78,7 +79,7 @@ fun ChatbotScreen(
                     value = input,
                     onValueChange = { input = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Ask about blood donation...") },
+                    placeholder = { Text(tr("Ask about blood donation...", "রক্তদান সম্পর্কে জিজ্ঞাসা করুন...")) },
                     keyboardOptions = KeyboardOptions.Default,
                     maxLines = 4,
                 )
@@ -91,7 +92,7 @@ fun ChatbotScreen(
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "Send",
+                        contentDescription = tr("Send", "পাঠান"),
                         tint = BloodRed,
                     )
                 }
@@ -106,7 +107,10 @@ fun ChatbotScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        "Hello! I'm the Blood Network assistant. Ask me anything about blood donation, eligibility, or finding a donor.",
+                        tr(
+                            "Hello! I'm the Blood Network assistant. Ask me anything about blood donation, eligibility, or finding a donor.",
+                            "হ্যালো! আমি ব্লাড নেটওয়ার্কের সহকারী। রক্তদান, যোগ্যতা বা রক্তদাতা খুঁজে পাওয়া নিয়ে যা খুশি জিজ্ঞাসা করতে পারেন।",
+                        ),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.secondary,
                     )

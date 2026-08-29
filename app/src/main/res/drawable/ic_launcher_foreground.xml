@@ -4,20 +4,18 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Minimal clean design: solid red background is provided by adaptive-icon background (#C62828).
-         Foreground: centered white water-drop with a minimal red medical cross (+). -->
-    <group
-        android:scaleX="0.62"
-        android:scaleY="0.62"
-        android:translateX="20.52"
-        android:translateY="20.52">
-        <!-- White water-drop shape, centered -->
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M54,44 C46,30 32,30 32,48 C32,60 42,70 54,74 C66,70 76,60 76,48 C76,30 62,30 54,44 Z" />
-        <!-- Red medical cross (+) inside the drop - minimal, clean, centered -->
-        <path
-            android:fillColor="#C62828"
-            android:pathData="M52,50 H56 V54 H62 V58 H56 V62 H52 V58 H46 V54 H52 Z" />
-    </group>
+    <!-- Solid red background provided by adaptive-icon background (#C62828).
+         Foreground: centered white water-drop holding a red + and - (blood donation symbol). -->
+    <!-- White water-drop shape, centered within the icon safe zone -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24 C43,38 34,48 34,60 A20,20 0 0,0 74,60 C74,48 65,38 54,24 Z" />
+    <!-- Red "+" -->
+    <path
+        android:fillColor="#C62828"
+        android:pathData="M51,47 H57 V53 H63 V59 H57 V65 H51 V59 H45 V53 H51 Z" />
+    <!-- Red "-" -->
+    <path
+        android:fillColor="#C62828"
+        android:pathData="M45,67 H63 V73 H45 Z" />
 </vector>

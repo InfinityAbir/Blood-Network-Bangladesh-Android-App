@@ -24,6 +24,7 @@ import com.bloodnetwork.bangladesh.data.model.RegisterRequest
 import com.bloodnetwork.bangladesh.data.model.RespondToMatchRequest
 import com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest
 import com.bloodnetwork.bangladesh.data.model.UnreadCountDto
+import com.bloodnetwork.bangladesh.data.model.UpdateBloodRequestRequest
 import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UpazilaDto
 import com.bloodnetwork.bangladesh.data.model.UpdateProfileRequest
@@ -124,6 +125,16 @@ class BloodNetworkRepository(
         api.createBloodRequest(request)
 
     suspend fun getMyBloodRequests(): List<BloodRequestDto> = api.getMyBloodRequests()
+
+    suspend fun getBloodRequest(id: String): BloodRequestDto = api.getBloodRequest(id)
+
+    suspend fun updateBloodRequest(id: String, request: UpdateBloodRequestRequest): BloodRequestDto =
+        api.updateBloodRequest(id, request)
+
+    suspend fun cancelBloodRequest(id: String) = api.cancelBloodRequest(id)
+
+    suspend fun fulfillBloodRequest(id: String, unitsFulfilled: Int, notes: String? = null): BloodRequestDto =
+        api.fulfillBloodRequest(id, com.bloodnetwork.bangladesh.data.model.FulfillBloodRequestRequest(unitsFulfilled, notes))
 
     suspend fun getOpenBloodRequests(
         bloodGroup: BloodGroup? = null,

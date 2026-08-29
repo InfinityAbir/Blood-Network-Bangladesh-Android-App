@@ -27,13 +27,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 
 @Composable
 fun PaginationFooter(
     page: Int,
     pageSize: Int,
     totalCount: Int,
-    label: String = "items",
+    label: String = tr("items", "আইটেম"),
     onPageChange: (Int) -> Unit,
     onPageSizeChange: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -50,7 +51,10 @@ fun PaginationFooter(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Showing $start to $end of $totalCount $label",
+            text = tr(
+                "Showing $start to $end of $totalCount $label",
+                "$totalCount-টি $label এর মধ্যে $start–$end দেখানো হচ্ছে",
+            ),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f)
@@ -70,7 +74,7 @@ fun PaginationFooter(
                 onClick = { onPageChange(page - 1) },
                 enabled = page > 1
             ) {
-                Icon(Icons.Filled.ChevronLeft, contentDescription = "Previous page")
+                Icon(Icons.Filled.ChevronLeft, contentDescription = tr("Previous page", "আগের পাতা"))
             }
             Box(
                 modifier = Modifier
@@ -89,7 +93,7 @@ fun PaginationFooter(
                 onClick = { onPageChange(page + 1) },
                 enabled = page < totalPages
             ) {
-                Icon(Icons.Filled.ChevronRight, contentDescription = "Next page")
+                Icon(Icons.Filled.ChevronRight, contentDescription = tr("Next page", "পরের পাতা"))
             }
             TextButton(
                 onClick = { onPageChange(totalPages) },

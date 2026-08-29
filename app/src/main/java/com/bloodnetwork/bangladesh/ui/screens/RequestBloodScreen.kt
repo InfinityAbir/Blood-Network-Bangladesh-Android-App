@@ -1,5 +1,6 @@
 package com.bloodnetwork.bangladesh.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,12 +36,14 @@ import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.Urgency
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.BloodGroupChips
+import com.bloodnetwork.bangladesh.ui.components.DatePickerField
 import com.bloodnetwork.bangladesh.ui.components.ErrorText
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RowChips
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
@@ -78,6 +81,42 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
 
     val requiredFilled = bloodGroup != null && units.toIntOrNull() != null && hospitalName.isNotBlank() && districtId != null && upazilaId != null && requiredBy.isNotBlank() && contactPhone.length >= 10
 
+    val backLabel = tr("Back", "ফিরে যান")
+    val requestBloodTitle = tr("Request Blood", "রক্তের জন্য অনুরোধ")
+    val bloodGroupLabel = tr("Blood Group", "রক্তের গ্রুপ")
+    val unitsRequiredLabel = tr("Units Required", "প্রয়োজনীয় ইউনিট")
+    val hospitalNameLabel = tr("Hospital Name", "হাসপাতালের নাম")
+    val hospitalAddressLabel = tr("Hospital Address", "হাসপাতালের ঠিকানা")
+    val divisionLabel = tr("Division", "বিভাগ")
+    val selectDivisionLabel = tr("Select Division", "বিভাগ নির্বাচন করুন")
+    val districtLabel = tr("District", "জেলা")
+    val selectDistrictLabel = tr("Select District", "জেলা নির্বাচন করুন")
+    val upazilaAreaLabel = tr("Upazila / Area", "উপজেলা / এলাকা")
+    val selectUpazilaLabel = tr("Select Upazila", "উপজেলা নির্বাচন করুন")
+    val areaOptionalLabel = tr("Area (optional)", "এলাকা (ঐচ্ছিক)")
+    val urgencyLabel = tr("Urgency", "জরুরির মাত্রা")
+    val requiredByLabel = tr("Required By", "প্রয়োজনের তারিখ")
+    val patientNameLabel = tr("Patient Name (optional)", "রোগীর নাম (ঐচ্ছিক)")
+    val patientRelationLabel = tr("Patient Relation (optional)", "রোগীর সাথে সম্পর্ক (ঐচ্ছিক)")
+    val contactPhoneLabel = tr("Contact Phone", "যোগাযোগের ফোন নম্বর")
+    val additionalInfoLabel = tr("Additional Info (optional)", "অতিরিক্ত তথ্য (ঐচ্ছিক)")
+    val yourRecentRequestsLabel = tr("Your recent requests", "আপনার সাম্প্রতিক অনুরোধসমূহ")
+    val submitRequestLabel = tr("Submit Request", "অনুরোধ জমা দিন")
+    val myRequestsLabel = tr("My Requests", "আমার অনুরোধসমূহ")
+    val urgencyLabels: Map<Urgency, String> = mapOf(
+        Urgency.Critical to tr("Critical", "সংকটাপন্ন"),
+        Urgency.Urgent to tr("Urgent", "জরুরি"),
+        Urgency.Normal to tr("Normal", "স্বাভাবিক"),
+    )
+
+    val selectBloodGroupErr = tr("Select a blood group", "একটি রক্তের গ্রুপ নির্বাচন করুন")
+    val enterUnitsErr = tr("Enter units required", "প্রয়োজনীয় ইউনিট লিখুন")
+    val enterHospitalNameErr = tr("Enter hospital name", "হাসপাতালের নাম লিখুন")
+    val selectDistrictErr = tr("Select a district", "একটি জেলা নির্বাচন করুন")
+    val selectUpazilaErr = tr("Select an upazila", "একটি উপজেলা নির্বাচন করুন")
+    val enterRequiredByErr = tr("Enter required-by date as YYYY-MM-DD", "প্রয়োজনের তারিখ YYYY-MM-DD আকারে লিখুন")
+    val enterValidPhoneErr = tr("Enter a valid contact phone", "একটি সঠিক যোগাযোগের ফোন নম্বর লিখুন")
+
     LaunchedEffect(Unit) {
         locVm.loadDivisions()
         vm.loadMyRequests()
@@ -114,10 +153,10 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Request Blood") },
+                title = { Text(requestBloodTitle) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = backLabel)
                     }
                 },
             )
@@ -133,20 +172,20 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Blood Group", style = MaterialTheme.typography.titleMedium)
+            Text(bloodGroupLabel, style = MaterialTheme.typography.titleMedium)
             BloodGroupChips(
                 options = BloodGroup.entries.map { it.label },
                 selected = bloodGroup,
                 onSelect = { bloodGroup = it },
             )
 
-            LabeledTextField(units, { units = it }, "Units Required", keyboardType = KeyboardType.Number)
-            LabeledTextField(hospitalName, { hospitalName = it }, "Hospital Name", singleLine = false)
-            LabeledTextField(hospitalAddress, { hospitalAddress = it }, "Hospital Address", singleLine = false)
+            LabeledTextField(units, { units = it }, unitsRequiredLabel, keyboardType = KeyboardType.Number)
+            LabeledTextField(hospitalName, { hospitalName = it }, hospitalNameLabel, singleLine = false)
+            LabeledTextField(hospitalAddress, { hospitalAddress = it }, hospitalAddressLabel, singleLine = false)
 
-            Text("Division", style = MaterialTheme.typography.titleMedium)
+            Text(divisionLabel, style = MaterialTheme.typography.titleMedium)
             PickerField(
-                label = divisionName ?: "Select Division",
+                label = divisionName ?: selectDivisionLabel,
                 options = locState.divisions.map { it.name },
                 onSelect = { name ->
                     val d = locState.divisions.firstOrNull { it.name == name }
@@ -159,9 +198,9 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
                     if (d != null) locVm.loadDistricts(d.id)
                 },
             )
-            Text("District", style = MaterialTheme.typography.titleMedium)
+            Text(districtLabel, style = MaterialTheme.typography.titleMedium)
             PickerField(
-                label = districtName ?: "Select District",
+                label = districtName ?: selectDistrictLabel,
                 options = locState.districts.map { it.name },
                 onSelect = { name ->
                     val d = locState.districts.firstOrNull { it.name == name }
@@ -172,9 +211,9 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
                     if (d != null) locVm.loadUpazilas(d.id)
                 },
             )
-            Text("Upazila / Area", style = MaterialTheme.typography.titleMedium)
+            Text(upazilaAreaLabel, style = MaterialTheme.typography.titleMedium)
             PickerField(
-                label = upazilaName ?: "Select Upazila",
+                label = upazilaName ?: selectUpazilaLabel,
                 options = locState.upazilas.map { it.name },
                 onSelect = { name ->
                     val u = locState.upazilas.firstOrNull { it.name == name }
@@ -182,43 +221,55 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
                     upazilaId = u?.id
                 },
             )
-            LabeledTextField(area, { area = it }, "Area (optional)")
+            LabeledTextField(area, { area = it }, areaOptionalLabel)
 
-            Text("Urgency", style = MaterialTheme.typography.titleMedium)
+            Text(urgencyLabel, style = MaterialTheme.typography.titleMedium)
             RowChips(
                 options = Urgency.entries.toList(),
                 selected = urgency,
-                labelOf = { it.name },
+                labelOf = { urgencyLabels[it] ?: it.name },
                 onSelect = { urgency = it },
             )
 
-            LabeledTextField(requiredBy, { requiredBy = it }, "Required By (YYYY-MM-DD)", placeholder = "2026-12-31")
-            LabeledTextField(patientName, { patientName = it }, "Patient Name (optional)")
-            LabeledTextField(patientRelation, { patientRelation = it }, "Patient Relation (optional)")
-            LabeledTextField(contactPhone, { contactPhone = it }, "Contact Phone", keyboardType = KeyboardType.Phone)
-            LabeledTextField(additionalInfo, { additionalInfo = it }, "Additional Info (optional)", singleLine = false)
+            DatePickerField(
+                requiredBy,
+                { requiredBy = it },
+                requiredByLabel,
+                minDateMillis = remember {
+                    java.util.Calendar.getInstance().apply {
+                        set(java.util.Calendar.HOUR_OF_DAY, 0)
+                        set(java.util.Calendar.MINUTE, 0)
+                        set(java.util.Calendar.SECOND, 0)
+                        set(java.util.Calendar.MILLISECOND, 0)
+                    }.timeInMillis
+                },
+            )
+            LabeledTextField(patientName, { patientName = it }, patientNameLabel)
+            LabeledTextField(patientRelation, { patientRelation = it }, patientRelationLabel)
+            LabeledTextField(contactPhone, { contactPhone = it }, contactPhoneLabel, keyboardType = KeyboardType.Phone)
+            LabeledTextField(additionalInfo, { additionalInfo = it }, additionalInfoLabel, singleLine = false)
 
             formError?.let { ErrorText(it) }
 
             if (state.success && state.myRequests.isNotEmpty()) {
-                Text("Your recent requests", style = MaterialTheme.typography.titleMedium)
+                Text(yourRecentRequestsLabel, style = MaterialTheme.typography.titleMedium)
             }
 
             PrimaryButton(
-                text = "Submit Request",
+                text = submitRequestLabel,
                 loading = state.isLoading,
                 enabled = requiredFilled,
                 onClick = {
                     val group = bloodGroup?.let { label -> BloodGroup.entries.firstOrNull { it.label == label } }
                     formError = when {
-                        group == null -> "Select a blood group"
-                        units.toIntOrNull() == null -> "Enter units required"
-                        hospitalName.isBlank() -> "Enter hospital name"
-                        districtId == null -> "Select a district"
-                        upazilaId == null -> "Select an upazila"
+                        group == null -> selectBloodGroupErr
+                        units.toIntOrNull() == null -> enterUnitsErr
+                        hospitalName.isBlank() -> enterHospitalNameErr
+                        districtId == null -> selectDistrictErr
+                        upazilaId == null -> selectUpazilaErr
                         requiredBy.isBlank() || !Regex("\\d{4}-\\d{2}-\\d{2}").matches(requiredBy.trim()) ->
-                            "Enter required-by date as YYYY-MM-DD"
-                        contactPhone.length < 10 -> "Enter a valid contact phone"
+                            enterRequiredByErr
+                        contactPhone.length < 10 -> enterValidPhoneErr
                         else -> null
                     }
                     if (formError == null) {
@@ -242,12 +293,16 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
             )
 
             if (state.loadingRequests && state.myRequests.isEmpty()) {
-                Text("My Requests", style = MaterialTheme.typography.titleLarge)
+                Text(myRequestsLabel, style = MaterialTheme.typography.titleLarge)
                 Card(modifier = Modifier.fillMaxWidth()) { SkeletonCard() }
             } else if (state.myRequests.isNotEmpty()) {
-                Text("My Requests", style = MaterialTheme.typography.titleLarge)
+                Text(myRequestsLabel, style = MaterialTheme.typography.titleLarge)
                 state.myRequests.forEach { req ->
-                    Card(modifier = Modifier.fillMaxWidth()) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigate("${com.bloodnetwork.bangladesh.ui.navigation.Routes.REQUEST_DETAILS}/${req.id}") },
+                    ) {
                         androidx.compose.foundation.layout.Column(modifier = Modifier.padding(12.dp)) {
                             androidx.compose.foundation.layout.Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -256,7 +311,13 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
                                 Text(req.bloodGroup.label, color = BloodRed, style = MaterialTheme.typography.titleMedium)
                                 Text(req.status.name, style = MaterialTheme.typography.labelLarge)
                             }
-                            Text("${req.hospitalName} · ${req.unitsRequired} unit(s)", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                tr(
+                                    "${req.hospitalName} · ${req.unitsRequired} unit(s)",
+                                    "${req.hospitalName} · ${req.unitsRequired} ইউনিট",
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
                             Text(req.requiredBy, style = MaterialTheme.typography.bodySmall)
                         }
                     }

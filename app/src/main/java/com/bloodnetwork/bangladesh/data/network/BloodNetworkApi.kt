@@ -9,6 +9,7 @@ import com.bloodnetwork.bangladesh.data.model.BloodRequestDto
 import com.bloodnetwork.bangladesh.data.model.BloodRequestMatchDto
 import com.bloodnetwork.bangladesh.data.model.CreateBloodRequestRequest
 import com.bloodnetwork.bangladesh.data.model.CreateDonorProfileRequest
+import com.bloodnetwork.bangladesh.data.model.FulfillBloodRequestRequest
 import com.bloodnetwork.bangladesh.data.model.DistrictDto
 import com.bloodnetwork.bangladesh.data.model.DivisionDto
 import com.bloodnetwork.bangladesh.data.model.DonorProfileDto
@@ -30,6 +31,7 @@ import com.bloodnetwork.bangladesh.data.model.SaveEligibilityQuestionRequest
 import com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest
 import com.bloodnetwork.bangladesh.data.model.ToggleEligibilityQuestionActiveRequest
 import com.bloodnetwork.bangladesh.data.model.UnreadCountDto
+import com.bloodnetwork.bangladesh.data.model.UpdateBloodRequestRequest
 import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UpazilaDto
 import com.bloodnetwork.bangladesh.data.model.UpdateProfileRequest
@@ -117,11 +119,14 @@ interface BloodNetworkApi {
         @Query("pageSize") pageSize: Int = 20,
     ): PagedResult<PublicBloodRequestDto>
 
+    @PATCH("api/blood-requests/{id}")
+    suspend fun updateBloodRequest(@Path("id") id: String, @Body request: UpdateBloodRequestRequest): BloodRequestDto
+
     @PATCH("api/blood-requests/{id}/cancel")
     suspend fun cancelBloodRequest(@Path("id") id: String): Unit
 
     @PATCH("api/blood-requests/{id}/fulfill")
-    suspend fun fulfillBloodRequest(@Path("id") id: String): Unit
+    suspend fun fulfillBloodRequest(@Path("id") id: String, @Body request: FulfillBloodRequestRequest): BloodRequestDto
 
     // ---- Locations ----
     @GET("api/locations/divisions")

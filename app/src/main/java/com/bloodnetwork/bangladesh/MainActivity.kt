@@ -11,7 +11,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bloodnetwork.bangladesh.ui.AppRoot
+import com.bloodnetwork.bangladesh.ui.LocalLanguageStore
 import com.bloodnetwork.bangladesh.ui.LocalThemeStore
+import com.bloodnetwork.bangladesh.ui.i18n.LocalAppLanguage
 import com.bloodnetwork.bangladesh.ui.theme.BloodNetworkTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +23,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             val themeMode by container.themeStore.mode.collectAsStateWithLifecycle()
-            CompositionLocalProvider(LocalThemeStore provides container.themeStore) {
+            val appLanguage by container.languageStore.language.collectAsStateWithLifecycle()
+            CompositionLocalProvider(
+                LocalThemeStore provides container.themeStore,
+                LocalLanguageStore provides container.languageStore,
+                LocalAppLanguage provides appLanguage,
+            ) {
                 BloodNetworkTheme(themeMode = themeMode) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),

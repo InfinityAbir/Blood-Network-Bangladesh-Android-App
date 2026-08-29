@@ -23,6 +23,25 @@ data class CreateBloodRequestRequest(
 )
 
 @Serializable
+data class UpdateBloodRequestRequest(
+    @SerialName("bloodGroup") val bloodGroup: BloodGroup,
+    @SerialName("unitsRequired") val unitsRequired: Int,
+    @SerialName("hospitalName") val hospitalName: String,
+    @SerialName("hospitalAddress") val hospitalAddress: String,
+    @SerialName("districtId") val districtId: String,
+    @SerialName("upazilaId") val upazilaId: String,
+    @SerialName("area") val area: String? = null,
+    @SerialName("requiredBy") val requiredBy: String,
+    @SerialName("urgency") val urgency: Urgency,
+    @SerialName("patientName") val patientName: String? = null,
+    @SerialName("patientRelation") val patientRelation: String? = null,
+    @SerialName("contactPhone") val contactPhone: String,
+    @SerialName("additionalInformation") val additionalInformation: String? = null,
+    @SerialName("latitude") val latitude: Double? = null,
+    @SerialName("longitude") val longitude: Double? = null,
+)
+
+@Serializable
 data class BloodRequestDto(
     @SerialName("id") val id: String = "",
     @SerialName("requesterId") val requesterId: String = "",

@@ -44,6 +44,7 @@ import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RowChips
 import com.bloodnetwork.bangladesh.ui.components.DonorProfileSkeleton
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.DonorViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
@@ -73,6 +74,10 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var lastDonationDate by remember { mutableStateOf("") }
     var formError by remember { mutableStateOf<String?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val selectBloodGroupErr = tr("Select a blood group", "রক্তের গ্রুপ নির্বাচন করুন")
+    val selectDistrictErr = tr("Select a district", "জেলা নির্বাচন করুন")
+    val selectUpazilaErr = tr("Select an upazila", "উপজেলা নির্বাচন করুন")
 
     var initialized by remember { mutableStateOf(false) }
     var origBloodGroup by remember { mutableStateOf<String?>(null) }
@@ -215,10 +220,10 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Donor Profile") },
+                title = { Text(tr("Donor Profile", "দাতার প্রোফাইল")) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -237,14 +242,14 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("Blood Group", style = MaterialTheme.typography.titleMedium)
+            Text(tr("Blood Group", "রক্তের গ্রুপ"), style = MaterialTheme.typography.titleMedium)
             BloodGroupChips(
                 options = BloodGroup.entries.map { it.label },
                 selected = bloodGroup,
                 onSelect = { bloodGroup = it; saveDraft() },
             )
 
-            Text("Gender", style = MaterialTheme.typography.titleMedium)
+            Text(tr("Gender", "লিঙ্গ"), style = MaterialTheme.typography.titleMedium)
             RowChips(
                 options = listOf("Male", "Female", "Other"),
                 selected = gender ?: "",
@@ -252,11 +257,11 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 onSelect = { gender = it; saveDraft() },
             )
 
-            DatePickerField(dateOfBirth, { dateOfBirth = it; saveDraft() }, "Date of Birth")
+            DatePickerField(dateOfBirth, { dateOfBirth = it; saveDraft() }, tr("Date of Birth", "জন্ম তারিখ"))
 
-            Text("Division", style = MaterialTheme.typography.titleMedium)
+            Text(tr("Division", "বিভাগ"), style = MaterialTheme.typography.titleMedium)
             PickerField(
-                label = divisionName ?: "Select Division",
+                label = divisionName ?: tr("Select Division", "বিভাগ নির্বাচন করুন"),
                 options = locState.divisions.map { it.name },
                 onSelect = { name ->
                     val d = locState.divisions.firstOrNull { it.name == name }
@@ -270,9 +275,9 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     saveDraft()
                 },
             )
-            Text("District", style = MaterialTheme.typography.titleMedium)
+            Text(tr("District", "জেলা"), style = MaterialTheme.typography.titleMedium)
             PickerField(
-                label = districtName ?: "Select District",
+                label = districtName ?: tr("Select District", "জেলা নির্বাচন করুন"),
                 options = locState.districts.map { it.name },
                 onSelect = { name ->
                     val d = locState.districts.firstOrNull { it.name == name }
@@ -284,9 +289,9 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     saveDraft()
                 },
             )
-            Text("Upazila / Area", style = MaterialTheme.typography.titleMedium)
+            Text(tr("Upazila / Area", "উপজেলা / এলাকা"), style = MaterialTheme.typography.titleMedium)
             PickerField(
-                label = upazilaName ?: "Select Upazila",
+                label = upazilaName ?: tr("Select Upazila", "উপজেলা নির্বাচন করুন"),
                 options = locState.upazilas.map { it.name },
                 onSelect = { name ->
                     val u = locState.upazilas.firstOrNull { it.name == name }
@@ -295,9 +300,14 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     saveDraft()
                 },
             )
-            LabeledTextField(area, { area = it; saveDraft() }, "Area (optional)")
-            LabeledTextField(customAddress, { customAddress = it; saveDraft() }, "Custom Address (if not in dropdown)", singleLine = false)
-            DatePickerField(lastDonationDate, { lastDonationDate = it; saveDraft() }, "Last Donation Date")
+            LabeledTextField(area, { area = it; saveDraft() }, tr("Area (optional)", "এলাকা (ঐচ্ছিক)"))
+            LabeledTextField(
+                customAddress,
+                { customAddress = it; saveDraft() },
+                tr("Custom Address (if not in dropdown)", "নিজের ঠিকানা লিখুন (তালিকায় না থাকলে)"),
+                singleLine = false,
+            )
+            DatePickerField(lastDonationDate, { lastDonationDate = it; saveDraft() }, tr("Last Donation Date", "সর্বশেষ রক্তদানের তারিখ"))
 
             if (state.profile != null) {
                 val isRecentlyDonated = state.profile?.availabilityStatus == AvailabilityStatus.RecentlyDonated
@@ -313,8 +323,14 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column {
-                            Text("Available to donate", style = MaterialTheme.typography.titleMedium)
-                            Text("Current: ${state.profile?.availabilityStatus?.name ?: "Unknown"}", style = MaterialTheme.typography.bodySmall)
+                            Text(tr("Available to donate", "রক্তদানের জন্য উপলব্ধ"), style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                tr(
+                                    "Current: ${state.profile?.availabilityStatus?.name ?: "Unknown"}",
+                                    "বর্তমান অবস্থা: ${state.profile?.availabilityStatus?.name ?: "অজানা"}",
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
                         }
                         Switch(
                             checked = availabilityAvailable,
@@ -326,7 +342,10 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     }
                     if (isRecentlyDonated) {
                         Text(
-                            text = "Donors need a 90-day gap between donations." + (eligibleAgainOn?.let { " Available again on $it." } ?: ""),
+                            text = tr(
+                                "Donors need a 90-day gap between donations." + (eligibleAgainOn?.let { " Available again on $it." } ?: ""),
+                                "রক্তদানের মধ্যে অন্তত ৯০ দিনের ব্যবধান থাকা প্রয়োজন।" + (eligibleAgainOn?.let { " আবার উপলব্ধ হবেন $it তারিখে।" } ?: ""),
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 4.dp),
@@ -337,19 +356,19 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
 
             formError?.let { ErrorText(it) }
             if (state.saved) {
-                Text("Profile saved", color = BloodRed, style = MaterialTheme.typography.labelLarge)
+                Text(tr("Profile saved", "প্রোফাইল সংরক্ষিত হয়েছে"), color = BloodRed, style = MaterialTheme.typography.labelLarge)
             }
 
             PrimaryButton(
-                text = "Save Donor Profile",
+                text = tr("Save Donor Profile", "দাতার প্রোফাইল সংরক্ষণ করুন"),
                 loading = state.isLoading,
                 enabled = state.profile == null || hasChanges,
                 onClick = {
                     val group = bloodGroup?.let { label -> BloodGroup.entries.firstOrNull { it.label == label } }
                     formError = when {
-                        group == null -> "Select a blood group"
-                        districtId == null -> "Select a district"
-                        upazilaId == null -> "Select an upazila"
+                        group == null -> selectBloodGroupErr
+                        districtId == null -> selectDistrictErr
+                        upazilaId == null -> selectUpazilaErr
                         else -> null
                     }
                     if (formError == null) {

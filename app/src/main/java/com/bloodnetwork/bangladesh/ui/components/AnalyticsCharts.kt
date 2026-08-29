@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 
 data class BarItem(val label: String, val value: Int, val color: Color)
 
@@ -39,7 +40,7 @@ data class BarItem(val label: String, val value: Int, val color: Color)
  * distributions where each category needs its own readable label (blood type, status,
  * district top-N) rather than a dense chart. */
 @Composable
-fun BarListChart(items: List<BarItem>, modifier: Modifier = Modifier, emptyText: String = "No data yet") {
+fun BarListChart(items: List<BarItem>, modifier: Modifier = Modifier, emptyText: String = tr("No data yet", "এখনো কোনো তথ্য নেই")) {
     if (items.isEmpty()) {
         Text(emptyText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier)
         return
@@ -96,7 +97,7 @@ fun TrendLineChart(
     endLabel: String = "",
 ) {
     if (points.size < 2) {
-        Text("Not enough data yet", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier)
+        Text(tr("Not enough data yet", "এখনো পর্যাপ্ত তথ্য নেই"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = modifier)
         return
     }
     var animatedProgress by remember { mutableStateOf(0f) }
@@ -150,7 +151,7 @@ fun TrendLineChart(
         Spacer(Modifier.height(6.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(startLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("peak $max", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(tr("peak $max", "সর্বোচ্চ $max"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(endLabel, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }

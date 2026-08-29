@@ -35,6 +35,7 @@ import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.ui.components.ErrorText
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 
@@ -60,6 +61,14 @@ fun RegisterScreen(
     var emailError by remember { mutableStateOf(false) }
     var initialized by remember { mutableStateOf(false) }
 
+    val fillNameMsg = tr("Please fill in your name", "আপনার নাম লিখুন")
+    val invalidPhoneMsg = tr("Enter a valid Bangladeshi phone number", "সঠিক বাংলাদেশী ফোন নম্বর লিখুন")
+    val passwordLengthMsg = tr("Password must be at least 8 characters", "পাসওয়ার্ড অন্তত ৮ অক্ষরের হতে হবে")
+    val passwordUppercaseMsg = tr("Password must contain an uppercase letter", "পাসওয়ার্ডে অন্তত একটি বড় হাতের অক্ষর থাকতে হবে")
+    val passwordLowercaseMsg = tr("Password must contain a lowercase letter", "পাসওয়ার্ডে অন্তত একটি ছোট হাতের অক্ষর থাকতে হবে")
+    val passwordDigitMsg = tr("Password must contain a digit", "পাসওয়ার্ডে অন্তত একটি সংখ্যা থাকতে হবে")
+    val passwordsMismatchMsg = tr("Passwords do not match", "পাসওয়ার্ড দুটি মিলছে না")
+
     LaunchedEffect(savedData) {
         if (!initialized) {
             initialized = true
@@ -82,10 +91,10 @@ fun RegisterScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Account") },
+                title = { Text(tr("Create Account", "অ্যাকাউন্ট তৈরি করুন")) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পিছনে"))
                     }
                 },
             )
@@ -101,45 +110,45 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = "Register to donate or request blood",
+                text = tr("Register to donate or request blood", "রক্তদান বা রক্তের জন্য অনুরোধ করতে রেজিস্টার করুন"),
                 style = MaterialTheme.typography.titleLarge,
             )
-            LabeledTextField(firstName, { firstName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = it, lastName = lastName, phoneNumber = phone)) }, "First Name",
+            LabeledTextField(firstName, { firstName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = it, lastName = lastName, phoneNumber = phone)) }, tr("First Name", "প্রথম নাম"),
                 leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) })
-            LabeledTextField(lastName, { lastName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = it, phoneNumber = phone)) }, "Last Name")
-            LabeledTextField(phone, { phone = it; phoneError = false; localError = null; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = lastName, phoneNumber = it)) }, "Phone Number",
+            LabeledTextField(lastName, { lastName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = it, phoneNumber = phone)) }, tr("Last Name", "শেষ নাম"))
+            LabeledTextField(phone, { phone = it; phoneError = false; localError = null; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = lastName, phoneNumber = it)) }, tr("Phone Number", "ফোন নম্বর"),
                 keyboardType = KeyboardType.Phone, isError = phoneError,
                 leadingIcon = { Icon(Icons.Filled.Phone, contentDescription = null) })
-            LabeledTextField(email, { email = it; emailError = false; localError = null }, "Email (optional)",
+            LabeledTextField(email, { email = it; emailError = false; localError = null }, tr("Email (optional)", "ইমেইল (ঐচ্ছিক)"),
                 keyboardType = KeyboardType.Email, isError = emailError)
-            LabeledTextField(password, { password = it }, "Password",
+            LabeledTextField(password, { password = it }, tr("Password", "পাসওয়ার্ড"),
                 isPassword = true,
                 leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) })
-            LabeledTextField(confirm, { confirm = it }, "Confirm Password",
+            LabeledTextField(confirm, { confirm = it }, tr("Confirm Password", "পাসওয়ার্ড নিশ্চিত করুন"),
                 isPassword = true)
 
             localError?.let { ErrorText(it) }
             state.error?.let { ErrorText(it) }
 
             PrimaryButton(
-                text = "Register",
+                text = tr("Register", "রেজিস্টার করুন"),
                 loading = state.isLoading,
                 onClick = {
                     localError = when {
-                        firstName.isBlank() || lastName.isBlank() -> "Please fill in your name"
-                        phone.length < 11 -> "Enter a valid Bangladeshi phone number"
-                        password.length < 8 -> "Password must be at least 8 characters"
-                        !password.any { it.isUpperCase() } -> "Password must contain an uppercase letter"
-                        !password.any { it.isLowerCase() } -> "Password must contain a lowercase letter"
-                        !password.any { it.isDigit() } -> "Password must contain a digit"
-                        password != confirm -> "Passwords do not match"
+                        firstName.isBlank() || lastName.isBlank() -> fillNameMsg
+                        phone.length < 11 -> invalidPhoneMsg
+                        password.length < 8 -> passwordLengthMsg
+                        !password.any { it.isUpperCase() } -> passwordUppercaseMsg
+                        !password.any { it.isLowerCase() } -> passwordLowercaseMsg
+                        !password.any { it.isDigit() } -> passwordDigitMsg
+                        password != confirm -> passwordsMismatchMsg
                         else -> null
                     }
                     if (localError == null) vm.register(firstName, lastName, phone, password, email)
                 },
             )
             TextButton(onClick = { onNavigate(Routes.LOGIN) }) {
-                Text("Already have an account? Login")
+                Text(tr("Already have an account? Login", "ইতিমধ্যে অ্যাকাউন্ট আছে? লগ ইন করুন"))
             }
         }
     }

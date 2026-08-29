@@ -36,11 +36,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.data.model.EligibilityQuestionDto
+import com.bloodnetwork.bangladesh.data.prefs.AppLanguage
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RowChips
 import com.bloodnetwork.bangladesh.ui.components.FormFieldSkeleton
+import com.bloodnetwork.bangladesh.ui.i18n.LocalAppLanguage
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.AvailableGreen
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.EligibilityViewModel
@@ -76,10 +79,10 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Donation Eligibility") },
+                title = { Text(tr("Donation Eligibility", "রক্তদানের যোগ্যতা")) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -105,7 +108,7 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             ) {
                 item {
                     Text(
-                        "Answer these questions to check if you can donate blood.",
+                        tr("Answer these questions to check if you can donate blood.", "আপনি রক্ত দিতে পারবেন কিনা তা যাচাই করতে এই প্রশ্নগুলোর উত্তর দিন।"),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -116,7 +119,7 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     }
                 }
                 item {
-                    PrimaryButton(text = "Check Eligibility", onClick = { vm.checkEligibility() }, loading = state.isChecking, enabled = allAnswered)
+                    PrimaryButton(text = tr("Check Eligibility", "যোগ্যতা যাচাই করুন"), onClick = { vm.checkEligibility() }, loading = state.isChecking, enabled = allAnswered)
                 }
                 state.result?.let { result ->
                     item {
@@ -127,7 +130,10 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     if (hasChanges && state.lastCheckedAnswers != null) {
                         item {
                             Text(
-                                "Answers changed — tap Check Eligibility again to update your score.",
+                                tr(
+                                    "Answers changed — tap Check Eligibility again to update your score.",
+                                    "উত্তর পরিবর্তিত হয়েছে — স্কোর হালনাগাদ করতে আবার \"যোগ্যতা যাচাই করুন\"-এ চাপুন।",
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -158,8 +164,12 @@ fun MedicalDisclaimerCard() {
                 modifier = Modifier.padding(top = 2.dp),
             )
             Text(
-                "This self-check is not a medical diagnosis and isn't approved by a medical authority. " +
-                    "For an accurate assessment, please visit a hospital or consult a doctor.",
+                tr(
+                    "This self-check is not a medical diagnosis and isn't approved by a medical authority. " +
+                        "For an accurate assessment, please visit a hospital or consult a doctor.",
+                    "এই স্ব-যাচাই কোনো চিকিৎসা নির্ণয় নয় এবং কোনো চিকিৎসা কর্তৃপক্ষ কর্তৃক অনুমোদিত নয়। " +
+                        "সঠিক মূল্যায়নের জন্য, দয়া করে হাসপাতালে যান বা একজন ডাক্তারের সাথে পরামর্শ করুন।",
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -169,21 +179,27 @@ fun MedicalDisclaimerCard() {
 
 @Composable
 fun QuestionCard(q: EligibilityQuestionDto, current: String?, onAnswer: (String) -> Unit) {
+    val language = LocalAppLanguage.current
+    val questionText = if (language == AppLanguage.Bangla && q.questionBn.isNotBlank()) q.questionBn else q.questionEn
+    val yesLabel = tr("Yes", "হ্যাঁ")
+    val noLabel = tr("No", "না")
+    val answerLabel = tr("Answer", "উত্তর")
+    val numberLabel = tr("number", "সংখ্যা")
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(q.questionEn, style = MaterialTheme.typography.titleSmall)
+            Text(questionText, style = MaterialTheme.typography.titleSmall)
             if (q.questionType == "yesno") {
                 RowChips(
                     options = listOf("Yes", "No"),
                     selected = current ?: "",
-                    labelOf = { it },
+                    labelOf = { if (it == "Yes") yesLabel else noLabel },
                     onSelect = onAnswer,
                 )
             } else {
                 LabeledTextField(
                     value = current ?: "",
                     onValueChange = onAnswer,
-                    label = "Answer (${q.unit ?: "number"})",
+                    label = "$answerLabel (${q.unit ?: numberLabel})",
                     keyboardType = KeyboardType.Number,
                 )
             }
@@ -193,16 +209,18 @@ fun QuestionCard(q: EligibilityQuestionDto, current: String?, onAnswer: (String)
 
 @Composable
 fun ResultCard(result: com.bloodnetwork.bangladesh.data.model.EligibilityResultDto) {
+    val language = LocalAppLanguage.current
+    val recommendation = if (language == AppLanguage.Bangla && result.recommendationBn.isNotBlank()) result.recommendationBn else result.recommendationEn
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = if (result.isEligible) "You are eligible to donate" else "Not eligible right now",
+                text = if (result.isEligible) tr("You are eligible to donate", "আপনি রক্ত দেওয়ার যোগ্য") else tr("Not eligible right now", "এই মুহূর্তে যোগ্য নন"),
                 style = MaterialTheme.typography.titleMedium,
                 color = if (result.isEligible) AvailableGreen else BloodRed,
             )
-            Text("Score: ${result.score}", style = MaterialTheme.typography.bodyMedium)
-            if (result.recommendationEn.isNotBlank()) {
-                Text(result.recommendationEn, style = MaterialTheme.typography.bodyMedium)
+            Text("${tr("Score", "স্কোর")}: ${result.score}", style = MaterialTheme.typography.bodyMedium)
+            if (recommendation.isNotBlank()) {
+                Text(recommendation, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }

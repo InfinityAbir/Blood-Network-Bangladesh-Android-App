@@ -46,6 +46,7 @@ import com.bloodnetwork.bangladesh.data.model.NotificationType
 import com.bloodnetwork.bangladesh.data.model.metadataAvailabilityStatus
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.theme.AvailableGreen
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
@@ -72,15 +73,15 @@ fun NotificationsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notifications") },
+                title = { Text(tr("Notifications", "নোটিফিকেশন")) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
                 actions = {
                     if (state.unreadCount > 0) {
-                        TextButton(onClick = { vm.markAllRead() }) { Text("Mark all read") }
+                        TextButton(onClick = { vm.markAllRead() }) { Text(tr("Mark all read", "সব পঠিত হিসেবে চিহ্নিত করুন")) }
                     }
                 },
             )
@@ -110,25 +111,29 @@ fun NotificationsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                         FilterChip(
                             selected = state.typeFilter == null,
                             onClick = { vm.setTypeFilter(null) },
-                            label = { Text("All") },
+                            label = { Text(tr("All", "সব")) },
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White),
                         )
                         FilterChip(
                             selected = state.typeFilter == NotificationType.Availability,
                             onClick = { vm.setTypeFilter(NotificationType.Availability) },
-                            label = { Text("Donor available") },
+                            label = { Text(tr("Donor available", "দাতা উপলব্ধ")) },
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White),
                         )
                     }
                 }
                 item {
                     Text(
-                        if (state.unreadCount > 0) "${state.unreadCount} unread" else "You're all caught up",
+                        if (state.unreadCount > 0) {
+                            tr("${state.unreadCount} unread", "${state.unreadCount}টি অপঠিত")
+                        } else {
+                            tr("You're all caught up", "আপনি সব দেখে ফেলেছেন")
+                        },
                         style = MaterialTheme.typography.titleSmall,
                     )
                 }
                 if (state.notifications.isEmpty()) {
-                    item { Text("No notifications yet", style = MaterialTheme.typography.bodyMedium) }
+                    item { Text(tr("No notifications yet", "এখনো কোনো নোটিফিকেশন নেই"), style = MaterialTheme.typography.bodyMedium) }
                 }
                 items(state.notifications, key = { it.id }) { n ->
                     NotificationCard(n, onClick = {
@@ -173,10 +178,10 @@ fun NotificationCard(n: NotificationDto, onClick: () -> Unit = {}) {
 @Composable
 fun AvailabilityPill(status: String?) {
     val (bg, fg, label) = when (status) {
-        "Available" -> Triple(AvailableGreen.copy(alpha = 0.12f), AvailableGreen, "Available")
-        "RecentlyDonated" -> Triple(RecentlyDonatedAmber.copy(alpha = 0.14f), RecentlyDonatedAmber, "Recently donated")
-        "Unavailable" -> Triple(GrayMid.copy(alpha = 0.12f), GrayMid, "Unavailable")
-        else -> Triple(GrayMid.copy(alpha = 0.12f), GrayMid, "Unknown")
+        "Available" -> Triple(AvailableGreen.copy(alpha = 0.12f), AvailableGreen, tr("Available", "উপলব্ধ"))
+        "RecentlyDonated" -> Triple(RecentlyDonatedAmber.copy(alpha = 0.14f), RecentlyDonatedAmber, tr("Recently donated", "সম্প্রতি দান করেছেন"))
+        "Unavailable" -> Triple(GrayMid.copy(alpha = 0.12f), GrayMid, tr("Unavailable", "অনুপলব্ধ"))
+        else -> Triple(GrayMid.copy(alpha = 0.12f), GrayMid, tr("Unknown", "অজানা"))
     }
     Box(modifier = Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 8.dp, vertical = 3.dp)) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = fg, fontWeight = FontWeight.SemiBold, maxLines = 1)

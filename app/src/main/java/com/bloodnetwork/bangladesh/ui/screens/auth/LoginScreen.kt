@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.bloodnetwork.bangladesh.ui.components.ErrorText
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 
@@ -57,10 +58,10 @@ fun LoginScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Login") },
+                title = { Text(tr("Login", "লগ ইন")) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পিছনে"))
                     }
                 },
             )
@@ -76,13 +77,13 @@ fun LoginScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = "Welcome back",
+                text = tr("Welcome back", "স্বাগতম"),
                 style = MaterialTheme.typography.titleLarge,
             )
             LabeledTextField(
                 value = phone,
                 onValueChange = { phone = it },
-                label = "Phone Number",
+                label = tr("Phone Number", "ফোন নম্বর"),
                 placeholder = "01XXXXXXXXX",
                 keyboardType = KeyboardType.Phone,
                 leadingIcon = { androidx.compose.material3.Icon(Icons.Filled.Phone, contentDescription = null) },
@@ -90,18 +91,18 @@ fun LoginScreen(
             LabeledTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = "Password",
+                label = tr("Password", "পাসওয়ার্ড"),
                 isPassword = true,
                 leadingIcon = { androidx.compose.material3.Icon(Icons.Filled.Lock, contentDescription = null) },
             )
             ErrorText(state.error)
             PrimaryButton(
-                text = "Login",
+                text = tr("Login", "লগ ইন"),
                 loading = state.isLoading,
                 onClick = { vm.login(phone, password) },
             )
             TextButton(onClick = { onNavigate(Routes.REGISTER) }) {
-                Text("Don't have an account? Register")
+                Text(tr("Don't have an account? Register", "অ্যাকাউন্ট নেই? রেজিস্টার করুন"))
             }
         }
     }

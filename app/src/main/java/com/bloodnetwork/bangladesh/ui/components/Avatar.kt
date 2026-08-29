@@ -16,6 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 
 /** Circular avatar showing [photoUrl] when set. Falls back to a person-icon placeholder
@@ -33,7 +34,7 @@ fun Avatar(photoUrl: String?, modifier: Modifier = Modifier, size: Dp = 64.dp) {
         if (!photoUrl.isNullOrBlank()) {
             AsyncImage(
                 model = photoUrl,
-                contentDescription = "Profile photo",
+                contentDescription = tr("Profile photo", "প্রোফাইল ছবি"),
                 modifier = Modifier.size(size).clip(CircleShape),
                 contentScale = ContentScale.Crop,
                 placeholder = fallback,

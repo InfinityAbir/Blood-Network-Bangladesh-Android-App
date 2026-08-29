@@ -60,6 +60,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.data.model.UserRole
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AdminViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
@@ -89,10 +90,10 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("User Management", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
+                title = { Text(tr("User Management", "ব্যবহারকারী ব্যবস্থাপনা"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -116,17 +117,27 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        placeholder = { Text("Search name, phone, email", style = MaterialTheme.typography.bodySmall) },
+                        placeholder = { Text(tr("Search name, phone, email", "নাম, ফোন, ইমেইল খুঁজুন"), style = MaterialTheme.typography.bodySmall) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
+                        trailingIcon = {
+                            if (searchQuery.isNotEmpty()) {
+                                IconButton(onClick = {
+                                    searchQuery = ""
+                                    vm.loadUsers(null, selectedRole.ifBlank { null }, isActiveFilter())
+                                }) {
+                                    Icon(Icons.Filled.Close, contentDescription = tr("Clear search", "খোঁজ মুছুন"))
+                                }
+                            }
+                        },
                     )
                     Button(
                         onClick = { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, isActiveFilter()) },
                         colors = ButtonDefaults.buttonColors(containerColor = BloodRed),
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
-                    ) { Text("Search", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold) }
+                    ) { Text(tr("Search", "খুঁজুন"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold) }
                 }
             }
             // --- Professional two-row filter groups: Role + Status ---
@@ -134,40 +145,40 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     // Role row
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Role", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(48.dp))
+                        Text(tr("Role", "ভূমিকা"), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(48.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
                             FilterChip(
                                 selected = selectedRole == "", onClick = { selectedRole = ""; vm.loadUsers(searchQuery.ifBlank { null }, null, isActiveFilter()) },
-                                label = { Text("All", style = MaterialTheme.typography.labelSmall) },
+                                label = { Text(tr("All", "সব"), style = MaterialTheme.typography.labelSmall) },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White),
                             )
-                            FilterChip(selected = selectedRole == "Donor", onClick = { selectedRole = "Donor"; vm.loadUsers(searchQuery.ifBlank { null }, "Donor", isActiveFilter()) }, label = { Text("Donor", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
-                            FilterChip(selected = selectedRole == "Requester", onClick = { selectedRole = "Requester"; vm.loadUsers(searchQuery.ifBlank { null }, "Requester", isActiveFilter()) }, label = { Text("Requester", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
-                            FilterChip(selected = selectedRole == "Admin", onClick = { selectedRole = "Admin"; vm.loadUsers(searchQuery.ifBlank { null }, "Admin", isActiveFilter()) }, label = { Text("Admin", style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                            FilterChip(selected = selectedRole == "Donor", onClick = { selectedRole = "Donor"; vm.loadUsers(searchQuery.ifBlank { null }, "Donor", isActiveFilter()) }, label = { Text(tr("Donor", "রক্তদাতা"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
+                            FilterChip(selected = selectedRole == "Requester", onClick = { selectedRole = "Requester"; vm.loadUsers(searchQuery.ifBlank { null }, "Requester", isActiveFilter()) }, label = { Text(tr("Requester", "অনুরোধকারী"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF1565C0), selectedLabelColor = Color.White))
+                            FilterChip(selected = selectedRole == "Admin", onClick = { selectedRole = "Admin"; vm.loadUsers(searchQuery.ifBlank { null }, "Admin", isActiveFilter()) }, label = { Text(tr("Admin", "অ্যাডমিন"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF7B1FA2), selectedLabelColor = Color.White))
                         }
                     }
                     // Status row - modern, clean with icons
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Status", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(48.dp))
+                        Text(tr("Status", "অবস্থা"), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(48.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
                             FilterChip(
                                 selected = selectedStatus == "", onClick = { selectedStatus = ""; vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, null) },
-                                label = { Text("All", style = MaterialTheme.typography.labelSmall) },
+                                label = { Text(tr("All", "সব"), style = MaterialTheme.typography.labelSmall) },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White),
                             )
                             FilterChip(
                                 selected = selectedStatus == "Active",
                                 onClick = { selectedStatus = "Active"; vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, true) },
-                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)); Text("Active", style = MaterialTheme.typography.labelSmall) } },
+                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(14.dp)); Text(tr("Active", "সক্রিয়"), style = MaterialTheme.typography.labelSmall) } },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF2E7D32), selectedLabelColor = Color.White),
                             )
                             FilterChip(
                                 selected = selectedStatus == "Deactive",
                                 onClick = { selectedStatus = "Deactive"; vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, false) },
-                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(14.dp)); Text("Deactive", style = MaterialTheme.typography.labelSmall) } },
+                                label = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) { Icon(Icons.Filled.Close, contentDescription = null, modifier = Modifier.size(14.dp)); Text(tr("Deactive", "নিষ্ক্রিয়"), style = MaterialTheme.typography.labelSmall) } },
                                 shape = RoundedCornerShape(50),
                                 colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFC62828), selectedLabelColor = Color.White),
                             )
@@ -182,9 +193,9 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                 item {
                     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Failed to load users", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
+                            Text(tr("Failed to load users", "ব্যবহারকারীদের তথ্য লোড করা যায়নি"), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                             Text(errorMsg, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Button(onClick = { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, isActiveFilter()) }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) { Text("Retry", style = MaterialTheme.typography.labelSmall) }
+                            Button(onClick = { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, isActiveFilter()) }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50), contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)) { Text(tr("Retry", "আবার চেষ্টা করুন"), style = MaterialTheme.typography.labelSmall) }
                         }
                     }
                 }
@@ -192,8 +203,8 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                 item {
                     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
                         Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text("No users found", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                            Text("Try a different search or role filter", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(tr("No users found", "কোনো ব্যবহারকারী পাওয়া যায়নি"), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text(tr("Try a different search or role filter", "ভিন্ন খোঁজ বা ভূমিকা ফিল্টার চেষ্টা করুন"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -227,7 +238,7 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                                 }
                             }
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                StatusPill(text = if (user.isActive) "Active" else "Inactive", active = user.isActive)
+                                StatusPill(text = if (user.isActive) tr("Active", "সক্রিয়") else tr("Inactive", "নিষ্ক্রিয়"), active = user.isActive)
                                 user.donorVerificationStatus?.let {
                                     VerifyPill(status = it)
                                 }
@@ -238,22 +249,22 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                                     if (user.role == UserRole.Donor) {
                                         when (user.donorVerificationStatus) {
                                             "Unverified", "Rejected" -> {
-                                                CompactFilledButton("Verify", onClick = { vm.verifyDonor(user.id, "Verified") })
+                                                CompactFilledButton(tr("Verify", "যাচাই করুন"), onClick = { vm.verifyDonor(user.id, "Verified") })
                                             }
                                             "Verified" -> {
-                                                CompactOutlinedButton("Reject", onClick = { vm.verifyDonor(user.id, "Rejected") })
+                                                CompactOutlinedButton(tr("Reject", "প্রত্যাখ্যান করুন"), onClick = { vm.verifyDonor(user.id, "Rejected") })
                                             }
                                             "Pending" -> {
-                                                CompactFilledButton("Verify", onClick = { vm.verifyDonor(user.id, "Verified") })
-                                                CompactOutlinedButton("Reject", onClick = { vm.verifyDonor(user.id, "Rejected") })
+                                                CompactFilledButton(tr("Verify", "যাচাই করুন"), onClick = { vm.verifyDonor(user.id, "Verified") })
+                                                CompactOutlinedButton(tr("Reject", "প্রত্যাখ্যান করুন"), onClick = { vm.verifyDonor(user.id, "Rejected") })
                                             }
                                         }
                                     }
                                     val isSelf = currentUserId != null && user.id == currentUserId
                                     if (user.isActive) {
-                                        CompactOutlinedButton("Deactivate", onClick = { vm.toggleActive(user.id, false) }, enabled = !isSelf)
+                                        CompactOutlinedButton(tr("Deactivate", "নিষ্ক্রিয় করুন"), onClick = { vm.toggleActive(user.id, false) }, enabled = !isSelf)
                                     } else {
-                                        CompactFilledButton("Activate", onClick = { vm.toggleActive(user.id, true) }, enabled = !isSelf)
+                                        CompactFilledButton(tr("Activate", "সক্রিয় করুন"), onClick = { vm.toggleActive(user.id, true) }, enabled = !isSelf)
                                     }
                                 }
                             }
@@ -267,7 +278,7 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                             page = state.usersPage,
                             pageSize = state.usersPageSize,
                             totalCount = state.usersTotalCount,
-                            label = "users",
+                            label = tr("users", "ব্যবহারকারী"),
                             onPageChange = { newPage -> vm.gotoUsersPage(newPage) },
                             onPageSizeChange = { newSize -> vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, isActiveFilter(), newSize) }
                         )
@@ -298,8 +309,14 @@ private fun RoleBadge(role: String) {
         "Donor" -> BloodRed
         else -> Color(0xFF1565C0)
     }
+    val displayText = when (role) {
+        "Admin" -> tr("Admin", "অ্যাডমিন")
+        "Donor" -> tr("Donor", "রক্তদাতা")
+        "Requester" -> tr("Requester", "অনুরোধকারী")
+        else -> role
+    }
     Box(modifier = Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 10.dp, vertical = 5.dp)) {
-        Text(role, style = MaterialTheme.typography.labelSmall, color = fg, fontWeight = FontWeight.SemiBold)
+        Text(displayText, style = MaterialTheme.typography.labelSmall, color = fg, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -320,8 +337,15 @@ private fun VerifyPill(status: String) {
         "Rejected" -> Color(0xFFC62828).copy(alpha = 0.1f) to Color(0xFFC62828)
         else -> Color(0xFF616161).copy(alpha = 0.1f) to Color(0xFF616161)
     }
+    val displayText = when (status) {
+        "Verified" -> tr("Verified", "যাচাইকৃত")
+        "Pending" -> tr("Pending", "মুলতুবি")
+        "Rejected" -> tr("Rejected", "প্রত্যাখ্যাত")
+        "Unverified" -> tr("Unverified", "অযাচাইকৃত")
+        else -> status
+    }
     Box(modifier = Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 8.dp, vertical = 4.dp)) {
-        Text(status, style = MaterialTheme.typography.labelSmall, color = fg, fontWeight = FontWeight.Medium)
+        Text(displayText, style = MaterialTheme.typography.labelSmall, color = fg, fontWeight = FontWeight.Medium)
     }
 }
 

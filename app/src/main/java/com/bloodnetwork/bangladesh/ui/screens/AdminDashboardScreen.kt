@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonLine
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AdminViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.NotificationsViewModel
@@ -67,19 +68,20 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Admin Dashboard") },
+                title = { Text(tr("Admin Dashboard", "অ্যাডমিন ড্যাশবোর্ড")) },
                 actions = {
+                    com.bloodnetwork.bangladesh.ui.components.LanguageToggleButton()
                     com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton()
                     BadgedBox(
                         badge = { com.bloodnetwork.bangladesh.ui.components.AnimatedCountBadge(notifState.unreadCount) },
                     ) {
                         IconButton(onClick = { showNotifSheet = true }) {
-                            Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
+                            Icon(Icons.Filled.Notifications, contentDescription = tr("Notifications", "নোটিফিকেশন"))
                         }
                     }
                     Spacer(Modifier.width(4.dp))
                     IconButton(onClick = onLogout) {
-                        Icon(Icons.Filled.Logout, contentDescription = "Logout")
+                        Icon(Icons.Filled.Logout, contentDescription = tr("Logout", "লগ আউট"))
                     }
                     Spacer(Modifier.width(4.dp))
                 },
@@ -119,49 +121,49 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 state.dashboard?.let { stats ->
-                    item { Text("Overview", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) }
+                    item { Text(tr("Overview", "সংক্ষিপ্ত বিবরণ"), style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) }
                     item {
                         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            StatCard("Total Users", stats.totalUsers, Modifier.weight(1f).fillMaxHeight())
-                            StatCard("Donors", stats.totalDonors, Modifier.weight(1f).fillMaxHeight())
+                            StatCard(tr("Total Users", "মোট ব্যবহারকারী"), stats.totalUsers, Modifier.weight(1f).fillMaxHeight())
+                            StatCard(tr("Donors", "দাতা"), stats.totalDonors, Modifier.weight(1f).fillMaxHeight())
                         }
                     }
                     item {
                         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            StatCard("Blood Requests", stats.openBloodRequests, Modifier.weight(1f).fillMaxHeight(), "open")
-                            StatCard("Matches", stats.acceptedMatches, Modifier.weight(1f).fillMaxHeight(), "accepted")
+                            StatCard(tr("Blood Requests", "রক্তের অনুরোধ"), stats.openBloodRequests, Modifier.weight(1f).fillMaxHeight(), tr("open", "খোলা"))
+                            StatCard(tr("Matches", "মিল"), stats.acceptedMatches, Modifier.weight(1f).fillMaxHeight(), tr("accepted", "গৃহীত"))
                         }
                     }
                     item {
                         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            StatCard("Reports", stats.openReports, Modifier.weight(1f).fillMaxHeight(), "open")
-                            StatCard("Pending Verifications", stats.pendingVerifications, Modifier.weight(1f).fillMaxHeight())
+                            StatCard(tr("Reports", "রিপোর্ট"), stats.openReports, Modifier.weight(1f).fillMaxHeight(), tr("open", "খোলা"))
+                            StatCard(tr("Pending Verifications", "মুলতুবি যাচাইকরণ"), stats.pendingVerifications, Modifier.weight(1f).fillMaxHeight())
                         }
                     }
                 }
 
-                item { Text("Management", style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) }
+                item { Text(tr("Management", "ব্যবস্থাপনা"), style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) }
                 item {
                     Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ManagementCard("Analytics", "Trends, blood-type & district breakdowns", Icons.Filled.BarChart, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_analytics") }
-                        ManagementCard("User Management", "Verify, activate & manage accounts", Icons.Filled.People, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_users") }
+                        ManagementCard(tr("Analytics", "বিশ্লেষণ"), tr("Trends, blood-type & district breakdowns", "প্রবণতা, রক্তের গ্রুপ ও জেলাভিত্তিক বিভাজন"), Icons.Filled.BarChart, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_analytics") }
+                        ManagementCard(tr("User Management", "ব্যবহারকারী ব্যবস্থাপনা"), tr("Verify, activate & manage accounts", "অ্যাকাউন্ট যাচাই, সক্রিয় ও পরিচালনা করুন"), Icons.Filled.People, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_users") }
                     }
                 }
                 item {
                     Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ManagementCard("Reports", "Review & resolve flagged reports", Icons.Filled.Assignment, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_reports") }
-                        ManagementCard("Audit Logs", "Track system activity history", Icons.Filled.History, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_audit_logs") }
+                        ManagementCard(tr("Reports", "রিপোর্ট"), tr("Review & resolve flagged reports", "চিহ্নিত রিপোর্ট পর্যালোচনা ও সমাধান করুন"), Icons.Filled.Assignment, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_reports") }
+                        ManagementCard(tr("Audit Logs", "অডিট লগ"), tr("Track system activity history", "সিস্টেম কার্যকলাপের ইতিহাস ট্র্যাক করুন"), Icons.Filled.History, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_audit_logs") }
                     }
                 }
                 item {
                     Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ManagementCard("Account Settings", "Update email, phone & password", Icons.Filled.Settings, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_settings") }
-                        ManagementCard("About", "Edit the developer info shown to users", Icons.Filled.Info, Modifier.weight(1f).fillMaxHeight()) { onNavigate("about") }
+                        ManagementCard(tr("Account Settings", "অ্যাকাউন্ট সেটিংস"), tr("Update email, phone & password", "ইমেইল, ফোন ও পাসওয়ার্ড আপডেট করুন"), Icons.Filled.Settings, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_settings") }
+                        ManagementCard(tr("About", "সম্পর্কে"), tr("Edit the developer info shown to users", "ব্যবহারকারীদের দেখানো ডেভেলপার তথ্য সম্পাদনা করুন"), Icons.Filled.Info, Modifier.weight(1f).fillMaxHeight()) { onNavigate("about") }
                     }
                 }
                 item {
                     Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        ManagementCard("Eligibility Questions", "Edit the donor eligibility questionnaire", Icons.Filled.FactCheck, Modifier.weight(1f).fillMaxHeight()) { onNavigate(com.bloodnetwork.bangladesh.ui.navigation.Routes.ADMIN_ELIGIBILITY_QUESTIONS) }
+                        ManagementCard(tr("Eligibility Questions", "যোগ্যতার প্রশ্নাবলী"), tr("Edit the donor eligibility questionnaire", "দাতার যোগ্যতা প্রশ্নাবলী সম্পাদনা করুন"), Icons.Filled.FactCheck, Modifier.weight(1f).fillMaxHeight()) { onNavigate(com.bloodnetwork.bangladesh.ui.navigation.Routes.ADMIN_ELIGIBILITY_QUESTIONS) }
                     }
                 }
             }

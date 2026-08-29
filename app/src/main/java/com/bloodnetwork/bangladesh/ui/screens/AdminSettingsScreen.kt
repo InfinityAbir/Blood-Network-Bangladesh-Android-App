@@ -58,6 +58,7 @@ import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,6 +79,9 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
     var successMessage by remember { mutableStateOf<String?>(null) }
     var initialized by remember { mutableStateOf(false) }
 
+    val passwordsMismatchMsg = tr("Passwords do not match", "পাসওয়ার্ড দুটি মিলছে না")
+    val profileUpdatedMsg = tr("Profile updated successfully.", "প্রোফাইল সফলভাবে আপডেট করা হয়েছে।")
+
     LaunchedEffect(state.user) {
         if (!initialized && state.user != null) {
             newEmail = state.user?.email ?: ""
@@ -96,10 +100,10 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Account Settings", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
+                title = { Text(tr("Account Settings", "অ্যাকাউন্ট সেটিংস"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -121,20 +125,20 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                             Icon(Icons.Filled.Person, contentDescription = null, tint = BloodRed, modifier = Modifier.size(20.dp))
                         }
                         Column {
-                            Text("${state.user?.firstName ?: ""} ${state.user?.lastName ?: ""}".trim().ifBlank { "Account" }, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text("${state.user?.firstName ?: ""} ${state.user?.lastName ?: ""}".trim().ifBlank { tr("Account", "অ্যাকাউন্ট") }, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                             Text(state.user?.role?.name ?: "Admin", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Current account", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(tr("Current account", "বর্তমান অ্যাকাউন্ট"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
                                 Icon(Icons.Filled.Phone, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Column {
-                                Text("Phone", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text(currentPhone ?: "Not set", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                                Text(tr("Phone", "ফোন"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(currentPhone ?: tr("Not set", "সেট করা হয়নি"), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
                             }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -142,8 +146,8 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                                 Icon(Icons.Filled.Email, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             Column {
-                                Text("Email", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text(currentEmail?.ifBlank { null } ?: "Not set", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
+                                Text(tr("Email", "ইমেইল"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(currentEmail?.ifBlank { null } ?: tr("Not set", "সেট করা হয়নি"), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Medium)
                             }
                         }
                     }
@@ -152,8 +156,8 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
 
             Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Change your email, phone number or password", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                    Text("Leave a field unchanged to keep current value. Current password is required.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(tr("Change your email, phone number or password", "আপনার ইমেইল, ফোন নম্বর বা পাসওয়ার্ড পরিবর্তন করুন"), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    Text(tr("Leave a field unchanged to keep current value. Current password is required.", "কোনো তথ্য অপরিবর্তিত রাখতে ফাঁকা রাখুন। বর্তমান পাসওয়ার্ড আবশ্যক।"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
                     errorMessage?.let {
                         Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.errorContainer).padding(10.dp)) {
@@ -169,7 +173,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                     OutlinedTextField(
                         value = currentPassword,
                         onValueChange = { currentPassword = it },
-                        label = { Text("Current Password *", style = MaterialTheme.typography.bodySmall) },
+                        label = { Text(tr("Current Password *", "বর্তমান পাসওয়ার্ড *"), style = MaterialTheme.typography.bodySmall) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
@@ -184,7 +188,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                     OutlinedTextField(
                         value = newEmail,
                         onValueChange = { newEmail = it },
-                        label = { Text("New Email (optional)", style = MaterialTheme.typography.bodySmall) },
+                        label = { Text(tr("New Email (optional)", "নতুন ইমেইল (ঐচ্ছিক)"), style = MaterialTheme.typography.bodySmall) },
                         placeholder = { Text(currentEmail ?: "you@example.com", style = MaterialTheme.typography.bodySmall) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
@@ -195,7 +199,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                     OutlinedTextField(
                         value = newPhone,
                         onValueChange = { newPhone = it },
-                        label = { Text("New Phone (optional)", style = MaterialTheme.typography.bodySmall) },
+                        label = { Text(tr("New Phone (optional)", "নতুন ফোন নম্বর (ঐচ্ছিক)"), style = MaterialTheme.typography.bodySmall) },
                         placeholder = { Text(currentPhone ?: "01712345678", style = MaterialTheme.typography.bodySmall) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
@@ -206,7 +210,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                     OutlinedTextField(
                         value = newPassword,
                         onValueChange = { newPassword = it },
-                        label = { Text("New Password (optional)", style = MaterialTheme.typography.bodySmall) },
+                        label = { Text(tr("New Password (optional)", "নতুন পাসওয়ার্ড (ঐচ্ছিক)"), style = MaterialTheme.typography.bodySmall) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
@@ -222,7 +226,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                         OutlinedTextField(
                             value = confirmPassword,
                             onValueChange = { confirmPassword = it },
-                            label = { Text("Confirm New Password", style = MaterialTheme.typography.bodySmall) },
+                            label = { Text(tr("Confirm New Password", "নতুন পাসওয়ার্ড নিশ্চিত করুন"), style = MaterialTheme.typography.bodySmall) },
                             modifier = Modifier.fillMaxWidth(),
                             singleLine = true,
                             shape = RoundedCornerShape(12.dp),
@@ -240,7 +244,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                     Button(
                         onClick = {
                             if (newPassword.isNotBlank() && newPassword != confirmPassword) {
-                                errorMessage = "Passwords do not match"
+                                errorMessage = passwordsMismatchMsg
                                 return@Button
                             }
                             isLoading = true
@@ -253,7 +257,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                                 newPassword = newPassword.ifBlank { null },
                                 onSuccess = {
                                     isLoading = false
-                                    successMessage = "Profile updated successfully."
+                                    successMessage = profileUpdatedMsg
                                     currentPassword = ""
                                     newPassword = ""
                                     confirmPassword = ""
@@ -270,7 +274,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                         shape = RoundedCornerShape(50),
                         contentPadding = PaddingValues(vertical = 14.dp),
                     ) {
-                        Text(if (isLoading) "Saving..." else "Save Changes", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
+                        Text(if (isLoading) tr("Saving...", "সংরক্ষণ করা হচ্ছে...") else tr("Save Changes", "পরিবর্তন সংরক্ষণ করুন"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }

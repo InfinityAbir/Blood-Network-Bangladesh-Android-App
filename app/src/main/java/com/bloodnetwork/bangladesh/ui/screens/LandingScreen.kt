@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.bloodnetwork.bangladesh.ui.components.AnimatedSlideIn
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.SecondaryButton
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 
 @Composable
@@ -83,7 +85,7 @@ fun LandingScreen(onNavigate: (String) -> Unit) {
         Spacer(Modifier.height(24.dp))
         AnimatedSlideIn(visible = contentVisible, delay = 200) {
             Text(
-                text = "Blood Network BD",
+                text = tr("Blood Network BD", "ব্লাড নেটওয়ার্ক বিডি"),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -92,7 +94,10 @@ fun LandingScreen(onNavigate: (String) -> Unit) {
         Spacer(Modifier.height(12.dp))
         AnimatedSlideIn(visible = contentVisible, delay = 400) {
             Text(
-                text = "Connecting willing donors with people who need blood, fast.",
+                text = tr(
+                    "Connecting willing donors with people who need blood, fast.",
+                    "রক্তদাতা ও রক্তপ্রার্থীদের দ্রুত একসাথে সংযুক্ত করে।",
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -102,25 +107,29 @@ fun LandingScreen(onNavigate: (String) -> Unit) {
         Spacer(Modifier.height(40.dp))
 
         AnimatedSlideIn(visible = contentVisible, delay = 600) {
-            PrimaryButton("Find Blood", onClick = { onNavigate(Routes.FIND_BLOOD) })
+            PrimaryButton(tr("Find Blood", "রক্ত খুঁজুন"), onClick = { onNavigate(Routes.FIND_BLOOD) })
         }
         Spacer(Modifier.height(12.dp))
         AnimatedSlideIn(visible = contentVisible, delay = 700) {
-            PrimaryButton("Donate Blood", onClick = { onNavigate(Routes.ELIGIBILITY) })
+            PrimaryButton(tr("Donate Blood", "রক্ত দিন"), onClick = { onNavigate(Routes.ELIGIBILITY) })
         }
 
         Spacer(Modifier.height(24.dp))
 
         AnimatedSlideIn(visible = contentVisible, delay = 800) {
-            SecondaryButton("Login", onClick = { onNavigate(Routes.LOGIN) })
+            SecondaryButton(tr("Login", "লগইন"), onClick = { onNavigate(Routes.LOGIN) })
         }
         Spacer(Modifier.height(12.dp))
         AnimatedSlideIn(visible = contentVisible, delay = 900) {
-            SecondaryButton("Create Account", onClick = { onNavigate(Routes.REGISTER) })
+            SecondaryButton(tr("Create Account", "অ্যাকাউন্ট তৈরি করুন"), onClick = { onNavigate(Routes.REGISTER) })
         }
         }
-        com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton(
+        Row(
             modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp),
-        )
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            com.bloodnetwork.bangladesh.ui.components.LanguageToggleButton()
+            com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton()
+        }
     }
 }

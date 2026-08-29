@@ -58,6 +58,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AdminViewModel
 
@@ -75,10 +76,10 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Audit Logs", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
+                title = { Text(tr("Audit Logs", "অডিট লগ"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -112,8 +113,8 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     OutlinedTextField(
                         value = entityTypeFilter,
                         onValueChange = { entityTypeFilter = it },
-                        placeholder = { Text("Entity Type (User, BloodRequest)", style = MaterialTheme.typography.bodySmall) },
-                        label = { Text("Entity Type", style = MaterialTheme.typography.bodySmall) },
+                        placeholder = { Text(tr("Entity Type (User, BloodRequest)", "এন্টিটি টাইপ (User, BloodRequest)"), style = MaterialTheme.typography.bodySmall) },
+                        label = { Text(tr("Entity Type", "এন্টিটি টাইপ"), style = MaterialTheme.typography.bodySmall) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
@@ -123,7 +124,7 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                         colors = ButtonDefaults.buttonColors(containerColor = BloodRed),
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
-                    ) { Text("Filter", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold) }
+                    ) { Text(tr("Filter", "ফিল্টার"), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold) }
                 }
             }
             val errorMsg = state.error
@@ -133,9 +134,9 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 item {
                     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Failed to load logs", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
+                            Text(tr("Failed to load logs", "লগ লোড করা যায়নি"), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                             Text(errorMsg, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Button(onClick = { vm.loadAuditLogs(entityTypeFilter.ifBlank { null }) }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50)) { Text("Retry", style = MaterialTheme.typography.labelSmall) }
+                            Button(onClick = { vm.loadAuditLogs(entityTypeFilter.ifBlank { null }) }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50)) { Text(tr("Retry", "আবার চেষ্টা করুন"), style = MaterialTheme.typography.labelSmall) }
                         }
                     }
                 }
@@ -146,8 +147,8 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                             Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
                                 Icon(Icons.Filled.History, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
-                            Text("No audit logs", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                            Text("Logs appear as admins take actions", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(tr("No audit logs", "কোনো অডিট লগ নেই"), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                            Text(tr("Logs appear as admins take actions", "অ্যাডমিনরা কোনো কার্যক্রম নিলে এখানে লগ দেখা যাবে"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -155,7 +156,7 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 items(state.auditLogs, key = { it.id }) { log ->
                     AuditLogCard(
                         modifier = Modifier.animateItem(),
-                        userName = log.userName ?: "System",
+                        userName = log.userName ?: tr("System", "সিস্টেম"),
                         action = log.action,
                         entityType = log.entityType,
                         entityId = log.entityId,
@@ -206,9 +207,9 @@ private fun AuditLogCard(
             }
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                DetailRow(icon = Icons.Filled.Badge, label = "Entity", value = entityType)
-                entityId?.let { DetailRow(icon = Icons.Filled.Fingerprint, label = "ID", value = it.take(8) + "…") }
-                ipAddress?.let { DetailRow(icon = Icons.Filled.Language, label = "IP", value = it) }
+                DetailRow(icon = Icons.Filled.Badge, label = tr("Entity", "এন্টিটি"), value = entityType)
+                entityId?.let { DetailRow(icon = Icons.Filled.Fingerprint, label = tr("ID", "আইডি"), value = it.take(8) + "…") }
+                ipAddress?.let { DetailRow(icon = Icons.Filled.Language, label = tr("IP", "আইপি"), value = it) }
             }
             metadata?.let {
                 Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)).padding(10.dp)) {

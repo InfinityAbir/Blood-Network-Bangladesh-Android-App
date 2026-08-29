@@ -46,6 +46,7 @@ import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RoleBadge
 import com.bloodnetwork.bangladesh.ui.components.SearchResultsSkeleton
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
@@ -83,10 +84,10 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Find Blood") },
+                title = { Text(tr("Find Blood", "রক্ত খুঁজুন")) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -118,7 +119,7 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
-                Text("Blood Group", style = MaterialTheme.typography.titleMedium)
+                Text(tr("Blood Group", "রক্তের গ্রুপ"), style = MaterialTheme.typography.titleMedium)
                 BloodGroupChips(
                     options = BloodGroup.entries.map { it.label },
                     selected = selectedGroup,
@@ -126,9 +127,9 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
                 )
             }
             item {
-                Text("Division", style = MaterialTheme.typography.titleMedium)
+                Text(tr("Division", "বিভাগ"), style = MaterialTheme.typography.titleMedium)
                 PickerField(
-                    label = selectedDivisionName ?: "Select Division",
+                    label = selectedDivisionName ?: tr("Select Division", "বিভাগ নির্বাচন করুন"),
                     options = locState.divisions.map { it.name },
                     onSelect = { name ->
                         val d = locState.divisions.firstOrNull { it.name == name }
@@ -141,9 +142,9 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
                         if (d != null) locVm.loadDistricts(d.id)
                     },
                 )
-                Text("District", style = MaterialTheme.typography.titleMedium)
+                Text(tr("District", "জেলা"), style = MaterialTheme.typography.titleMedium)
                 PickerField(
-                    label = selectedDistrictName ?: "Select District",
+                    label = selectedDistrictName ?: tr("Select District", "জেলা নির্বাচন করুন"),
                     options = locState.districts.map { it.name },
                     onSelect = { name ->
                         val d = locState.districts.firstOrNull { it.name == name }
@@ -154,9 +155,9 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
                         if (d != null) locVm.loadUpazilas(d.id)
                     },
                 )
-                Text("Upazila / Area", style = MaterialTheme.typography.titleMedium)
+                Text(tr("Upazila / Area", "উপজেলা / এলাকা"), style = MaterialTheme.typography.titleMedium)
                 PickerField(
-                    label = selectedUpazilaName ?: "Select Upazila (optional)",
+                    label = selectedUpazilaName ?: tr("Select Upazila (optional)", "উপজেলা নির্বাচন করুন (ঐচ্ছিক)"),
                     options = locState.upazilas.map { it.name },
                     onSelect = { name ->
                         val u = locState.upazilas.firstOrNull { it.name == name }
@@ -166,7 +167,7 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
                 )
             }
             item {
-                PrimaryButton(text = "Search Donors", onClick = {
+                PrimaryButton(text = tr("Search Donors", "দাতা খুঁজুন"), onClick = {
                     val group = selectedGroup?.let { label ->
                         BloodGroup.entries.firstOrNull { it.label == label }
                     }
@@ -178,7 +179,10 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
                     val end = state.donors.size
                     val start = if (end == 0) 0 else 1
                     Text(
-                        "Showing $start to $end of ${state.totalCount} donors",
+                        tr(
+                            "Showing $start to $end of ${state.totalCount} donors",
+                            "${state.totalCount} জনের মধ্যে $start থেকে $end দেখানো হচ্ছে",
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -186,7 +190,10 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: Au
             } else {
                 item {
                     if (state.searched && state.totalCount > 0) {
-                        Text("${state.totalCount} donor(s) found", style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            tr("${state.totalCount} donor(s) found", "${state.totalCount} জন দাতা পাওয়া গেছে"),
+                            style = MaterialTheme.typography.titleSmall,
+                        )
                     }
                 }
             }
@@ -269,12 +276,15 @@ fun DonorCard(donor: PublicDonorDto, modifier: Modifier = Modifier, onRequest: (
                 ) {
                     RoleBadge(donor.availabilityStatus.name)
                     donor.distanceKm?.let {
-                        Text("${String.format("%.1f", it)} km", style = MaterialTheme.typography.labelLarge)
+                        Text(
+                            tr("${String.format("%.1f", it)} km", "${String.format("%.1f", it)} কিমি"),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
                     }
                 }
                 if (donor.availabilityStatus == com.bloodnetwork.bangladesh.data.model.AvailabilityStatus.Available) {
                     PrimaryButton(
-                        text = "Request Blood",
+                        text = tr("Request Blood", "রক্তের অনুরোধ করুন"),
                         onClick = onRequest,
                         fillMax = false,
                         modifier = Modifier.padding(start = 8.dp),

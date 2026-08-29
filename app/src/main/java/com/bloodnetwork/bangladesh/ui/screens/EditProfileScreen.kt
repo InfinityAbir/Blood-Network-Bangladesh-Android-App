@@ -42,6 +42,7 @@ import com.bloodnetwork.bangladesh.ui.components.Avatar
 import com.bloodnetwork.bangladesh.ui.components.ErrorText
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.EditProfileViewModel
@@ -68,6 +69,11 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: 
 
     val hasChanges = newPhone.isNotBlank() || newEmail.isNotBlank() || newPassword.isNotBlank()
 
+    // Precomputed translated strings for use inside non-composable lambdas (onClick, etc.)
+    val enterCurrentPasswordErr = tr("Enter current password", "বর্তমান পাসওয়ার্ড লিখুন")
+    val passwordsMismatchErr = tr("Passwords do not match", "পাসওয়ার্ড মিলছে না")
+    val passwordTooShortErr = tr("Password must be at least 8 characters", "পাসওয়ার্ড কমপক্ষে ৮ অক্ষর হতে হবে")
+
     LaunchedEffect(state.error) {
         state.error?.let { snackbarHostState.showSnackbar(it) }
     }
@@ -75,10 +81,10 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Profile") },
+                title = { Text(tr("Edit Profile", "প্রোফাইল সম্পাদনা")) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -96,17 +102,17 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: 
         ) {
             Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("Profile Photo", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(tr("Profile Photo", "প্রোফাইল ছবি"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                         Avatar(photoUrl = photoUrlInput.ifBlank { authState.user?.photoUrl }, size = 64.dp)
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            LabeledTextField(photoUrlInput, { photoUrlInput = it; photoError = null }, "Photo URL")
+                            LabeledTextField(photoUrlInput, { photoUrlInput = it; photoError = null }, tr("Photo URL", "ছবির ইউআরএল"))
                             photoError?.let { ErrorText(it) }
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         PrimaryButton(
-                            text = "Save Photo",
+                            text = tr("Save Photo", "ছবি সংরক্ষণ করুন"),
                             loading = isSavingPhoto,
                             enabled = !isSavingPhoto && photoUrlInput != (authState.user?.photoUrl ?: ""),
                             fillMax = false,
@@ -131,53 +137,53 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: 
                                         onError = { msg -> isSavingPhoto = false; photoError = msg },
                                     )
                                 },
-                            ) { Text("Remove") }
+                            ) { Text(tr("Remove", "অপসারণ করুন")) }
                         }
                     }
                 }
             }
 
-            Text("Change Phone Number", style = MaterialTheme.typography.titleMedium)
+            Text(tr("Change Phone Number", "ফোন নম্বর পরিবর্তন করুন"), style = MaterialTheme.typography.titleMedium)
             Text(
-                "Current: ${authState.user?.phoneNumber ?: "—"}",
+                tr("Current: ", "বর্তমান: ") + (authState.user?.phoneNumber ?: "—"),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            LabeledTextField(newPhone, { newPhone = it }, "New Phone Number (optional)",
+            LabeledTextField(newPhone, { newPhone = it }, tr("New Phone Number (optional)", "নতুন ফোন নম্বর (ঐচ্ছিক)"),
                 keyboardType = KeyboardType.Phone)
 
-            Text("Change Email", style = MaterialTheme.typography.titleMedium)
+            Text(tr("Change Email", "ইমেইল পরিবর্তন করুন"), style = MaterialTheme.typography.titleMedium)
             Text(
-                "Current: ${authState.user?.email?.takeIf { it.isNotBlank() } ?: "Not set"}",
+                tr("Current: ", "বর্তমান: ") + (authState.user?.email?.takeIf { it.isNotBlank() } ?: tr("Not set", "নির্ধারিত নয়")),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            LabeledTextField(newEmail, { newEmail = it }, "New Email (optional)",
+            LabeledTextField(newEmail, { newEmail = it }, tr("New Email (optional)", "নতুন ইমেইল (ঐচ্ছিক)"),
                 keyboardType = KeyboardType.Email)
 
-            Text("Change Password", style = MaterialTheme.typography.titleMedium)
-            LabeledTextField(currentPassword, { currentPassword = it }, "Current Password",
+            Text(tr("Change Password", "পাসওয়ার্ড পরিবর্তন করুন"), style = MaterialTheme.typography.titleMedium)
+            LabeledTextField(currentPassword, { currentPassword = it }, tr("Current Password", "বর্তমান পাসওয়ার্ড"),
                 isPassword = true)
-            LabeledTextField(newPassword, { newPassword = it }, "New Password (optional)",
+            LabeledTextField(newPassword, { newPassword = it }, tr("New Password (optional)", "নতুন পাসওয়ার্ড (ঐচ্ছিক)"),
                 isPassword = true)
-            LabeledTextField(confirmNewPassword, { confirmNewPassword = it }, "Confirm New Password",
+            LabeledTextField(confirmNewPassword, { confirmNewPassword = it }, tr("Confirm New Password", "নতুন পাসওয়ার্ড নিশ্চিত করুন"),
                 isPassword = true)
 
             localError?.let { ErrorText(it) }
 
             if (state.success) {
-                Text("Profile updated successfully", color = BloodRed, style = MaterialTheme.typography.labelLarge)
+                Text(tr("Profile updated successfully", "প্রোফাইল সফলভাবে হালনাগাদ হয়েছে"), color = BloodRed, style = MaterialTheme.typography.labelLarge)
             }
 
             PrimaryButton(
-                text = "Update Profile",
+                text = tr("Update Profile", "প্রোফাইল হালনাগাদ করুন"),
                 loading = state.isLoading,
                 enabled = hasChanges && currentPassword.isNotBlank(),
                 onClick = {
                     localError = when {
-                        currentPassword.isBlank() -> "Enter current password"
-                        newPassword.isNotBlank() && newPassword != confirmNewPassword -> "Passwords do not match"
-                        newPassword.isNotBlank() && newPassword.length < 8 -> "Password must be at least 8 characters"
+                        currentPassword.isBlank() -> enterCurrentPasswordErr
+                        newPassword.isNotBlank() && newPassword != confirmNewPassword -> passwordsMismatchErr
+                        newPassword.isNotBlank() && newPassword.length < 8 -> passwordTooShortErr
                         else -> null
                     }
                     if (localError == null) {

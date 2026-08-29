@@ -22,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
@@ -47,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.ImeAction
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -364,6 +366,7 @@ fun DatePickerField(
     label: String,
     modifier: Modifier = Modifier,
     placeholder: String = "YYYY-MM-DD",
+    minDateMillis: Long? = null,
 ) {
     var showDialog by remember { mutableStateOf(false) }
     val today = remember {
@@ -390,7 +393,7 @@ fun DatePickerField(
             readOnly = true,
             trailingIcon = {
                 IconButton(onClick = { showDialog = true }) {
-                    Icon(Icons.Filled.ArrowDropDown, contentDescription = "Pick date")
+                    Icon(Icons.Filled.ArrowDropDown, contentDescription = tr("Pick date", "তারিখ বাছাই করুন"))
                 }
             },
         )
@@ -411,6 +414,12 @@ fun DatePickerField(
                     set(java.util.Calendar.MILLISECOND, 0)
                 }.timeInMillis
             },
+            selectableDates = remember(minDateMillis) {
+                object : SelectableDates {
+                    override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                        minDateMillis == null || utcTimeMillis >= minDateMillis
+                }
+            },
         )
         DatePickerDialog(
             onDismissRequest = { showDialog = false },
@@ -424,10 +433,10 @@ fun DatePickerField(
                         onValueChange("%04d-%02d-%02d".format(y, m, d))
                     }
                     showDialog = false
-                }) { Text("OK") }
+                }) { Text(tr("OK", "ঠিক আছে")) }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showDialog = false }) { Text(tr("Cancel", "বাতিল")) }
             },
         ) {
             DatePicker(state = state)

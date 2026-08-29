@@ -38,6 +38,7 @@ import com.bloodnetwork.bangladesh.ui.components.BarListChart
 import com.bloodnetwork.bangladesh.ui.components.MetricTile
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.components.TrendLineChart
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.AvailableGreen
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.theme.GrayMid
@@ -72,10 +73,10 @@ fun AdminAnalyticsScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Analytics", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
+                title = { Text(tr("Analytics", "বিশ্লেষণ"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
             )
@@ -100,7 +101,7 @@ fun AdminAnalyticsScreen(onBack: () -> Unit) {
                     }
                     analytics == null && state.analyticsError != null -> {
                         SectionCard {
-                            Text("Failed to load analytics", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
+                            Text(tr("Failed to load analytics", "বিশ্লেষণ লোড করা যায়নি"), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                             Text(state.analyticsError ?: "", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
@@ -116,25 +117,25 @@ private fun AnalyticsContent(analytics: AdminAnalyticsDto) {
     val totalDonorsTracked = analytics.bloodTypeDistribution.sumOf { it.count }
 
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-        MetricTile("Fulfillment rate", "${analytics.fulfillmentRatePercent}%", AvailableGreen, Modifier.weight(1f))
+        MetricTile(tr("Fulfillment rate", "পূরণের হার"), "${analytics.fulfillmentRatePercent}%", AvailableGreen, Modifier.weight(1f))
         MetricTile(
-            "Avg donor response",
+            tr("Avg donor response", "গড় দাতা সাড়া দেওয়ার সময়"),
             analytics.averageDonorResponseHours?.let { "${it}h" } ?: "—",
             Color(0xFF1565C0),
             Modifier.weight(1f),
         )
     }
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-        MetricTile("Donors tracked", "$totalDonorsTracked", BloodRed, Modifier.weight(1f))
+        MetricTile(tr("Donors tracked", "নথিভুক্ত দাতা"), "$totalDonorsTracked", BloodRed, Modifier.weight(1f))
         MetricTile(
-            "Requests (30d)",
+            tr("Requests (30d)", "অনুরোধ (৩০ দিন)"),
             "${analytics.requestsOverTime.sumOf { it.count }}",
             RecentlyDonatedAmber,
             Modifier.weight(1f),
         )
     }
 
-    SectionCard(title = "Blood type distribution") {
+    SectionCard(title = tr("Blood type distribution", "রক্তের গ্রুপ অনুযায়ী বিভাজন")) {
         BarListChart(
             items = analytics.bloodTypeDistribution.mapIndexed { i, x ->
                 BarItem(x.bloodGroup.label, x.count, bloodGroupPalette[i % bloodGroupPalette.size])
@@ -142,7 +143,7 @@ private fun AnalyticsContent(analytics: AdminAnalyticsDto) {
         )
     }
 
-    SectionCard(title = "Requests — last 30 days") {
+    SectionCard(title = tr("Requests — last 30 days", "অনুরোধ — গত ৩০ দিন")) {
         val points = analytics.requestsOverTime.map { it.count }
         TrendLineChart(
             points = points,
@@ -152,7 +153,7 @@ private fun AnalyticsContent(analytics: AdminAnalyticsDto) {
         )
     }
 
-    SectionCard(title = "New donor sign-ups — last 30 days") {
+    SectionCard(title = tr("New donor sign-ups — last 30 days", "নতুন দাতা নিবন্ধন — গত ৩০ দিন")) {
         val points = analytics.newDonorsOverTime.map { it.count }
         TrendLineChart(
             points = points,
@@ -162,23 +163,23 @@ private fun AnalyticsContent(analytics: AdminAnalyticsDto) {
         )
     }
 
-    SectionCard(title = "Request status breakdown") {
+    SectionCard(title = tr("Request status breakdown", "অনুরোধের অবস্থা অনুযায়ী বিভাজন")) {
         BarListChart(items = analytics.requestStatusBreakdown.map { BarItem(it.status, it.count, statusColor(it.status)) })
     }
 
-    SectionCard(title = "Urgency breakdown") {
+    SectionCard(title = tr("Urgency breakdown", "জরুরি মাত্রা অনুযায়ী বিভাজন")) {
         BarListChart(items = analytics.urgencyBreakdown.map { BarItem(it.status, it.count, urgencyColor(it.status)) })
     }
 
-    SectionCard(title = "Donor verification breakdown") {
+    SectionCard(title = tr("Donor verification breakdown", "দাতা যাচাইকরণ অনুযায়ী বিভাজন")) {
         BarListChart(items = analytics.donorVerificationBreakdown.map { BarItem(it.status, it.count, verificationColor(it.status)) })
     }
 
-    SectionCard(title = "Top districts by open requests") {
+    SectionCard(title = tr("Top districts by open requests", "খোলা অনুরোধ অনুযায়ী শীর্ষ জেলা")) {
         BarListChart(items = analytics.requestsByDistrict.map { BarItem(it.districtName, it.count, BloodRed) })
     }
 
-    SectionCard(title = "Top districts by registered donors") {
+    SectionCard(title = tr("Top districts by registered donors", "নিবন্ধিত দাতা অনুযায়ী শীর্ষ জেলা")) {
         BarListChart(items = analytics.donorsByDistrict.map { BarItem(it.districtName, it.count, Color(0xFF1565C0)) })
     }
 }

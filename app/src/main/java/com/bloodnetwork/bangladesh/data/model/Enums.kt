@@ -38,7 +38,7 @@ enum class VerificationStatus {
 
 /** Must match the backend's `NotificationType` enum values exactly (string-serialized). */
 enum class NotificationType {
-    BloodRequestMatch, RequestUpdate, DonorAccepted, DonorDeclined, ProfileReminder, Availability, System
+    BloodRequestMatch, RequestUpdate, DonorAccepted, DonorDeclined, ProfileReminder, Availability, System, NewRequestPendingReview
 }
 
 enum class DonorResponse {

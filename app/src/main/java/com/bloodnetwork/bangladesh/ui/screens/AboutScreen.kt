@@ -59,6 +59,7 @@ import com.bloodnetwork.bangladesh.data.model.DeveloperInfoDto
 import com.bloodnetwork.bangladesh.data.model.UpdateDeveloperInfoRequest
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
+import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AboutViewModel
 
@@ -76,16 +77,16 @@ fun AboutScreen(onBack: () -> Unit, isAdmin: Boolean) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("About the Developer", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
+                title = { Text(tr("About the Developer", "ডেভেলপার সম্পর্কে"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = tr("Back", "পেছনে"))
                     }
                 },
                 actions = {
                     if (isAdmin && state.info != null) {
                         IconButton(onClick = { showEditDialog = true }) {
-                            Icon(Icons.Filled.Edit, contentDescription = "Edit developer info")
+                            Icon(Icons.Filled.Edit, contentDescription = tr("Edit developer info", "ডেভেলপার তথ্য সম্পাদনা করুন"))
                         }
                     }
                 },
@@ -105,9 +106,9 @@ fun AboutScreen(onBack: () -> Unit, isAdmin: Boolean) {
                 state.error != null && state.info == null -> {
                     Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text("Couldn't load this page", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
+                            Text(tr("Couldn't load this page", "এই পৃষ্ঠাটি লোড করা যায়নি"), style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold)
                             Text(state.error ?: "", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Button(onClick = { vm.load() }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50)) { Text("Retry") }
+                            Button(onClick = { vm.load() }, colors = ButtonDefaults.buttonColors(containerColor = BloodRed), shape = RoundedCornerShape(50)) { Text(tr("Retry", "আবার চেষ্টা করুন")) }
                         }
                     }
                 }
@@ -162,22 +163,25 @@ private fun AboutContent(
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
             info.email?.takeIf { it.isNotBlank() }?.let {
-                ContactRow(Icons.Filled.Email, "Email", it) { onEmail(it) }
+                ContactRow(Icons.Filled.Email, tr("Email", "ইমেইল"), it) { onEmail(it) }
             }
             info.phone?.takeIf { it.isNotBlank() }?.let {
-                ContactRow(Icons.Filled.Phone, "Phone", it) { onCall(it) }
+                ContactRow(Icons.Filled.Phone, tr("Phone", "ফোন"), it) { onCall(it) }
             }
             info.linkedInUrl?.takeIf { it.isNotBlank() }?.let {
-                ContactRow(Icons.Filled.Language, "LinkedIn", it) { onOpenUrl(it) }
+                ContactRow(Icons.Filled.Language, tr("LinkedIn", "লিংকডইন"), it) { onOpenUrl(it) }
             }
             info.githubUrl?.takeIf { it.isNotBlank() }?.let {
-                ContactRow(Icons.Filled.Code, "GitHub", it) { onOpenUrl(it) }
+                ContactRow(Icons.Filled.Code, tr("GitHub", "গিটহাব"), it) { onOpenUrl(it) }
             }
         }
     }
 
     Text(
-        "Blood Network Bangladesh helps donors and requesters find each other faster. Built to make donating blood as simple as it should be.",
+        tr(
+            "Blood Network Bangladesh helps donors and requesters find each other faster. Built to make donating blood as simple as it should be.",
+            "ব্লাড নেটওয়ার্ক বাংলাদেশ দাতা ও গ্রহীতাদের দ্রুত একে অপরকে খুঁজে পেতে সাহায্য করে। রক্তদানকে যতটা সহজ হওয়া উচিত, ঠিক ততটাই সহজ করতে তৈরি।",
+        ),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -230,7 +234,7 @@ private fun EditDeveloperInfoDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit developer info", fontWeight = FontWeight.SemiBold) },
+        title = { Text(tr("Edit developer info", "ডেভেলপার তথ্য সম্পাদনা করুন"), fontWeight = FontWeight.SemiBold) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -239,13 +243,13 @@ private fun EditDeveloperInfoDialog(
                 saveError?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 }
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = role, onValueChange = { role = it }, label = { Text("Role") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Phone") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = linkedIn, onValueChange = { linkedIn = it }, label = { Text("LinkedIn URL") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = github, onValueChange = { github = it }, label = { Text("GitHub URL") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = photoUrl, onValueChange = { photoUrl = it }, label = { Text("Photo URL") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(tr("Name", "নাম")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = role, onValueChange = { role = it }, label = { Text(tr("Role", "পদবি")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text(tr("Email", "ইমেইল")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text(tr("Phone", "ফোন")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = linkedIn, onValueChange = { linkedIn = it }, label = { Text(tr("LinkedIn URL", "লিংকডইন ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = github, onValueChange = { github = it }, label = { Text(tr("GitHub URL", "গিটহাব ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = photoUrl, onValueChange = { photoUrl = it }, label = { Text(tr("Photo URL", "ছবির ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             }
         },
         confirmButton = {
@@ -264,9 +268,9 @@ private fun EditDeveloperInfoDialog(
                 colors = ButtonDefaults.buttonColors(containerColor = BloodRed),
             ) {
                 if (isSaving) CircularProgressIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.onPrimary)
-                else Text("Save")
+                else Text(tr("Save", "সংরক্ষণ করুন"))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(tr("Cancel", "বাতিল করুন")) } },
     )
 }

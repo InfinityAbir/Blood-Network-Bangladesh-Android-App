@@ -17,10 +17,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.screens.ChatbotScreen
@@ -40,6 +42,7 @@ import com.bloodnetwork.bangladesh.ui.screens.FindBloodScreen
 import com.bloodnetwork.bangladesh.ui.screens.LandingScreen
 import com.bloodnetwork.bangladesh.ui.screens.NotificationsScreen
 import com.bloodnetwork.bangladesh.ui.screens.RequestBloodScreen
+import com.bloodnetwork.bangladesh.ui.screens.RequestDetailsScreen
 import com.bloodnetwork.bangladesh.ui.screens.auth.LoginScreen
 import com.bloodnetwork.bangladesh.ui.screens.auth.RegisterScreen
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
@@ -141,6 +144,13 @@ fun AppRoot(repository: BloodNetworkRepository) {
                 }
                 composable(Routes.REQUEST_BLOOD) {
                     RequestBloodScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() }, authVm = authVm)
+                }
+                composable(
+                    "${Routes.REQUEST_DETAILS}/{id}",
+                    arguments = listOf(navArgument("id") { type = NavType.StringType }),
+                ) { backStackEntry ->
+                    val id = backStackEntry.arguments?.getString("id") ?: return@composable
+                    RequestDetailsScreen(requestId = id, onBack = { navController.popBackStack() })
                 }
                 composable(Routes.ELIGIBILITY) {
                     EligibilityScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
