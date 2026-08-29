@@ -1,5 +1,6 @@
 package com.bloodnetwork.bangladesh.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,7 +49,14 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+
+/**
+ * The minimum comfortable height for a "compact" (non-fillMax) button — above Android's
+ * 48dp accessibility touch-target recommendation while still reading as smaller than a
+ * full-width primary action.
+ */
+private val CompactButtonMinHeight = 44.dp
+private val FillMaxButtonMinHeight = 50.dp
 
 @Composable
 fun PrimaryButton(
@@ -61,17 +69,60 @@ fun PrimaryButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.then(if (fillMax) Modifier.fillMaxWidth() else Modifier).heightIn(min = if (fillMax) 50.dp else 36.dp),
+        modifier = modifier.then(if (fillMax) Modifier.fillMaxWidth() else Modifier)
+            .heightIn(min = if (fillMax) FillMaxButtonMinHeight else CompactButtonMinHeight)
+            .bounceClick(),
         enabled = enabled && !loading,
         shape = RoundedCornerShape(8.dp),
-        contentPadding = if (fillMax) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = BloodRed),
+        contentPadding = if (fillMax) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
     ) {
         if (loading) {
             CircularProgressIndicator(
                 modifier = Modifier.heightIn(max = 18.dp),
                 strokeWidth = 2.dp,
                 color = MaterialTheme.colorScheme.onPrimary,
+            )
+        } else {
+            Text(text, style = if (fillMax) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+/**
+ * A visually de-emphasized counterpart to [PrimaryButton] — an outlined button using the
+ * theme's primary color for its border/text instead of a solid fill. Use this for secondary
+ * actions (Login, Create Account, Logout, Cancel) so they don't visually compete with the
+ * screen's primary call-to-action.
+ */
+@Composable
+fun SecondaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    loading: Boolean = false,
+    fillMax: Boolean = true,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier.then(if (fillMax) Modifier.fillMaxWidth() else Modifier)
+            .heightIn(min = if (fillMax) FillMaxButtonMinHeight else CompactButtonMinHeight)
+            .bounceClick(),
+        enabled = enabled && !loading,
+        shape = RoundedCornerShape(8.dp),
+        contentPadding = if (fillMax) ButtonDefaults.ContentPadding else PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.heightIn(max = 18.dp),
+                strokeWidth = 2.dp,
+                color = MaterialTheme.colorScheme.primary,
             )
         } else {
             Text(text, style = if (fillMax) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelMedium)
@@ -186,7 +237,7 @@ fun LoadingBox(modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        CircularProgressIndicator(color = BloodRed)
+        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
     }
 }
 
@@ -271,7 +322,7 @@ fun PickerField(
                 }) {
                     Icon(
                         imageVector = if (focused) Icons.Filled.Close else Icons.Filled.ArrowDropDown,
-                        contentDescription = null,
+                        contentDescription = if (focused) "Clear search" else "Show options",
                     )
                 }
             },

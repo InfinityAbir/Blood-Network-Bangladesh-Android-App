@@ -14,6 +14,7 @@ import kotlinx.coroutines.launch
 
 data class RequestBloodUiState(
     val isLoading: Boolean = false,
+    val loadingRequests: Boolean = false,
     val error: String? = null,
     val success: Boolean = false,
     val myRequests: List<BloodRequestDto> = emptyList(),
@@ -74,8 +75,10 @@ class RequestBloodViewModel(
 
     fun loadMyRequests() {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(loadingRequests = true)
             runCatching { repository.getMyBloodRequests() }
-                .onSuccess { _uiState.value = _uiState.value.copy(myRequests = it) }
+                .onSuccess { _uiState.value = _uiState.value.copy(myRequests = it, loadingRequests = false) }
+                .onFailure { _uiState.value = _uiState.value.copy(loadingRequests = false) }
         }
     }
 

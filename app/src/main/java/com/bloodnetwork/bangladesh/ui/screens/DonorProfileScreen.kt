@@ -15,6 +15,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -69,6 +71,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var customAddress by remember { mutableStateOf("") }
     var lastDonationDate by remember { mutableStateOf("") }
     var formError by remember { mutableStateOf<String?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var initialized by remember { mutableStateOf(false) }
     var origBloodGroup by remember { mutableStateOf<String?>(null) }
@@ -191,6 +194,16 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
         }
     }
 
+    // "No profile yet" is an expected state, not a failure — only surface real
+    // network/API errors as a transient snackbar.
+    val networkError = state.error?.takeUnless {
+        it.contains("not found", ignoreCase = true) || it.contains("No donor profile", ignoreCase = true)
+    }
+
+    LaunchedEffect(networkError) {
+        networkError?.let { snackbarHostState.showSnackbar(it) }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -202,6 +215,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.isLoading && !initialized) {
             DonorProfileSkeleton()
@@ -295,14 +309,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 }
             }
 
-            val err = state.error
-            val displayError = when {
-                formError != null -> formError
-                err != null && err.contains("not found", ignoreCase = true) -> null
-                err != null && err.contains("No donor profile", ignoreCase = true) -> null
-                else -> err
-            }
-            displayError?.let { ErrorText(it) }
+            formError?.let { ErrorText(it) }
             if (state.saved) {
                 Text("Profile saved", color = BloodRed, style = MaterialTheme.typography.labelLarge)
             }

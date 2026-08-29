@@ -63,7 +63,6 @@ fun RegisterScreen(
             firstName = savedData.firstName
             lastName = savedData.lastName
             phone = savedData.phoneNumber
-            password = savedData.password
         }
     }
 
@@ -100,15 +99,15 @@ fun RegisterScreen(
                 text = "Register to donate or request blood",
                 style = MaterialTheme.typography.titleLarge,
             )
-            LabeledTextField(firstName, { firstName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = it, lastName = lastName, phoneNumber = phone, password = password)) }, "First Name",
+            LabeledTextField(firstName, { firstName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = it, lastName = lastName, phoneNumber = phone)) }, "First Name",
                 leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) })
-            LabeledTextField(lastName, { lastName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = it, phoneNumber = phone, password = password)) }, "Last Name")
-            LabeledTextField(phone, { phone = it; phoneError = false; localError = null; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = lastName, phoneNumber = it, password = password)) }, "Phone Number",
+            LabeledTextField(lastName, { lastName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = it, phoneNumber = phone)) }, "Last Name")
+            LabeledTextField(phone, { phone = it; phoneError = false; localError = null; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = lastName, phoneNumber = it)) }, "Phone Number",
                 keyboardType = KeyboardType.Phone, isError = phoneError,
                 leadingIcon = { Icon(Icons.Filled.Phone, contentDescription = null) })
             LabeledTextField(email, { email = it; emailError = false; localError = null }, "Email (optional)",
                 keyboardType = KeyboardType.Email, isError = emailError)
-            LabeledTextField(password, { password = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = lastName, phoneNumber = phone, password = it)) }, "Password",
+            LabeledTextField(password, { password = it }, "Password",
                 isPassword = true,
                 leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) })
             LabeledTextField(confirm, { confirm = it }, "Confirm Password",

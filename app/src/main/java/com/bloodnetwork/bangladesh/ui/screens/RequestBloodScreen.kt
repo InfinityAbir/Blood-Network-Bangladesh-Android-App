@@ -16,6 +16,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -38,7 +40,7 @@ import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RowChips
-import com.bloodnetwork.bangladesh.ui.components.RequestBloodSkeleton
+import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.RequestBloodViewModel
@@ -71,6 +73,7 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var contactPhone by remember { mutableStateOf("") }
     var additionalInfo by remember { mutableStateOf("") }
     var formError by remember { mutableStateOf<String?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val requiredFilled = bloodGroup != null && units.toIntOrNull() != null && hospitalName.isNotBlank() && districtId != null && upazilaId != null && requiredBy.isNotBlank() && contactPhone.length >= 10
 
@@ -91,6 +94,10 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
         }
     }
 
+    LaunchedEffect(state.error) {
+        state.error?.let { snackbarHostState.showSnackbar(it) }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -102,6 +109,7 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -178,7 +186,6 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             LabeledTextField(additionalInfo, { additionalInfo = it }, "Additional Info (optional)")
 
             formError?.let { ErrorText(it) }
-            state.error?.let { ErrorText(it) }
 
             if (state.success && state.myRequests.isNotEmpty()) {
                 Text("Your recent requests", style = MaterialTheme.typography.titleMedium)
@@ -221,7 +228,10 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 },
             )
 
-            if (state.myRequests.isNotEmpty()) {
+            if (state.loadingRequests && state.myRequests.isEmpty()) {
+                Text("My Requests", style = MaterialTheme.typography.titleLarge)
+                Card(modifier = Modifier.fillMaxWidth()) { SkeletonCard() }
+            } else if (state.myRequests.isNotEmpty()) {
                 Text("My Requests", style = MaterialTheme.typography.titleLarge)
                 state.myRequests.forEach { req ->
                     Card(modifier = Modifier.fillMaxWidth()) {

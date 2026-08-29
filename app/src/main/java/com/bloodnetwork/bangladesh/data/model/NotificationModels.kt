@@ -13,7 +13,16 @@ data class NotificationDto(
     @SerialName("isRead") val isRead: Boolean = false,
     @SerialName("readAt") val readAt: String? = null,
     @SerialName("createdAt") val createdAt: String = "",
+    @SerialName("metadata") val metadata: String? = null,
 )
+
+/** Best-effort read of the `availabilityStatus` field from an Availability notification's
+ * JSON metadata (see backend DonorService.NotifyRequestersOfAvailabilityAsync). */
+fun NotificationDto.metadataAvailabilityStatus(): String? =
+    metadata?.let { runCatching { org.json.JSONObject(it).optString("availabilityStatus", null) }.getOrNull() }
+
+fun NotificationDto.metadataBloodGroup(): String? =
+    metadata?.let { runCatching { org.json.JSONObject(it).optString("bloodGroup", null) }.getOrNull() }
 
 @Serializable
 data class MarkNotificationReadRequest(

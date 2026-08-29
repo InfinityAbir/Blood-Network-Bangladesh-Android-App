@@ -16,6 +16,8 @@ data class AuthUiState(
     val error: String? = null,
     val user: UserDto? = null,
     val isLoggedIn: Boolean = false,
+    val meLoadFailed: Boolean = false,
+    val isProfileRefreshing: Boolean = false,
 )
 
 class AuthViewModel(
@@ -32,7 +34,16 @@ class AuthViewModel(
 
     init {
         viewModelScope.launch {
-            repository.isLoggedIn.collect { loggedInState.value = it }
+            repository.isLoggedIn.collect { isLoggedIn ->
+                loggedInState.value = isLoggedIn
+                if (isLoggedIn) {
+                    repository.notificationSocket.start()
+                    if (_uiState.value.user == null) loadMe()
+                } else {
+                    repository.notificationSocket.stop()
+                    _uiState.value = AuthUiState()
+                }
+            }
         }
         viewModelScope.launch {
             val saved = repository.registrationData.first()
@@ -41,6 +52,24 @@ class AuthViewModel(
             }
         }
     }
+
+    private fun loadMe() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isProfileRefreshing = true)
+            runCatching { repository.me() }
+                .onSuccess { user -> _uiState.value = _uiState.value.copy(user = user, isLoggedIn = true, meLoadFailed = false, isProfileRefreshing = false) }
+                .onFailure { _uiState.value = _uiState.value.copy(meLoadFailed = true, isProfileRefreshing = false) }
+        }
+    }
+
+    /** Retries fetching the profile after a failed cold-start load (e.g. no network yet). */
+    fun retryLoadUser() {
+        if (_uiState.value.user != null) return
+        loadMe()
+    }
+
+    /** Explicit refresh (e.g. pull-to-refresh) — reloads even if a profile is already cached. */
+    fun refreshProfile() = loadMe()
 
     fun saveRegistrationData(data: RegistrationStore.RegistrationData) {
         _registrationData.value = data
@@ -106,6 +135,33 @@ class AuthViewModel(
 
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
+    }
+
+    fun updateProfile(
+        currentPassword: String,
+        newEmail: String?,
+        newPhoneNumber: String?,
+        newPassword: String?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        viewModelScope.launch {
+            runCatching {
+                repository.updateProfile(
+                    com.bloodnetwork.bangladesh.data.model.UpdateProfileRequest(
+                        currentPassword = currentPassword,
+                        newEmail = newEmail,
+                        newPhoneNumber = newPhoneNumber,
+                        newPassword = newPassword,
+                    )
+                )
+            }
+                .onSuccess { user ->
+                    _uiState.value = _uiState.value.copy(user = user)
+                    onSuccess()
+                }
+                .onFailure { e -> onError(e.message ?: "Update failed") }
+        }
     }
 
     private fun Throwable.toUserMessage(): String {

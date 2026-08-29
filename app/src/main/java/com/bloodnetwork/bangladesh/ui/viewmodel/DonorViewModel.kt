@@ -136,6 +136,7 @@ class DonorViewModel(
                 _uiState.value = _uiState.value.copy(error = "Please save your donor profile first")
                 return@launch
             }
+            _uiState.value = _uiState.value.copy(error = null)
             try {
                 val profile = repository.toggleAvailability(com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest(status))
                 _uiState.value = _uiState.value.copy(profile = profile, error = null, hasProfile = true)

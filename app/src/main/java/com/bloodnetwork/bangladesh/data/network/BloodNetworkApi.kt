@@ -30,11 +30,15 @@ import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UpazilaDto
 import com.bloodnetwork.bangladesh.data.model.UpdateProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UserDto
+import com.bloodnetwork.bangladesh.data.model.AdminAnalyticsDto
+import com.bloodnetwork.bangladesh.data.model.DeveloperInfoDto
+import com.bloodnetwork.bangladesh.data.model.UpdateDeveloperInfoRequest
 import com.bloodnetwork.bangladesh.data.model.AdminDashboardStats
 import com.bloodnetwork.bangladesh.data.model.AdminUserDto
 import com.bloodnetwork.bangladesh.data.model.AdminReportDto
 import com.bloodnetwork.bangladesh.data.model.AdminAuditLogDto
 import com.bloodnetwork.bangladesh.data.model.ToggleUserActiveRequest
+import com.bloodnetwork.bangladesh.data.model.VerifyDonorRequest
 import com.bloodnetwork.bangladesh.data.model.ResolveReportRequest
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -142,7 +146,7 @@ interface BloodNetworkApi {
 
     // ---- Notifications ----
     @GET("api/notifications")
-    suspend fun getNotifications(): List<NotificationDto>
+    suspend fun getNotifications(@Query("type") type: String? = null): List<NotificationDto>
 
     @GET("api/notifications/unread-count")
     suspend fun getUnreadCount(): UnreadCountDto
@@ -157,6 +161,13 @@ interface BloodNetworkApi {
     suspend fun markAllNotificationsRead(): Unit
 
     // ---- Eligibility (public) ----
+    // ---- Developer info (public "About" content, admin-editable) ----
+    @GET("api/developer-info")
+    suspend fun getDeveloperInfo(): DeveloperInfoDto
+
+    @PUT("api/developer-info")
+    suspend fun updateDeveloperInfo(@Body request: UpdateDeveloperInfoRequest): DeveloperInfoDto
+
     @GET("api/ai/eligibility/questions")
     suspend fun getEligibilityQuestions(): List<EligibilityQuestionDto>
 
@@ -168,10 +179,13 @@ interface BloodNetworkApi {
     suspend fun chat(@Body request: ChatRequest): ChatResponse
 
     // ---- Admin ----
-    @GET("admin/dashboard")
+    @GET("api/admin/dashboard")
     suspend fun getAdminDashboard(): AdminDashboardStats
 
-    @GET("admin/users")
+    @GET("api/admin/analytics")
+    suspend fun getAdminAnalytics(): AdminAnalyticsDto
+
+    @GET("api/admin/users")
     suspend fun getAdminUsers(
         @Query("search") search: String? = null,
         @Query("role") role: String? = null,
@@ -179,26 +193,32 @@ interface BloodNetworkApi {
         @Query("pageSize") pageSize: Int = 20,
     ): PagedResult<AdminUserDto>
 
-    @POST("admin/users/{userId}/toggle-active")
+    @POST("api/admin/users/{userId}/toggle-active")
     suspend fun toggleUserActive(
         @Path("userId") userId: String,
         @Body request: ToggleUserActiveRequest,
     ): AdminUserDto
 
-    @GET("admin/reports")
+    @POST("api/admin/users/{userId}/verify-donor")
+    suspend fun verifyDonor(
+        @Path("userId") userId: String,
+        @Body request: VerifyDonorRequest,
+    ): AdminUserDto
+
+    @GET("api/admin/reports")
     suspend fun getAdminReports(
         @Query("status") status: String? = null,
         @Query("page") page: Int = 1,
         @Query("pageSize") pageSize: Int = 20,
     ): PagedResult<AdminReportDto>
 
-    @POST("admin/reports/{reportId}/resolve")
+    @POST("api/admin/reports/{reportId}/resolve")
     suspend fun resolveReport(
         @Path("reportId") reportId: String,
         @Body request: ResolveReportRequest,
     ): AdminReportDto
 
-    @GET("admin/audit-logs")
+    @GET("api/admin/audit-logs")
     suspend fun getAdminAuditLogs(
         @Query("entityType") entityType: String? = null,
         @Query("page") page: Int = 1,

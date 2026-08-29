@@ -29,15 +29,16 @@ enum class RequestStatus {
 }
 
 enum class UserRole {
-    Admin, Donor, Requester
+    Admin, Donor, Requester, Volunteer
 }
 
 enum class VerificationStatus {
     Unverified, Pending, Verified, Rejected
 }
 
+/** Must match the backend's `NotificationType` enum values exactly (string-serialized). */
 enum class NotificationType {
-    BloodRequest, Match, System, Report
+    BloodRequestMatch, RequestUpdate, DonorAccepted, DonorDeclined, ProfileReminder, Availability, System
 }
 
 enum class DonorResponse {

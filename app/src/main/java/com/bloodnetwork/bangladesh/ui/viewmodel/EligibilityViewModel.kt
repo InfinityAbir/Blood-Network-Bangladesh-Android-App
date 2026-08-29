@@ -38,7 +38,7 @@ class EligibilityViewModel(
     }
 
     fun loadQuestions() {
-        _uiState.value = _uiState.value.copy(isLoading = true)
+        _uiState.value = _uiState.value.copy(isLoading = true, error = null)
         viewModelScope.launch {
             runCatching { repository.getEligibilityQuestions() }
                 .onSuccess { _uiState.value = _uiState.value.copy(isLoading = false, questions = it) }

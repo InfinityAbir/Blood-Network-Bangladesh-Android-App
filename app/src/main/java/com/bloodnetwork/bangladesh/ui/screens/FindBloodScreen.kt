@@ -7,20 +7,27 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,8 +41,6 @@ import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.BloodGroupChips
-import com.bloodnetwork.bangladesh.ui.components.ErrorText
-import com.bloodnetwork.bangladesh.ui.components.LoadingBox
 import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RoleBadge
@@ -65,8 +70,13 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var selectedUpazilaName by remember { mutableStateOf<String?>(null) }
 
     val hasCriteria = selectedGroup != null || selectedDistrictId != null
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) { locVm.loadDivisions() }
+
+    LaunchedEffect(state.error) {
+        state.error?.let { snackbarHostState.showSnackbar(it) }
+    }
 
     Scaffold(
         topBar = {
@@ -79,11 +89,29 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
+        val listState = rememberLazyListState()
+        val shouldLoadMore by remember {
+            derivedStateOf {
+                val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+                val total = listState.layoutInfo.totalItemsCount
+                total > 0 && last >= total - 3
+            }
+        }
+        LaunchedEffect(shouldLoadMore, state.hasMore) {
+            if (shouldLoadMore && state.hasMore) vm.loadMore()
+        }
+
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { vm.refresh() },
+            modifier = Modifier.fillMaxSize().padding(padding),
+        ) {
         LazyColumn(
+            state = listState,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
+                .fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -142,7 +170,6 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     }
                     vm.search(group, selectedDistrictId, selectedUpazilaId)
                 }, enabled = hasCriteria)
-                ErrorText(state.error)
             }
             item {
                 if (state.searched && state.totalCount > 0) {
@@ -157,7 +184,15 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                         if (isLoggedIn) onNavigate(Routes.REQUEST_BLOOD) else onNavigate(Routes.LOGIN)
                     }
                 }
+                if (state.isLoadingMore) {
+                    item {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        }
+                    }
+                }
             }
+        }
         }
     }
 }

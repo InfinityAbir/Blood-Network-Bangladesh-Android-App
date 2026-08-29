@@ -26,6 +26,32 @@ The APK is at `app/build/outputs/apk/release/app-release.apk`. The release build
 > **Android Studio will detect no existing `gradle-wrapper.jar`.** Run the wrapper task once: you can also execute
 > `gradle wrapper` from your installed Gradle, or just sync/build from Android Studio which handles the wrapper.
 
+## Release build & signing
+
+Release builds need a signing key before `assembleRelease`/`bundleRelease` will produce an installable
+(and Play-Store-uploadable) artifact. One-time setup, from Android Studio's **Terminal** tab (it bundles a JDK):
+
+```
+keytool -genkeypair -v -keystore release.jks -alias bloodnetwork -keyalg RSA -keysize 2048 -validity 10000
+```
+
+Answer its prompts (name/org/etc. — anything reasonable) and **pick strong store/key passwords you will not
+lose** — losing this file or its passwords means you can never publish an update to the same Play Store
+listing again. Then:
+
+1. Copy `keystore.properties.example` → `keystore.properties` (repo root, gitignored) and fill in the
+   `storeFile` path plus the passwords/alias you just chose.
+2. Build the release artifacts:
+   ```
+   ./gradlew bundleRelease   # Play Store .aab
+   ./gradlew assembleRelease # sideloadable .apk, e.g. for internal testing
+   ```
+3. Back up `release.jks` and its passwords somewhere durable and private (password manager + offline copy) —
+   they're gitignored on purpose and this repo has no other copy.
+
+For every release after the first, bump both `versionCode` (integer, always increases) and `versionName`
+(the human-readable string) in `app/build.gradle.kts` before building.
+
 ## Architecture
 
 Layered, with manual dependency injection (no Hilt/KSP to keep the build lean):
@@ -57,7 +83,15 @@ app/src/main/java/com/bloodnetwork/bangladesh/
 
 ### Screens (v1)
 Landing · Login · Register · Find Blood (donor search) · Donate (eligibility) · Request Blood ·
-Donor Profile (create/update + availability) · Notifications · AI Chatbot.
+Donor Profile (create/update + availability) · Notifications (realtime via SignalR, type filter, deep-link
+tap) · AI Chatbot · About (developer contact info, admin-editable) · Admin Dashboard, Analytics
+(charts: blood-type distribution, 30-day trends, district breakdowns), User Management, Reports, Audit Logs.
+
+### Realtime notifications
+
+The app connects to the backend's `/hubs/notifications` SignalR hub (`data/network/NotificationSocket.kt`)
+while logged in, so new notifications and unread-count changes show up live instead of only on manual
+refresh/poll. Push-when-backgrounded (FCM) is a deferred follow-up — see `plan.md`/the roadmap doc for why.
 
 ## Security
 

@@ -13,9 +13,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,8 +48,13 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     var newPassword by remember { mutableStateOf("") }
     var confirmNewPassword by remember { mutableStateOf("") }
     var localError by remember { mutableStateOf<String?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val hasChanges = newPhone.isNotBlank() || newEmail.isNotBlank() || newPassword.isNotBlank()
+
+    LaunchedEffect(state.error) {
+        state.error?.let { snackbarHostState.showSnackbar(it) }
+    }
 
     Scaffold(
         topBar = {
@@ -59,6 +67,7 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -85,7 +94,6 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 isPassword = true)
 
             localError?.let { ErrorText(it) }
-            state.error?.let { ErrorText(it) }
 
             if (state.success) {
                 Text("Profile updated successfully", color = BloodRed, style = MaterialTheme.typography.labelLarge)

@@ -15,11 +15,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -27,9 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.data.model.EligibilityQuestionDto
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
-import com.bloodnetwork.bangladesh.ui.components.ErrorText
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
-import com.bloodnetwork.bangladesh.ui.components.LoadingBox
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RowChips
 import com.bloodnetwork.bangladesh.ui.components.FormFieldSkeleton
@@ -48,6 +49,11 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
 
     val allAnswered = state.questions.isNotEmpty() && state.questions.all { state.answers.containsKey(it.id) }
     val hasChanges = state.lastCheckedAnswers == null || state.answers != state.lastCheckedAnswers
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.error) {
+        state.error?.let { snackbarHostState.showSnackbar(it) }
+    }
 
     Scaffold(
         topBar = {
@@ -60,6 +66,7 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         if (state.isLoading) {
             Column(
@@ -88,7 +95,6 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                     }
                 }
                 item {
-                    ErrorText(state.error)
                     PrimaryButton(text = "Check Eligibility", onClick = { vm.checkEligibility() }, loading = state.isLoading, enabled = allAnswered && hasChanges)
                 }
                 state.result?.let { result ->

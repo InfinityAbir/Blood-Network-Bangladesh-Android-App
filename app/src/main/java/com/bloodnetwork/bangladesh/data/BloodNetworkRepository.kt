@@ -15,9 +15,11 @@ import com.bloodnetwork.bangladesh.data.model.EligibilityQuestionDto
 import com.bloodnetwork.bangladesh.data.model.EligibilityResultDto
 import com.bloodnetwork.bangladesh.data.model.LoginRequest
 import com.bloodnetwork.bangladesh.data.model.NotificationDto
+import com.bloodnetwork.bangladesh.data.model.NotificationType
 import com.bloodnetwork.bangladesh.data.model.PagedResult
 import com.bloodnetwork.bangladesh.data.model.PublicBloodRequestDto
 import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
+import com.bloodnetwork.bangladesh.data.model.RefreshTokenRequest
 import com.bloodnetwork.bangladesh.data.model.RegisterRequest
 import com.bloodnetwork.bangladesh.data.model.RespondToMatchRequest
 import com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest
@@ -26,18 +28,24 @@ import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UpazilaDto
 import com.bloodnetwork.bangladesh.data.model.UpdateProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UserDto
+import com.bloodnetwork.bangladesh.data.model.AdminAnalyticsDto
+import com.bloodnetwork.bangladesh.data.model.DeveloperInfoDto
+import com.bloodnetwork.bangladesh.data.model.UpdateDeveloperInfoRequest
 import com.bloodnetwork.bangladesh.data.model.AdminDashboardStats
 import com.bloodnetwork.bangladesh.data.model.AdminUserDto
 import com.bloodnetwork.bangladesh.data.model.AdminReportDto
 import com.bloodnetwork.bangladesh.data.model.AdminAuditLogDto
 import com.bloodnetwork.bangladesh.data.model.ToggleUserActiveRequest
+import com.bloodnetwork.bangladesh.data.model.VerifyDonorRequest
 import com.bloodnetwork.bangladesh.data.model.ResolveReportRequest
 import com.bloodnetwork.bangladesh.data.network.BloodNetworkApi
+import com.bloodnetwork.bangladesh.data.network.NotificationSocket
 import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
 import com.bloodnetwork.bangladesh.data.prefs.EligibilityStore
 import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.data.prefs.TokenStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 class BloodNetworkRepository(
     private val api: BloodNetworkApi,
@@ -45,11 +53,14 @@ class BloodNetworkRepository(
     private val eligibilityStore: EligibilityStore,
     private val registrationStore: RegistrationStore,
     private val donorProfileStore: DonorProfileStore,
+    val notificationSocket: NotificationSocket,
 ) {
 
     val isLoggedIn: Flow<Boolean> = tokenStore.isLoggedIn
     val currentUserId: Flow<String?> = tokenStore.currentUserId
     val currentUserRole: Flow<com.bloodnetwork.bangladesh.data.model.UserRole?> = tokenStore.currentUserRole
+    fun isLoggedInSync(): Boolean = tokenStore.isLoggedInSync()
+    fun currentUserRoleSync(): com.bloodnetwork.bangladesh.data.model.UserRole? = tokenStore.currentUserRoleSync()
 
     // ---- Auth ----
     suspend fun login(phone: String, password: String): AuthResponse {
@@ -67,6 +78,12 @@ class BloodNetworkRepository(
     }
 
     suspend fun logout() {
+        // Best-effort server-side revocation so a captured refresh token can't outlive
+        // the user's own logout; local tokens are cleared regardless of the outcome.
+        val refreshToken = tokenStore.refreshToken.first()
+        if (!refreshToken.isNullOrEmpty()) {
+            runCatching { api.logout(RefreshTokenRequest(refreshToken)) }
+        }
         tokenStore.clear()
     }
 
@@ -121,7 +138,7 @@ class BloodNetworkRepository(
     suspend fun getUpazilas(districtId: String? = null): List<UpazilaDto> = api.getUpazilas(districtId)
 
     // ---- Notifications ----
-    suspend fun getNotifications(): List<NotificationDto> = api.getNotifications()
+    suspend fun getNotifications(type: NotificationType? = null): List<NotificationDto> = api.getNotifications(type?.name)
     suspend fun getUnreadCount(): UnreadCountDto = api.getUnreadCount()
     suspend fun markNotificationRead(id: String) = api.markNotificationRead(id, com.bloodnetwork.bangladesh.data.model.MarkNotificationReadRequest(isRead = true))
     suspend fun markAllNotificationsRead() = api.markAllNotificationsRead()
@@ -154,8 +171,14 @@ class BloodNetworkRepository(
 
     // ---- Admin ----
     suspend fun getAdminDashboard(): AdminDashboardStats = api.getAdminDashboard()
+    suspend fun getAdminAnalytics(): AdminAnalyticsDto = api.getAdminAnalytics()
+
+    // ---- Developer info ----
+    suspend fun getDeveloperInfo(): DeveloperInfoDto = api.getDeveloperInfo()
+    suspend fun updateDeveloperInfo(request: UpdateDeveloperInfoRequest): DeveloperInfoDto = api.updateDeveloperInfo(request)
     suspend fun getAdminUsers(search: String? = null, role: String? = null, page: Int = 1, pageSize: Int = 20) = api.getAdminUsers(search, role, page, pageSize)
     suspend fun toggleUserActive(userId: String, isActive: Boolean): AdminUserDto = api.toggleUserActive(userId, ToggleUserActiveRequest(isActive))
+    suspend fun verifyDonor(userId: String, status: String): AdminUserDto = api.verifyDonor(userId, VerifyDonorRequest(status))
     suspend fun getAdminReports(status: String? = null, page: Int = 1, pageSize: Int = 20) = api.getAdminReports(status, page, pageSize)
     suspend fun resolveReport(reportId: String, status: String, resolution: String? = null): AdminReportDto = api.resolveReport(reportId, ResolveReportRequest(status, resolution))
     suspend fun getAdminAuditLogs(entityType: String? = null, page: Int = 1, pageSize: Int = 20) = api.getAdminAuditLogs(entityType, page, pageSize)

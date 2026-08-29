@@ -14,10 +14,19 @@ private val LightColors = lightColorScheme(
     onPrimaryContainer = DarkRed,
     secondary = GrayMid,
     onSecondary = Color.White,
+    secondaryContainer = LightSecondaryContainer,
+    onSecondaryContainer = LightOnSecondaryContainer,
     background = BloodBackground,
     onBackground = GrayDark,
     surface = BloodSurface,
     onSurface = GrayDark,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = LightOnSurfaceVariant,
+    outline = LightOutline,
+    error = BloodRed,
+    onError = Color.White,
+    errorContainer = LightErrorContainer,
+    onErrorContainer = LightOnErrorContainer,
 )
 
 private val DarkColors = darkColorScheme(
@@ -25,8 +34,21 @@ private val DarkColors = darkColorScheme(
     onPrimary = DarkRed,
     primaryContainer = DarkRed,
     onPrimaryContainer = BloodPink,
-    secondary = GrayMid,
-    onSecondary = Color.White,
+    secondary = DarkSecondary,
+    onSecondary = GrayDark,
+    secondaryContainer = DarkSecondaryContainer,
+    onSecondaryContainer = DarkOnSecondaryContainer,
+    background = DarkBackground,
+    onBackground = GrayLight,
+    surface = DarkSurface,
+    onSurface = GrayLight,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = DarkOnSurfaceVariant,
+    outline = DarkOutline,
+    error = BloodRedLight,
+    onError = DarkRed,
+    errorContainer = DarkErrorContainer,
+    onErrorContainer = DarkOnErrorContainer,
 )
 
 @Composable

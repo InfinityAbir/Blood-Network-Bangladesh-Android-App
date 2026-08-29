@@ -33,3 +33,10 @@
 
 # ---------- kotlinx.coroutines ----------
 -dontwarn kotlinx.coroutines.**
+
+# ---------- SignalR client (notifications realtime) ----------
+# Ships its own consumer rules; these are defensive in case R8 strips reflectively-used
+# Gson/RxJava2 pieces it depends on internally.
+-dontwarn com.microsoft.signalr.**
+-dontwarn io.reactivex.**
+-keep class com.microsoft.signalr.** { *; }

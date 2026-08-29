@@ -1,5 +1,6 @@
 package com.bloodnetwork.bangladesh.data.network
 
+import com.bloodnetwork.bangladesh.BuildConfig
 import com.bloodnetwork.bangladesh.data.prefs.TokenStore
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -22,8 +23,14 @@ object ApiClient {
         authInterceptor: AuthInterceptor,
         tokenStore: TokenStore,
     ): BloodNetworkApi {
+        // Full request/response bodies (tokens, passwords, personal data) are only ever
+        // logged in debug builds - never in release, where Logcat is not a safe sink.
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
         }
 
         val okHttp = OkHttpClient.Builder()

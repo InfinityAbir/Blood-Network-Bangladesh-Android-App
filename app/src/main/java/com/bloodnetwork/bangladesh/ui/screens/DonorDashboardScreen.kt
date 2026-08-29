@@ -1,17 +1,28 @@
 package com.bloodnetwork.bangladesh.ui.screens
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.HealthAndSafety
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -20,6 +31,7 @@ import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,9 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
-import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
-import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.NotificationsViewModel
 
@@ -59,6 +70,7 @@ private val actions = listOf(
     DashboardAction("Request Blood", "Create a new blood request", Icons.Filled.HealthAndSafety, Routes.REQUEST_BLOOD),
     DashboardAction("My Donor Profile", "Manage your donor profile and availability", Icons.Filled.Person, Routes.DONOR_PROFILE),
     DashboardAction("Edit Profile", "Change your phone, email or password", Icons.Filled.Settings, Routes.EDIT_PROFILE),
+    DashboardAction("About", "Meet the developer behind this app", Icons.Filled.Info, Routes.ABOUT),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,18 +107,32 @@ fun DonorDashboardScreen(
                             )
                         }
                     }
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            Icons.Filled.Logout,
+                            contentDescription = "Logout",
+                        )
+                    }
                 },
             )
         },
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
+        PullToRefreshBox(
+            isRefreshing = state.isProfileRefreshing,
+            onRefresh = {
+                vm.refreshProfile()
+                notifVm.loadUnreadCount()
+            },
+            modifier = Modifier.fillMaxSize().padding(padding),
+        ) {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 160.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            item {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
                     text = "Welcome${state.user?.let { ", ${it.firstName}" } ?: ""}",
                     style = MaterialTheme.typography.headlineSmall,
@@ -115,9 +141,7 @@ fun DonorDashboardScreen(
             items(actions) { action ->
                 ActionCard(action, onNavigate)
             }
-            item {
-                PrimaryButton("Logout", onClick = onLogout)
-            }
+        }
         }
     }
 
@@ -128,31 +152,54 @@ fun DonorDashboardScreen(
                 showNotifSheet = false
                 notifVm.loadUnreadCount()
             },
+            onNavigate = onNavigate,
         )
     }
 }
 
 @Composable
 fun ActionCard(action: DashboardAction, onNavigate: (String) -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val containerColor by animateColorAsState(
+        targetValue = if (isPressed) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f) else MaterialTheme.colorScheme.surface,
+        label = "cardColor",
+    )
+
     Card(
+        onClick = { onNavigate(action.route) },
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onNavigate(action.route) },
+            .heightIn(min = 132.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp, pressedElevation = 4.dp),
+        interactionSource = interactionSource,
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Icon(
-                imageVector = action.icon,
-                contentDescription = null,
-                tint = BloodRed,
-            )
-            Column {
-                Text(action.title, style = MaterialTheme.typography.titleMedium)
-                Text(action.subtitle, style = MaterialTheme.typography.bodySmall)
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = action.icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
             }
+            Text(action.title, style = MaterialTheme.typography.titleMedium)
+            Text(
+                action.subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

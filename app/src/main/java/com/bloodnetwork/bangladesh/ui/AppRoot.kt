@@ -26,7 +26,13 @@ import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.screens.ChatbotScreen
 import com.bloodnetwork.bangladesh.ui.screens.DonorDashboardScreen
 import com.bloodnetwork.bangladesh.ui.screens.DonorProfileScreen
+import com.bloodnetwork.bangladesh.ui.screens.AboutScreen
+import com.bloodnetwork.bangladesh.ui.screens.AdminAnalyticsScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminDashboardScreen
+import com.bloodnetwork.bangladesh.ui.screens.AdminUserManagementScreen
+import com.bloodnetwork.bangladesh.ui.screens.AdminReportsScreen
+import com.bloodnetwork.bangladesh.ui.screens.AdminAuditLogsScreen
+import com.bloodnetwork.bangladesh.ui.screens.AdminSettingsScreen
 import com.bloodnetwork.bangladesh.ui.screens.EditProfileScreen
 import com.bloodnetwork.bangladesh.ui.screens.EligibilityScreen
 import com.bloodnetwork.bangladesh.ui.screens.FindBloodScreen
@@ -47,10 +53,16 @@ fun AppRoot(repository: BloodNetworkRepository) {
     val factory = remember(repository) { VmFactory(repository) }
 
     val authVm: AuthViewModel = viewModel(factory = factory)
-    val loggedIn by authVm.loggedInState.collectAsStateWithLifecycle()
 
-    val start = remember(loggedIn) {
-        if (loggedIn) Routes.DONOR_DASHBOARD else Routes.LANDING
+    // Read synchronously from EncryptedSharedPreferences (initialized in TokenStore ctor)
+    // so the correct start destination is known on the very first frame — no flash of
+    // the wrong dashboard while flows emit.
+    val start = remember {
+        val loggedIn = repository.isLoggedInSync()
+        val role = repository.currentUserRoleSync()
+        if (loggedIn && role == com.bloodnetwork.bangladesh.data.model.UserRole.Admin) Routes.ADMIN_DASHBOARD
+        else if (loggedIn) Routes.DONOR_DASHBOARD
+        else Routes.LANDING
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -140,7 +152,38 @@ fun AppRoot(repository: BloodNetworkRepository) {
                     EditProfileScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
                 }
                 composable(Routes.ADMIN_DASHBOARD) {
-                    AdminDashboardScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                    AdminDashboardScreen(
+                        onNavigate = navController::navigate,
+                        onBack = { navController.popBackStack() },
+                        onLogout = {
+                            authVm.logout()
+                            navController.navigate(Routes.LANDING) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        },
+                    )
+                }
+                composable(Routes.ADMIN_ANALYTICS) {
+                    AdminAnalyticsScreen(onBack = { navController.popBackStack() })
+                }
+                composable(Routes.ADMIN_USERS) {
+                    AdminUserManagementScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                }
+                composable(Routes.ADMIN_REPORTS) {
+                    AdminReportsScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                }
+                composable(Routes.ADMIN_AUDIT_LOGS) {
+                    AdminAuditLogsScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                }
+                composable(Routes.ADMIN_SETTINGS) {
+                    AdminSettingsScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() }, vm = authVm)
+                }
+                composable(Routes.ABOUT) {
+                    val authState by authVm.uiState.collectAsStateWithLifecycle()
+                    AboutScreen(
+                        onBack = { navController.popBackStack() },
+                        isAdmin = authState.user?.role == com.bloodnetwork.bangladesh.data.model.UserRole.Admin,
+                    )
                 }
             }
         }

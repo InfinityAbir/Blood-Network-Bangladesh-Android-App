@@ -4,6 +4,7 @@ import android.content.Context
 import com.bloodnetwork.bangladesh.data.network.ApiClient
 import com.bloodnetwork.bangladesh.data.network.AuthInterceptor
 import com.bloodnetwork.bangladesh.data.network.BloodNetworkApi
+import com.bloodnetwork.bangladesh.data.network.NotificationSocket
 import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
 import com.bloodnetwork.bangladesh.data.prefs.EligibilityStore
 import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
@@ -34,7 +35,9 @@ class AppContainer(context: Context) {
         ApiClient.create(baseUrl, authInterceptor, tokenStore)
     }
 
+    val notificationSocket: NotificationSocket by lazy { NotificationSocket(baseUrl, tokenStore) }
+
     val repository: BloodNetworkRepository by lazy {
-        BloodNetworkRepository(api, tokenStore, eligibilityStore, registrationStore, donorProfileStore)
+        BloodNetworkRepository(api, tokenStore, eligibilityStore, registrationStore, donorProfileStore, notificationSocket)
     }
 }

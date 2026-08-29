@@ -13,4 +13,10 @@ object Routes {
     const val CHATBOT = "chatbot"
     const val EDIT_PROFILE = "edit_profile"
     const val ADMIN_DASHBOARD = "admin_dashboard"
+    const val ADMIN_ANALYTICS = "admin_analytics"
+    const val ADMIN_USERS = "admin_users"
+    const val ADMIN_REPORTS = "admin_reports"
+    const val ADMIN_AUDIT_LOGS = "admin_audit_logs"
+    const val ADMIN_SETTINGS = "admin_settings"
+    const val ABOUT = "about"
 }
