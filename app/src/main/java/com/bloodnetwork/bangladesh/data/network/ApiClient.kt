@@ -38,7 +38,7 @@ object ApiClient {
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)
             .addInterceptor(authInterceptor)
-            .addInterceptor(TokenRefreshInterceptor(tokenStore))
+            .addInterceptor(TokenRefreshInterceptor(tokenStore, baseUrl))
             .addInterceptor(ApiErrorInterceptor(json))
             .addInterceptor(logging)
             .build()

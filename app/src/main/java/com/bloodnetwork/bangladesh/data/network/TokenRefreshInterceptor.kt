@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit
 
 class TokenRefreshInterceptor(
     private val tokenStore: TokenStore,
+    private val baseUrl: String,
 ) : Interceptor {
 
     // Serializes refresh attempts across OkHttp's dispatcher thread pool. A ThreadLocal
@@ -64,7 +65,6 @@ class TokenRefreshInterceptor(
 
     private suspend fun doRefresh(refreshToken: String): com.bloodnetwork.bangladesh.data.model.AuthResponse? {
         return try {
-            val baseUrl = "https://blood-network-bangladesh.onrender.com/"
             val body = """{"refreshToken":"$refreshToken"}"""
                 .toRequestBody("application/json".toMediaType())
             val request = okhttp3.Request.Builder()
