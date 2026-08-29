@@ -36,9 +36,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        // SignalR's own automatic reconnect gives up after enough failed attempts (e.g. the
-        // app sat backgrounded long enough for Android to kill the socket) — a harmless no-op
-        // if already connected, a fresh connection attempt otherwise.
+        // This client has no built-in automatic reconnect, so re-poke on every foreground —
+        // a harmless no-op if already connected, a fresh connection attempt otherwise (e.g.
+        // after the app sat backgrounded long enough for Android to kill the socket).
         if (container.tokenStore.isLoggedInSync()) {
             container.notificationSocket.start()
         }
