@@ -65,6 +65,8 @@ data class PublicDonorDto(
     @SerialName("verificationStatus") val verificationStatus: VerificationStatus = VerificationStatus.Pending,
     @SerialName("distanceKm") val distanceKm: Double? = null,
     @SerialName("photoUrl") val photoUrl: String? = null,
+    @SerialName("districtId") val districtId: String? = null,
+    @SerialName("upazilaId") val upazilaId: String? = null,
 )
 
 @Serializable

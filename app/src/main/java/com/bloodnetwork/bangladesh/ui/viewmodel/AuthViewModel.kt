@@ -3,6 +3,7 @@ package com.bloodnetwork.bangladesh.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
+import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.UserDto
 import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
@@ -32,6 +33,23 @@ class AuthViewModel(
     val registrationData: StateFlow<RegistrationStore.RegistrationData> = _registrationData.asStateFlow()
 
     final val loggedInState = MutableStateFlow(false)
+
+    /** Set by a screen that sent the user to Login/Register because an action needed an
+     * account (e.g. tapping "Request Blood" while signed out) — consumed once, in AppRoot's
+     * onLoggedIn, to land back on that screen instead of the default post-login dashboard. */
+    var pendingRedirectRoute: String? = null
+
+    /** The specific donor a "Request Blood" tap came from, carried across the Login/Register
+     * detour (if any) so RequestBloodScreen can pre-fill instead of opening blank. Consumed
+     * once by RequestBloodScreen. */
+    data class PendingRequestPrefill(
+        val bloodGroup: BloodGroup,
+        val districtId: String,
+        val districtName: String,
+        val upazilaId: String,
+        val upazilaName: String,
+    )
+    var pendingRequestPrefill: PendingRequestPrefill? = null
 
     init {
         viewModelScope.launch {

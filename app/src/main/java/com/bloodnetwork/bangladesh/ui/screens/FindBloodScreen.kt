@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -47,12 +48,13 @@ import com.bloodnetwork.bangladesh.ui.components.RoleBadge
 import com.bloodnetwork.bangladesh.ui.components.SearchResultsSkeleton
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
+import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.FindBloodViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
+fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: AuthViewModel) {
     val factory = LocalVmFactory.current!!
     val vm: FindBloodViewModel = viewModel(factory = factory)
     val locVm: LocationViewModel = viewModel(factory = factory)
@@ -181,7 +183,23 @@ fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             } else {
                 items(state.donors, key = { it.id }) { donor ->
                     DonorCard(donor) {
-                        if (isLoggedIn) onNavigate(Routes.REQUEST_BLOOD) else onNavigate(Routes.LOGIN)
+                        val districtId = donor.districtId
+                        val upazilaId = donor.upazilaId
+                        if (districtId != null && upazilaId != null) {
+                            authVm.pendingRequestPrefill = com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel.PendingRequestPrefill(
+                                bloodGroup = donor.bloodGroup,
+                                districtId = districtId,
+                                districtName = donor.districtName,
+                                upazilaId = upazilaId,
+                                upazilaName = donor.upazilaName,
+                            )
+                        }
+                        if (isLoggedIn) {
+                            onNavigate(Routes.REQUEST_BLOOD)
+                        } else {
+                            authVm.pendingRedirectRoute = Routes.REQUEST_BLOOD
+                            onNavigate(Routes.LOGIN)
+                        }
                     }
                 }
                 if (state.isLoadingMore) {
@@ -211,10 +229,19 @@ fun DonorCard(donor: PublicDonorDto, onRequest: () -> Unit = {}) {
                         Text(donor.firstName, style = MaterialTheme.typography.titleMedium)
                         Text(donor.bloodGroup.label, color = BloodRed, style = MaterialTheme.typography.titleMedium)
                     }
-                    Text(
-                        text = listOfNotNull(donor.districtName, donor.upazilaName).joinToString(", "),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Icon(
+                            Icons.Filled.LocationOn,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(14.dp),
+                        )
+                        Text(
+                            text = listOfNotNull(donor.upazilaName, donor.districtName).joinToString(", "),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             }
             Row(

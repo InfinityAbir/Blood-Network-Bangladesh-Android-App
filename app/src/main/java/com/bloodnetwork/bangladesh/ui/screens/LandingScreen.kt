@@ -61,9 +61,6 @@ fun LandingScreen(onNavigate: (String) -> Unit) {
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton(
-            modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp),
-        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -122,5 +119,8 @@ fun LandingScreen(onNavigate: (String) -> Unit) {
             SecondaryButton("Create Account", onClick = { onNavigate(Routes.REGISTER) })
         }
         }
+        com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton(
+            modifier = Modifier.align(Alignment.TopEnd).padding(top = 12.dp, end = 12.dp),
+        )
     }
 }

@@ -204,6 +204,7 @@ fun ActionCard(action: DashboardAction, onNavigate: (String) -> Unit) {
                 action.subtitle,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                minLines = 2,
             )
         }
     }

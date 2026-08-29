@@ -42,12 +42,13 @@ import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RowChips
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.RequestBloodViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
+fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: AuthViewModel) {
     val factory = LocalVmFactory.current!!
     val vm: RequestBloodViewModel = viewModel(factory = factory)
     val locVm: LocationViewModel = viewModel(factory = factory)
@@ -80,6 +81,18 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     LaunchedEffect(Unit) {
         locVm.loadDivisions()
         vm.loadMyRequests()
+
+        // Came here from "Request Blood" on a specific donor's card (possibly via a Login
+        // detour) — pre-fill their blood group and location instead of opening blank.
+        authVm.pendingRequestPrefill?.let { prefill ->
+            authVm.pendingRequestPrefill = null
+            bloodGroup = prefill.bloodGroup.label
+            districtId = prefill.districtId
+            districtName = prefill.districtName
+            upazilaId = prefill.upazilaId
+            upazilaName = prefill.upazilaName
+            locVm.loadUpazilas(prefill.districtId)
+        }
     }
 
     LaunchedEffect(state.success) {

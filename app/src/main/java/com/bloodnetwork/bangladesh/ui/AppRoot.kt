@@ -99,10 +99,22 @@ fun AppRoot(repository: BloodNetworkRepository) {
                         vm = authVm,
                         onLoggedIn = {
                             val user = authVm.uiState.value.user
-                            val dest = if (user?.role == com.bloodnetwork.bangladesh.data.model.UserRole.Admin) Routes.ADMIN_DASHBOARD else Routes.DONOR_DASHBOARD
-                            navController.navigate(dest) { popUpTo(Routes.LANDING) { inclusive = true } }
+                            val redirect = authVm.pendingRedirectRoute
+                            authVm.pendingRedirectRoute = null
+                            if (redirect != null) {
+                                // Came from a specific in-progress action (e.g. Request Blood on a
+                                // donor's card) — only drop Login itself, so back still returns to
+                                // wherever that action started (Find Blood), not a dead end.
+                                navController.navigate(redirect) { popUpTo(Routes.LOGIN) { inclusive = true } }
+                            } else {
+                                val dest = if (user?.role == com.bloodnetwork.bangladesh.data.model.UserRole.Admin) Routes.ADMIN_DASHBOARD else Routes.DONOR_DASHBOARD
+                                navController.navigate(dest) { popUpTo(Routes.LANDING) { inclusive = true } }
+                            }
                         },
-                        onBack = { navController.popBackStack() },
+                        onBack = {
+                            authVm.pendingRedirectRoute = null
+                            navController.popBackStack()
+                        },
                     )
                 }
                 composable(Routes.REGISTER) {
@@ -111,17 +123,23 @@ fun AppRoot(repository: BloodNetworkRepository) {
                         vm = authVm,
                         onRegistered = {
                             val user = authVm.uiState.value.user
-                            val dest = if (user?.role == com.bloodnetwork.bangladesh.data.model.UserRole.Admin) Routes.ADMIN_DASHBOARD else Routes.DONOR_DASHBOARD
-                            navController.navigate(dest) { popUpTo(Routes.LANDING) { inclusive = true } }
+                            val redirect = authVm.pendingRedirectRoute
+                            authVm.pendingRedirectRoute = null
+                            if (redirect != null) {
+                                navController.navigate(redirect) { popUpTo(Routes.LOGIN) { inclusive = true } }
+                            } else {
+                                val dest = if (user?.role == com.bloodnetwork.bangladesh.data.model.UserRole.Admin) Routes.ADMIN_DASHBOARD else Routes.DONOR_DASHBOARD
+                                navController.navigate(dest) { popUpTo(Routes.LANDING) { inclusive = true } }
+                            }
                         },
                         onBack = { navController.popBackStack() },
                     )
                 }
                 composable(Routes.FIND_BLOOD) {
-                    FindBloodScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                    FindBloodScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() }, authVm = authVm)
                 }
                 composable(Routes.REQUEST_BLOOD) {
-                    RequestBloodScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                    RequestBloodScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() }, authVm = authVm)
                 }
                 composable(Routes.ELIGIBILITY) {
                     EligibilityScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
