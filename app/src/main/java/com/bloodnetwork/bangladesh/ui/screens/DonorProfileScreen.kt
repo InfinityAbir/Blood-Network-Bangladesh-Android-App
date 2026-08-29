@@ -183,6 +183,8 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
         }
     }
 
+    val scrollState = rememberScrollState()
+
     LaunchedEffect(state.saved) {
         if (state.saved) {
             origBloodGroup = bloodGroup
@@ -192,6 +194,11 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             origUpazilaId = upazilaId
             origArea = area
             origLastDonationDate = lastDonationDate
+            // Saving can reveal the "Available to donate" card for the first time (it only
+            // shows once a profile exists), pushing the button/confirmation further down while
+            // scroll offset stays put — follow it so the user isn't left looking at content
+            // above where they were.
+            scrollState.animateScrollTo(Int.MAX_VALUE)
         }
     }
 
@@ -225,7 +232,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .imePadding()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -289,7 +296,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 },
             )
             LabeledTextField(area, { area = it; saveDraft() }, "Area (optional)")
-            LabeledTextField(customAddress, { customAddress = it; saveDraft() }, "Custom Address (if not in dropdown)")
+            LabeledTextField(customAddress, { customAddress = it; saveDraft() }, "Custom Address (if not in dropdown)", singleLine = false)
             DatePickerField(lastDonationDate, { lastDonationDate = it; saveDraft() }, "Last Donation Date")
 
             if (state.profile != null) {

@@ -196,7 +196,7 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
             LabeledTextField(patientName, { patientName = it }, "Patient Name (optional)")
             LabeledTextField(patientRelation, { patientRelation = it }, "Patient Relation (optional)")
             LabeledTextField(contactPhone, { contactPhone = it }, "Contact Phone", keyboardType = KeyboardType.Phone)
-            LabeledTextField(additionalInfo, { additionalInfo = it }, "Additional Info (optional)")
+            LabeledTextField(additionalInfo, { additionalInfo = it }, "Additional Info (optional)", singleLine = false)
 
             formError?.let { ErrorText(it) }
 

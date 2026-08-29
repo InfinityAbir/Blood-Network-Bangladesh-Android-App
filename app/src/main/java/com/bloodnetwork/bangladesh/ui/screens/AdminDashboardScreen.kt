@@ -47,7 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
-import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
+import com.bloodnetwork.bangladesh.ui.components.SkeletonLine
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AdminViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.NotificationsViewModel
@@ -90,9 +90,22 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                items(4) { Card(modifier = Modifier.fillMaxWidth()) { SkeletonCard() } }
+                item { SkeletonLine("30%", 20) }
+                items(3) {
+                    Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        StatCardSkeleton(Modifier.weight(1f).fillMaxHeight())
+                        StatCardSkeleton(Modifier.weight(1f).fillMaxHeight())
+                    }
+                }
+                item { SkeletonLine("35%", 20) }
+                items(4) {
+                    Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        ManagementCardSkeleton(Modifier.weight(1f).fillMaxHeight())
+                        ManagementCardSkeleton(Modifier.weight(1f).fillMaxHeight())
+                    }
+                }
             }
         } else {
             PullToRefreshBox(
@@ -165,6 +178,27 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
             },
             onNavigate = onNavigate,
         )
+    }
+}
+
+@Composable
+fun StatCardSkeleton(modifier: Modifier = Modifier) {
+    Card(modifier = modifier.heightIn(min = 92.dp)) {
+        Column(modifier = Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SkeletonLine("40%", 28)
+            SkeletonLine("70%", 14)
+        }
+    }
+}
+
+@Composable
+fun ManagementCardSkeleton(modifier: Modifier = Modifier) {
+    Card(modifier = modifier.heightIn(min = 118.dp)) {
+        Column(modifier = Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            SkeletonLine("20%", 24)
+            SkeletonLine("60%", 16)
+            SkeletonLine("90%", 12)
+        }
     }
 }
 

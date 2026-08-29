@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -123,7 +123,7 @@ fun AdminEligibilityQuestionsScreen(onBack: () -> Unit) {
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 items(state.questions, key = { it.id }) { q ->
@@ -257,12 +257,46 @@ private fun EligibilityQuestionEditDialog(
     val canSave = questionEn.isNotBlank() && questionBn.isNotBlank() && questionBanglish.isNotBlank() &&
         passMessageEn.isNotBlank() && passMessageBn.isNotBlank() && failMessageEn.isNotBlank() && failMessageBn.isNotBlank()
 
+    val isDirty = questionEn != (existing?.questionEn ?: "") ||
+        questionBn != (existing?.questionBn ?: "") ||
+        questionBanglish != (existing?.questionBanglish ?: "") ||
+        questionType != (existing?.questionType ?: "yesno") ||
+        unit != (existing?.unit ?: "") ||
+        minValue != (existing?.minValue?.toString() ?: "") ||
+        maxValue != (existing?.maxValue?.toString() ?: "") ||
+        passOnYes != (existing?.passOnYes ?: false) ||
+        isCritical != (existing?.isCritical ?: false) ||
+        displayOrder != (existing?.displayOrder ?: 0).toString() ||
+        passMessageEn != (existing?.passMessageEn ?: "") ||
+        passMessageBn != (existing?.passMessageBn ?: "") ||
+        failMessageEn != (existing?.failMessageEn ?: "") ||
+        failMessageBn != (existing?.failMessageBn ?: "")
+
+    var showDiscardConfirm by remember { mutableStateOf(false) }
+    val requestClose = { if (isDirty) showDiscardConfirm = true else onDismiss() }
+
+    if (showDiscardConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDiscardConfirm = false },
+            title = { Text("Discard changes?") },
+            text = { Text("Your edits to this question haven't been saved.") },
+            confirmButton = {
+                TextButton(onClick = { showDiscardConfirm = false; onDismiss() }) {
+                    Text("Discard", color = BloodRed)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardConfirm = false }) { Text("Keep Editing") }
+            },
+        )
+    }
+
     Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
+        onDismissRequest = requestClose,
+        properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false),
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.92f).padding(16.dp),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(0.92f).padding(16.dp).imePadding(),
             shape = RoundedCornerShape(20.dp),
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -279,9 +313,9 @@ private fun EligibilityQuestionEditDialog(
                         .padding(horizontal = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
-                    LabeledTextField(questionEn, { questionEn = it }, "Question (English)")
-                    LabeledTextField(questionBn, { questionBn = it }, "Question (Bengali script)")
-                    LabeledTextField(questionBanglish, { questionBanglish = it }, "Question (Banglish)")
+                    LabeledTextField(questionEn, { questionEn = it }, "Question (English)", singleLine = false)
+                    LabeledTextField(questionBn, { questionBn = it }, "Question (Bengali script)", singleLine = false)
+                    LabeledTextField(questionBanglish, { questionBanglish = it }, "Question (Banglish)", singleLine = false)
 
                     Text("Answer type", style = MaterialTheme.typography.labelLarge)
                     RowChips(
@@ -318,17 +352,17 @@ private fun EligibilityQuestionEditDialog(
                     LabeledTextField(displayOrder, { displayOrder = it.filter { c -> c.isDigit() } }, "Display order", keyboardType = KeyboardType.Number)
 
                     Text("Messages shown to the donor", style = MaterialTheme.typography.labelLarge)
-                    LabeledTextField(passMessageEn, { passMessageEn = it }, "Pass message (English)")
-                    LabeledTextField(passMessageBn, { passMessageBn = it }, "Pass message (Bengali)")
-                    LabeledTextField(failMessageEn, { failMessageEn = it }, "Fail message (English) — use {value} for the answer")
-                    LabeledTextField(failMessageBn, { failMessageBn = it }, "Fail message (Bengali) — use {value} for the answer")
+                    LabeledTextField(passMessageEn, { passMessageEn = it }, "Pass message (English)", singleLine = false)
+                    LabeledTextField(passMessageBn, { passMessageBn = it }, "Pass message (Bengali)", singleLine = false)
+                    LabeledTextField(failMessageEn, { failMessageEn = it }, "Fail message (English) — use {value} for the answer", singleLine = false)
+                    LabeledTextField(failMessageBn, { failMessageBn = it }, "Fail message (Bengali) — use {value} for the answer", singleLine = false)
                     Spacer(Modifier.height(4.dp))
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(20.dp),
                     horizontalArrangement = Arrangement.End,
                 ) {
-                    OutlinedButton(onClick = onDismiss, enabled = !isSaving) { Text("Cancel") }
+                    OutlinedButton(onClick = requestClose, enabled = !isSaving) { Text("Cancel") }
                     Spacer(Modifier.width(12.dp))
                     Button(
                         enabled = canSave && !isSaving,
