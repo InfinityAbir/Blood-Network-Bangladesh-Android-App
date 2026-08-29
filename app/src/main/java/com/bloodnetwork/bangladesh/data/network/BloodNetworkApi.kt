@@ -15,6 +15,7 @@ import com.bloodnetwork.bangladesh.data.model.DonorProfileDto
 import com.bloodnetwork.bangladesh.data.model.EligibilityAnswerDto
 import com.bloodnetwork.bangladesh.data.model.EligibilityQuestionDto
 import com.bloodnetwork.bangladesh.data.model.EligibilityResultDto
+import com.bloodnetwork.bangladesh.data.model.EligibilityStateDto
 import com.bloodnetwork.bangladesh.data.model.FirstLoginChangeRequest
 import com.bloodnetwork.bangladesh.data.model.LoginRequest
 import com.bloodnetwork.bangladesh.data.model.MarkNotificationReadRequest
