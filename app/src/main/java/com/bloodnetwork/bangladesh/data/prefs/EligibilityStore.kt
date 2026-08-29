@@ -17,15 +17,13 @@ class EligibilityStore(private val context: Context) {
         val ANSWERS = stringPreferencesKey("answers")
     }
 
-    val answers: Flow<Map<Int, String>> = context.eligibilityDataStore.data.map { prefs ->
-        prefs[Keys.ANSWERS]?.let { json ->
-            Json.decodeFromString<Map<String, String>>(json).mapKeys { it.key.toInt() }
-        } ?: emptyMap()
+    val answers: Flow<Map<String, String>> = context.eligibilityDataStore.data.map { prefs ->
+        prefs[Keys.ANSWERS]?.let { json -> Json.decodeFromString<Map<String, String>>(json) } ?: emptyMap()
     }
 
-    suspend fun saveAnswers(answers: Map<Int, String>) {
+    suspend fun saveAnswers(answers: Map<String, String>) {
         context.eligibilityDataStore.edit { prefs ->
-            prefs[Keys.ANSWERS] = Json.encodeToString(answers.mapKeys { it.key.toString() })
+            prefs[Keys.ANSWERS] = Json.encodeToString(answers)
         }
     }
 

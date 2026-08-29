@@ -15,11 +15,12 @@ import kotlinx.coroutines.launch
 
 data class EligibilityUiState(
     val isLoading: Boolean = false,
+    val isChecking: Boolean = false,
     val questions: List<EligibilityQuestionDto> = emptyList(),
-    val answers: Map<Int, String> = emptyMap(),
+    val answers: Map<String, String> = emptyMap(),
     val result: EligibilityResultDto? = null,
     val error: String? = null,
-    val lastCheckedAnswers: Map<Int, String>? = null,
+    val lastCheckedAnswers: Map<String, String>? = null,
 )
 
 class EligibilityViewModel(
@@ -47,7 +48,7 @@ class EligibilityViewModel(
         }
     }
 
-    fun setAnswer(questionId: Int, answer: String) {
+    fun setAnswer(questionId: String, answer: String) {
         val newAnswers = _uiState.value.answers + (questionId to answer)
         _uiState.value = _uiState.value.copy(answers = newAnswers)
         viewModelScope.launch { repository.saveEligibilityAnswers(newAnswers) }
@@ -61,12 +62,12 @@ class EligibilityViewModel(
             _uiState.value = state.copy(error = "Please answer all questions")
             return
         }
-        _uiState.value = state.copy(isLoading = true, error = null)
+        _uiState.value = state.copy(isChecking = true, error = null)
         viewModelScope.launch {
             val payload = state.questions.map { EligibilityAnswerDto(it.id, answers[it.id] ?: "") }
             runCatching { repository.checkEligibility(payload) }
-                .onSuccess { _uiState.value = _uiState.value.copy(result = it, isLoading = false, lastCheckedAnswers = answers) }
-                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to check eligibility")) }
+                .onSuccess { _uiState.value = _uiState.value.copy(result = it, isChecking = false, lastCheckedAnswers = answers) }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isChecking = false, error = e.toDisplayMessage("Failed to check eligibility")) }
         }
     }
 

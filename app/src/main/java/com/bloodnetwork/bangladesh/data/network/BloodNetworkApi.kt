@@ -1,5 +1,6 @@
 package com.bloodnetwork.bangladesh.data.network
 
+import com.bloodnetwork.bangladesh.data.model.AdminEligibilityQuestionDto
 import com.bloodnetwork.bangladesh.data.model.AuthResponse
 import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.ChatRequest
@@ -24,7 +25,9 @@ import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
 import com.bloodnetwork.bangladesh.data.model.RefreshTokenRequest
 import com.bloodnetwork.bangladesh.data.model.RegisterRequest
 import com.bloodnetwork.bangladesh.data.model.RespondToMatchRequest
+import com.bloodnetwork.bangladesh.data.model.SaveEligibilityQuestionRequest
 import com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest
+import com.bloodnetwork.bangladesh.data.model.ToggleEligibilityQuestionActiveRequest
 import com.bloodnetwork.bangladesh.data.model.UnreadCountDto
 import com.bloodnetwork.bangladesh.data.model.UpdateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.UpazilaDto
@@ -180,6 +183,22 @@ interface BloodNetworkApi {
 
     @POST("api/ai/eligibility/check")
     suspend fun checkEligibility(@Body answers: List<EligibilityAnswerDto>): EligibilityResultDto
+
+    // ---- Eligibility (admin) ----
+    @GET("api/admin/eligibility-questions")
+    suspend fun getAdminEligibilityQuestions(): List<AdminEligibilityQuestionDto>
+
+    @POST("api/admin/eligibility-questions")
+    suspend fun createEligibilityQuestion(@Body request: SaveEligibilityQuestionRequest): AdminEligibilityQuestionDto
+
+    @PUT("api/admin/eligibility-questions/{questionId}")
+    suspend fun updateEligibilityQuestion(@Path("questionId") questionId: String, @Body request: SaveEligibilityQuestionRequest): AdminEligibilityQuestionDto
+
+    @POST("api/admin/eligibility-questions/{questionId}/toggle-active")
+    suspend fun toggleEligibilityQuestionActive(@Path("questionId") questionId: String, @Body request: ToggleEligibilityQuestionActiveRequest): AdminEligibilityQuestionDto
+
+    @DELETE("api/admin/eligibility-questions/{questionId}")
+    suspend fun deleteEligibilityQuestion(@Path("questionId") questionId: String): Unit
 
     // ---- AI chatbot (proxies Groq server-side; no API key in the app) ----
     @POST("api/chat")

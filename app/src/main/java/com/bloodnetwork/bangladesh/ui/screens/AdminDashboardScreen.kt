@@ -21,10 +21,10 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -71,11 +71,7 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
                 actions = {
                     com.bloodnetwork.bangladesh.ui.components.ThemeToggleButton()
                     BadgedBox(
-                        badge = {
-                            if (notifState.unreadCount > 0) {
-                                Badge { Text("${notifState.unreadCount}") }
-                            }
-                        },
+                        badge = { com.bloodnetwork.bangladesh.ui.components.AnimatedCountBadge(notifState.unreadCount) },
                     ) {
                         IconButton(onClick = { showNotifSheet = true }) {
                             Icon(Icons.Filled.Notifications, contentDescription = "Notifications")
@@ -148,6 +144,11 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
                     Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         ManagementCard("Account Settings", "Update email, phone & password", Icons.Filled.Settings, Modifier.weight(1f).fillMaxHeight()) { onNavigate("admin_settings") }
                         ManagementCard("About", "Edit the developer info shown to users", Icons.Filled.Info, Modifier.weight(1f).fillMaxHeight()) { onNavigate("about") }
+                    }
+                }
+                item {
+                    Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        ManagementCard("Eligibility Questions", "Edit the donor eligibility questionnaire", Icons.Filled.FactCheck, Modifier.weight(1f).fillMaxHeight()) { onNavigate(com.bloodnetwork.bangladesh.ui.navigation.Routes.ADMIN_ELIGIBILITY_QUESTIONS) }
                     }
                 }
             }

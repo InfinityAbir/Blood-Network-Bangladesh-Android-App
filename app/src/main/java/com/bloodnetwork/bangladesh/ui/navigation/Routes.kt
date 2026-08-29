@@ -18,5 +18,6 @@ object Routes {
     const val ADMIN_REPORTS = "admin_reports"
     const val ADMIN_AUDIT_LOGS = "admin_audit_logs"
     const val ADMIN_SETTINGS = "admin_settings"
+    const val ADMIN_ELIGIBILITY_QUESTIONS = "admin_eligibility_questions"
     const val ABOUT = "about"
 }

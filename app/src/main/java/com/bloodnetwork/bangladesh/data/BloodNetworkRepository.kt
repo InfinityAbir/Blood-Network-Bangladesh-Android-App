@@ -85,6 +85,11 @@ class BloodNetworkRepository(
             runCatching { api.logout(RefreshTokenRequest(refreshToken)) }
         }
         tokenStore.clear()
+        // These stores are keyed by device, not by account, so a next user signing in on the
+        // same device must not see the previous account's local drafts.
+        eligibilityStore.clearAnswers()
+        registrationStore.clear()
+        donorProfileStore.clear()
     }
 
     suspend fun me(): UserDto = api.me()
@@ -154,9 +159,20 @@ class BloodNetworkRepository(
     suspend fun chat(request: ChatRequest): String = api.chat(request).reply
 
     // ---- Eligibility Store ----
-    val eligibilityAnswers: Flow<Map<Int, String>> = eligibilityStore.answers
-    suspend fun saveEligibilityAnswers(answers: Map<Int, String>) = eligibilityStore.saveAnswers(answers)
+    val eligibilityAnswers: Flow<Map<String, String>> = eligibilityStore.answers
+    suspend fun saveEligibilityAnswers(answers: Map<String, String>) = eligibilityStore.saveAnswers(answers)
     suspend fun clearEligibilityAnswers() = eligibilityStore.clearAnswers()
+
+    // ---- Admin: Eligibility Questions ----
+    suspend fun getAdminEligibilityQuestions(): List<com.bloodnetwork.bangladesh.data.model.AdminEligibilityQuestionDto> =
+        api.getAdminEligibilityQuestions()
+    suspend fun createEligibilityQuestion(request: com.bloodnetwork.bangladesh.data.model.SaveEligibilityQuestionRequest) =
+        api.createEligibilityQuestion(request)
+    suspend fun updateEligibilityQuestion(id: String, request: com.bloodnetwork.bangladesh.data.model.SaveEligibilityQuestionRequest) =
+        api.updateEligibilityQuestion(id, request)
+    suspend fun toggleEligibilityQuestionActive(id: String, isActive: Boolean) =
+        api.toggleEligibilityQuestionActive(id, com.bloodnetwork.bangladesh.data.model.ToggleEligibilityQuestionActiveRequest(isActive))
+    suspend fun deleteEligibilityQuestion(id: String) = api.deleteEligibilityQuestion(id)
 
     // ---- Registration Store ----
     val registrationData: Flow<RegistrationStore.RegistrationData> = registrationStore.data

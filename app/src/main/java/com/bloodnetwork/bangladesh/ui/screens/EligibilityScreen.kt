@@ -8,9 +8,14 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -51,9 +57,17 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     val allAnswered = state.questions.isNotEmpty() && state.questions.all { state.answers.containsKey(it.id) }
     val hasChanges = state.lastCheckedAnswers == null || state.answers != state.lastCheckedAnswers
     val snackbarHostState = remember { SnackbarHostState() }
+    val listState = rememberLazyListState()
 
     LaunchedEffect(state.error) {
         state.error?.let { snackbarHostState.showSnackbar(it) }
+    }
+
+    LaunchedEffect(state.result) {
+        if (state.result != null) {
+            // Result card lands right after the instruction line, disclaimer, questions, and button.
+            listState.animateScrollToItem(state.questions.size + 3)
+        }
     }
 
     Scaffold(
@@ -78,6 +92,7 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
             }
         } else {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
@@ -91,20 +106,58 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
+                item { MedicalDisclaimerCard() }
                 itemsIndexed(state.questions, key = { _, q -> q.id }) { _, q ->
                     QuestionCard(q, state.answers[q.id]) { answer ->
                         vm.setAnswer(q.id, answer)
                     }
                 }
                 item {
-                    PrimaryButton(text = "Check Eligibility", onClick = { vm.checkEligibility() }, loading = state.isLoading, enabled = allAnswered && hasChanges)
+                    PrimaryButton(text = "Check Eligibility", onClick = { vm.checkEligibility() }, loading = state.isChecking, enabled = allAnswered && hasChanges)
                 }
                 state.result?.let { result ->
                     item {
                         ResultCard(result)
                     }
+                    if (!hasChanges) {
+                        item {
+                            Text(
+                                "Change any answer above to check again.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun MedicalDisclaimerCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
+            Icon(
+                Icons.Filled.LocalHospital,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 2.dp),
+            )
+            Text(
+                "This self-check is not a medical diagnosis and isn't approved by a medical authority. " +
+                    "For an accurate assessment, please visit a hospital or consult a doctor.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
