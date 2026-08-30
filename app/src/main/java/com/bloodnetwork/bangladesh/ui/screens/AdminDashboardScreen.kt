@@ -1,5 +1,6 @@
 package com.bloodnetwork.bangladesh.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -57,7 +58,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.NotificationsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLogout: () -> Unit = {}) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: AdminViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
     val notifVm: NotificationsViewModel = viewModel(factory = factory)
@@ -124,6 +125,18 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
                 contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
+                state.error?.let { errorMsg ->
+                    if (state.dashboard == null) {
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Text(errorMsg, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                                    Text(tr("Pull down to retry", "পুনরায় চেষ্টা করতে নিচে টানুন"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
+                }
                 state.dashboard?.let { stats ->
                     item { Text(tr("Overview", "সংক্ষিপ্ত বিবরণ"), style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) }
                     item {

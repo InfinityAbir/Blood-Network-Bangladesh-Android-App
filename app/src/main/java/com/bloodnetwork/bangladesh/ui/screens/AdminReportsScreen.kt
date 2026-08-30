@@ -72,7 +72,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.AdminViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, initialStatus: String? = null) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: AdminViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
 

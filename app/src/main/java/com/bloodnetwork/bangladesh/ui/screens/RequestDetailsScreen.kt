@@ -81,7 +81,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.RequestDetailsViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: RequestDetailsViewModel = viewModel(factory = factory)
     val locVm: LocationViewModel = viewModel(factory = factory)
 

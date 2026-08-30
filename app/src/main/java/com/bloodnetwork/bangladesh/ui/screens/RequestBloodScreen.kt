@@ -50,7 +50,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.RequestBloodViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RequestBloodScreen(onBack: () -> Unit, authVm: AuthViewModel) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: RequestBloodViewModel = viewModel(factory = factory)
     val locVm: LocationViewModel = viewModel(factory = factory)
 

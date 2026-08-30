@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 // Release signing reads from a gitignored keystore.properties at the repo root (never
@@ -110,6 +111,7 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(platform(libs.google.firebase.bom))
     implementation(libs.google.firebase.messaging)
+    implementation(libs.google.firebase.crashlytics)
     implementation(libs.kotlinx.coroutines.play.services)
 
     debugImplementation(libs.androidx.ui.tooling)

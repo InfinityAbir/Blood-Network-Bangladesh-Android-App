@@ -44,6 +44,7 @@ signalr = { group = "com.microsoft.signalr", name = "signalr", version.ref = "si
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 google-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 google-firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+google-firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
 
 [plugins]
@@ -52,3 +53,4 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+google-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.2" }

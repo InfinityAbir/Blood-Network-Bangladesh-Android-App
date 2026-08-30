@@ -64,7 +64,7 @@ private fun shortDate(iso: String): String = try {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminAnalyticsScreen(onBack: () -> Unit) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: AdminViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
 

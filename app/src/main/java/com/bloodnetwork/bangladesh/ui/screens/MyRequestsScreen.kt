@@ -57,7 +57,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.RequestBloodViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyRequestsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: RequestBloodViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
     var isRefreshing by remember { mutableStateOf(false) }

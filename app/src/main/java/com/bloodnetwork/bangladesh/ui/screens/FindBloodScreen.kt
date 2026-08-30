@@ -56,7 +56,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FindBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: AuthViewModel) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: FindBloodViewModel = viewModel(factory = factory)
     val locVm: LocationViewModel = viewModel(factory = factory)
 

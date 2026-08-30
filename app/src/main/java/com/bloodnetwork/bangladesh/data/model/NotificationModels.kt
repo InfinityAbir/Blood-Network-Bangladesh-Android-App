@@ -19,10 +19,10 @@ data class NotificationDto(
 /** Best-effort read of the `availabilityStatus` field from an Availability notification's
  * JSON metadata (see backend DonorService.NotifyRequestersOfAvailabilityAsync). */
 fun NotificationDto.metadataAvailabilityStatus(): String? =
-    metadata?.let { runCatching { org.json.JSONObject(it).optString("availabilityStatus", null) }.getOrNull() }
+    metadata?.let { runCatching { org.json.JSONObject(it).opt("availabilityStatus") as? String }.getOrNull() }
 
 fun NotificationDto.metadataBloodGroup(): String? =
-    metadata?.let { runCatching { org.json.JSONObject(it).optString("bloodGroup", null) }.getOrNull() }
+    metadata?.let { runCatching { org.json.JSONObject(it).opt("bloodGroup") as? String }.getOrNull() }
 
 @Serializable
 data class MarkNotificationReadRequest(

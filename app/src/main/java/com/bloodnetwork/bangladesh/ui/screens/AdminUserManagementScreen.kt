@@ -76,7 +76,7 @@ fun AdminUserManagementScreen(
     initialRole: String? = null,
     initialVerification: String? = null,
 ) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: AdminViewModel = viewModel(factory = factory)
     val authVm: AuthViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()

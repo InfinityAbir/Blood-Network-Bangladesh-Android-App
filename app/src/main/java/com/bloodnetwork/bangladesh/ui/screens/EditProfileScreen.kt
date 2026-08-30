@@ -50,7 +50,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.EditProfileViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: AuthViewModel) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: EditProfileViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
     val authState by authVm.uiState.collectAsStateWithLifecycle()

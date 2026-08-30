@@ -17,21 +17,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun shimmerBrush(): Brush {
     val shimmerColors = listOf(
-        Color.LightGray.copy(alpha = 0.6f),
-        Color.LightGray.copy(alpha = 0.2f),
-        Color.LightGray.copy(alpha = 0.6f),
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
     )
     val transition = rememberInfiniteTransition(label = "shimmer")
     val translateAnim by transition.animateFloat(

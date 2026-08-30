@@ -79,7 +79,7 @@ private val RESPONSE_FILTERS = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminMatchesScreen(onBack: () -> Unit, initialResponse: String? = null) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: AdminViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
 

@@ -66,7 +66,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.AboutViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(onBack: () -> Unit, isAdmin: Boolean) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: AboutViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current

@@ -53,7 +53,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.EligibilityViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: EligibilityViewModel = viewModel(factory = factory)
     val authVm: AuthViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()

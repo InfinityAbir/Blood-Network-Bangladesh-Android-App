@@ -63,7 +63,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.DonorMatchesViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DonorMatchesScreen(onBack: () -> Unit) {
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val vm: DonorMatchesViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current

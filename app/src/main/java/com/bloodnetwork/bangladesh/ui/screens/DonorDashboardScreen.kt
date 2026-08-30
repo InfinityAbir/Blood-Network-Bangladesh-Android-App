@@ -88,7 +88,7 @@ fun DonorDashboardScreen(
     onLogout: () -> Unit,
 ) {
     val state by vm.uiState.collectAsStateWithLifecycle()
-    val factory = LocalVmFactory.current!!
+    val factory = LocalVmFactory.current
     val notifVm: NotificationsViewModel = viewModel(factory = factory)
     val notifState by notifVm.uiState.collectAsStateWithLifecycle()
     var showNotifSheet by remember { mutableStateOf(false) }
@@ -140,6 +140,14 @@ fun DonorDashboardScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (state.meLoadFailed) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(tr("Could not load profile", "প্রোফাইল লোড করা যায়নি"), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+                        Text(tr("Pull down to retry", "পুনরায় চেষ্টা করতে নিচে টানুন"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
             item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
                     text = "${tr("Welcome", "স্বাগতম")}${state.user?.let { ", ${it.firstName}" } ?: ""}",

@@ -153,7 +153,7 @@ fun RegisterScreen(
                 onClick = {
                     localError = when {
                         firstName.isBlank() || lastName.isBlank() -> fillNameMsg
-                        phone.length < 11 -> invalidPhoneMsg
+                        !phone.matches(Regex("^01[3-9]\\d{8}$")) -> invalidPhoneMsg
                         password.length < 8 -> passwordLengthMsg
                         !password.any { it.isUpperCase() } -> passwordUppercaseMsg
                         !password.any { it.isLowerCase() } -> passwordLowercaseMsg

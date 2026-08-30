@@ -50,6 +50,9 @@ fun LoginScreen(
     val state by vm.uiState.collectAsStateWithLifecycle()
     var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var localError by remember { mutableStateOf<String?>(null) }
+
+    val invalidPhoneMsg = tr("Enter a valid Bangladeshi phone number", "সঠিক বাংলাদেশী ফোন নম্বর লিখুন")
 
     LaunchedEffect(state.isLoggedIn) {
         if (state.isLoggedIn) onLoggedIn()
@@ -82,10 +85,11 @@ fun LoginScreen(
             )
             LabeledTextField(
                 value = phone,
-                onValueChange = { phone = it },
+                onValueChange = { phone = it; localError = null },
                 label = tr("Phone Number", "ফোন নম্বর"),
                 placeholder = "01XXXXXXXXX",
                 keyboardType = KeyboardType.Phone,
+                isError = localError != null,
                 leadingIcon = { androidx.compose.material3.Icon(Icons.Filled.Phone, contentDescription = null) },
             )
             LabeledTextField(
@@ -95,11 +99,19 @@ fun LoginScreen(
                 isPassword = true,
                 leadingIcon = { androidx.compose.material3.Icon(Icons.Filled.Lock, contentDescription = null) },
             )
+            localError?.let { ErrorText(it) }
             ErrorText(state.error)
             PrimaryButton(
                 text = tr("Login", "লগ ইন"),
                 loading = state.isLoading,
-                onClick = { vm.login(phone, password) },
+                onClick = {
+                    val isBanglaPhone = phone.matches(Regex("^01[3-9]\\d{8}$"))
+                    if (!isBanglaPhone) {
+                        localError = invalidPhoneMsg
+                        return@PrimaryButton
+                    }
+                    vm.login(phone, password)
+                },
             )
             TextButton(onClick = { onNavigate(Routes.REGISTER) }) {
                 Text(tr("Don't have an account? Register", "অ্যাকাউন্ট নেই? রেজিস্টার করুন"))

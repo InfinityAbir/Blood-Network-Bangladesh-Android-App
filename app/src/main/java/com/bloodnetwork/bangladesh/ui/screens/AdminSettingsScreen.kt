@@ -180,7 +180,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                         visualTransformation = if (showCurrentPassword) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
                             IconButton(onClick = { showCurrentPassword = !showCurrentPassword }) {
-                                Icon(if (showCurrentPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Icon(if (showCurrentPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = tr("Toggle current password visibility", "বর্তমান পাসওয়ার্ড দৃশ্যমানতা টগল করুন"), modifier = Modifier.size(18.dp))
                             }
                         },
                     )
@@ -217,7 +217,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                         visualTransformation = if (showNewPassword) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
                             IconButton(onClick = { showNewPassword = !showNewPassword }) {
-                                Icon(if (showNewPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Icon(if (showNewPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = tr("Toggle new password visibility", "নতুন পাসওয়ার্ড দৃশ্যমানতা টগল করুন"), modifier = Modifier.size(18.dp))
                             }
                         },
                     )
@@ -233,7 +233,7 @@ fun AdminSettingsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, vm: Au
                             visualTransformation = if (showConfirmPassword) VisualTransformation.None else PasswordVisualTransformation(),
                             trailingIcon = {
                                 IconButton(onClick = { showConfirmPassword = !showConfirmPassword }) {
-                                    Icon(if (showConfirmPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Icon(if (showConfirmPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility, contentDescription = tr("Toggle confirm password visibility", "নিশ্চিতকরণ পাসওয়ার্ড দৃশ্যমানতা টগল করুন"), modifier = Modifier.size(18.dp))
                                 }
                             },
                         )

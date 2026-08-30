@@ -1,0 +1,377 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flow-and-Gap Audit v2 - Blood Network Bangladesh</title>
+<style>
+:root{--bg:#fff;--fg:#1a1a2e;--card-bg:#f8f9fa;--border:#dee2e6;--accent:#c0392b;--accent2:#2980b9;--tag-bg:#e9ecef;--tag-fg:#495057;--link:#2563eb;--code-bg:#f1f3f5;--code-fg:#212529;--toc-bg:#f8f9fa;--section-bg:#fff;--shadow:0 1px 3px rgba(0,0,0,.08);--critical:#c0392b;--high:#d35400;--medium:#f39c12;--low:#27ae60;--fixed:#2980b9;--regression:#8e44ad}
+@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--fg:#e2e8f0;--card-bg:#1e293b;--border:#334155;--accent:#e74c3c;--accent2:#3498db;--tag-bg:#334155;--tag-fg:#cbd5e1;--link:#60a5fa;--code-bg:#1e293b;--code-fg:#e2e8f0;--toc-bg:#1e293b;--section-bg:#1e293b;--shadow:0 1px 3px rgba(0,0,0,.3)}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+code,.mono{font-family:'Cascadia Code','JetBrains Mono','Fira Code',monospace;font-size:.88em}
+.masthead{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:#fff;padding:3rem 2rem 2rem;text-align:center}
+.masthead h1{font-size:1.8rem;font-weight:700;margin-bottom:.5rem}
+.masthead p{opacity:.85;font-size:.95rem;max-width:700px;margin:0 auto}
+.count-row{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem}
+.count-box{background:rgba(255,255,255,.1);border-radius:10px;padding:.75rem 1.25rem;min-width:110px}
+.count-box .num{font-size:1.8rem;font-weight:700;display:block}
+.count-box .lbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;opacity:.8}
+nav.toc{position:sticky;top:0;z-index:100;background:var(--toc-bg);border-bottom:1px solid var(--border);padding:.6rem 1rem;overflow-x:auto;white-space:nowrap;box-shadow:var(--shadow)}
+nav.toc a{display:inline-block;padding:.3rem .8rem;border-radius:6px;font-size:.82rem;font-weight:500;color:var(--fg)}
+nav.toc a:hover{background:var(--accent2);color:#fff;text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+section{margin-bottom:3rem}section>h2{font-size:1.35rem;border-bottom:2px solid var(--accent);padding-bottom:.4rem;margin-bottom:1rem}
+section>h3{font-size:1.1rem;margin:1.5rem 0 .5rem}
+table{width:100%;border-collapse:collapse;margin:.75rem 0 1.25rem;font-size:.88rem}
+th,td{padding:.5rem .7rem;border:1px solid var(--border);text-align:left;vertical-align:top}
+th{background:var(--card-bg);font-weight:600}tr:nth-child(even){background:var(--card-bg)}
+.card{background:var(--section-bg);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.card h4{font-size:1rem;margin-bottom:.4rem}
+.chip{display:inline-block;padding:.15rem .55rem;border-radius:12px;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.chip-critical{background:var(--critical);color:#fff}.chip-high{background:var(--high);color:#fff}
+.chip-medium{background:var(--medium);color:#1a1a2e}.chip-low{background:var(--low);color:#fff}
+.chip-fixed{background:var(--fixed);color:#fff}.chip-regression{background:var(--regression);color:#fff}
+.ref{display:inline-block;background:var(--code-bg);color:var(--code-fg);padding:.1rem .4rem;border-radius:4px;font-family:'Cascadia Code',monospace;font-size:.82em}
+.impact{color:var(--fg);opacity:.85;font-size:.9em;margin-top:.25rem}
+.journey-step{display:flex;gap:.75rem;margin:.5rem 0;align-items:flex-start}
+.journey-step .dot{width:10px;height:10px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:.45rem}
+.journey-step .dot.ok{background:var(--low)}.journey-step .dot.broken{background:var(--critical)}
+.tag{display:inline-block;background:var(--tag-bg);color:var(--tag-fg);padding:.1rem .45rem;border-radius:4px;font-size:.78rem;margin-right:.3rem}
+ul.clean{list-style:none;padding-left:0}ul.clean li{padding:.3rem 0}
+ul.clean li::before{content:"\2192 ";color:var(--accent2);font-weight:600}
+@media(max-width:700px){.count-row{flex-direction:column;align-items:center}table{font-size:.78rem}th,td{padding:.35rem .5rem}}
+</style>
+</head>
+<body>
+<div class="masthead">
+<h1>Flow-and-Gap Audit v2</h1>
+<p>Post-G1-G7 / post-pre-publish polish re-verification of Blood Network Bangladesh. Android client + .NET backend. Traces every user journey, endpoint, notification, config enforcement, and test gap.</p>
+<div class="count-row">
+<div class="count-box"><span class="num">3</span><span class="lbl">Critical / High</span></div>
+<div class="count-box"><span class="num">7</span><span class="lbl">Medium</span></div>
+<div class="count-box"><span class="num">7</span><span class="lbl">Low / Info</span></div>
+<div class="count-box"><span class="num">4</span><span class="lbl">Fixed (prior)</span></div>
+<div class="count-box"><span class="num">0</span><span class="lbl">Regressions</span></div>
+</div>
+</div>
+<nav class="toc">
+<a href="#journeys">User Journeys</a>
+<a href="#endpoints">Endpoint Cross-Check</a>
+<a href="#notifications">Notification Matrix</a>
+<a href="#sensitivity">Data Sensitivity</a>
+<a href="#config">Config Enforcement</a>
+<a href="#tests">Test Coverage</a>
+<a href="#findings">All Findings</a>
+</nav>
+<div class="container">
+
+<section id="journeys">
+<h2>1. User Journey Trace</h2>
+<p>Each step traces the Android call site to backend endpoint to service logic to side-effect.</p>
+
+<h3>1A. Full Lifecycle: Register to Fulfill</h3>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Register</strong> - <span class="ref">AuthViewModel.kt:126</span> to <span class="ref">POST api/auth/register</span> to <span class="ref">AuthService.cs:88</span> - creates User, fires Welcome notification + push</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Login</strong> - <span class="ref">AuthViewModel.kt:108</span> to <span class="ref">POST api/auth/login</span> to <span class="ref">AuthService.cs:58</span> - returns JWT + refreshToken, stores in EncryptedSharedPreferences</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Token refresh</strong> - <span class="ref">TokenRefreshInterceptor.kt:52</span> to <span class="ref">POST api/auth/refresh</span> to <span class="ref">AuthService.cs:109</span> - silent, transparent</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Eligibility check</strong> - <span class="ref">EligibilityViewModel.kt:80</span> to <span class="ref">POST api/ai/eligibility/check</span> to <span class="ref">EligibilityService.cs:56</span> - evaluates answers, saves state</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Create donor profile</strong> - <span class="ref">DonorViewModel.kt:101</span> to <span class="ref">POST api/donors/me/profile</span> to <span class="ref">DonorService.cs:85</span> - checks MinimumDonationIntervalDays, creates profile</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Create blood request</strong> - <span class="ref">RequestBloodViewModel.kt:31</span> to <span class="ref">POST api/blood-requests</span> to <span class="ref">BloodRequestService.cs:70</span> - enforces MaxActiveRequests + Cooldown, triggers auto-matching, fires notifications</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Matching</strong> - <span class="ref">MatchingService.cs:85</span> - score >= 10 creates match; score > 60 sends push to donor</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Donor accepts/declines</strong> - <span class="ref">DonorMatchesViewModel.kt:46</span> to <span class="ref">POST api/matches/{matchId}/respond</span> to <span class="ref">MatchingService.cs:175</span> - notifies requester</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Fulfillment</strong> - <span class="ref">RequestDetailsViewModel.kt:112</span> to <span class="ref">PATCH api/blood-requests/{id}/fulfill</span> to <span class="ref">BloodRequestService.cs:310</span> - marks fulfilled, updates LastDonationDate on accepted donors, creates DonationRecords, notifies requester</div></div>
+
+<h3>1B. Admin Journey</h3>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Dashboard</strong> - <span class="ref">AdminViewModel.kt:80</span> to <span class="ref">GET api/admin/dashboard</span> to <span class="ref">AdminController.cs:24</span></div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>User management</strong> - <span class="ref">AdminViewModel.kt:116</span> to <span class="ref">GET api/admin/users</span> + toggle-active + verify-donor</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Report resolution</strong> - <span class="ref">AdminViewModel.kt:349</span> to <span class="ref">POST api/admin/reports/{id}/resolve</span> to <span class="ref">AdminService.cs:466</span> - notifies reporter via push</div></div>
+<div class="journey-step"><div class="dot ok"></div><div><strong>Donor availability toggle</strong> - <span class="ref">DonorViewModel.kt:130</span> to <span class="ref">PATCH api/donors/me/availability</span> to <span class="ref">DonorService.cs:220</span> - notifies nearby requesters if becoming available</div></div>
+
+<h3>1C. Identified Journey Gaps</h3>
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> Eligibility-to-Profile Handoff Does Not Exist</h4>
+<p class="impact">After completing eligibility check, user must manually navigate to donor profile creation. No automatic handoff or deep-link exists.</p>
+</div>
+</section>
+
+<section id="endpoints">
+<h2>2. Endpoint Cross-Check</h2>
+<p>60 backend endpoints (57 controller + 3 non-controller). 56 Android REST call sites + 1 SignalR WebSocket.</p>
+
+<h3>Backend Endpoints With Zero Android Call Sites</h3>
+<table>
+<tr><th>Method</th><th>Route</th><th>Backend Location</th><th>Status</th></tr>
+<tr><td>POST</td><td>api/auth/first-login-change</td><td><span class="ref">AuthController.cs:72</span></td><td><span class="chip chip-medium">Dead - no app caller</span></td></tr>
+<tr><td>POST</td><td>api/matches/request/{id}/trigger-match</td><td><span class="ref">MatchesController.cs:99</span></td><td><span class="chip chip-medium">Dead - admin-only, no app caller</span></td></tr>
+</table>
+
+<h3>Android API Calls With No Backend Endpoint</h3>
+<table>
+<tr><th>Method</th><th>Route</th><th>Android Location</th><th>Status</th></tr>
+<tr><td>GET</td><td>api/blood-requests/open</td><td><span class="ref">BloodNetworkApi.kt:118</span></td><td><span class="chip chip-low">Defined in repo but no ViewModel calls it</span></td></tr>
+</table>
+
+<h3>Inconsistent UserId Resolution</h3>
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> MatchesController.GetUserId() Uses Guid.Parse Instead of TryParse</h4>
+<p class="impact"><span class="ref">MatchesController.cs:110</span> - Will throw FormatException on malformed JWT claims. All other controllers use Guid.TryParse.</p>
+</div>
+<div class="card">
+<h4><span class="chip chip-low">Low</span> BloodRequestsController.GetCurrentUserId() Returns Guid.Empty</h4>
+<p class="impact"><span class="ref">BloodRequestsController.cs:27</span> - Returns Guid.Empty instead of null on missing token. Works but inconsistent with other controllers.</p>
+</div>
+
+<h3>Unused Android API Definitions</h3>
+<table>
+<tr><th>API Method</th><th>Android Location</th><th>Issue</th></tr>
+<tr><td>POST api/auth/first-login-change</td><td><span class="ref">BloodNetworkApi.kt:74</span></td><td>Defined but never called from Repository or ViewModel</td></tr>
+<tr><td>POST api/matches/request/{id}/trigger-match</td><td><span class="ref">BloodNetworkApi.kt:165</span></td><td>Defined but never called from Repository or ViewModel</td></tr>
+<tr><td>GET api/blood-requests/open</td><td><span class="ref">BloodNetworkApi.kt:118</span></td><td>Defined in Repository but no ViewModel calls it</td></tr>
+</table>
+</section>
+
+<section id="notifications">
+<h2>3. Notification Matrix</h2>
+<p>All notifications flow through <span class="ref">NotificationService.SendNotificationAsync()</span> which always saves to DB, broadcasts via SignalR, and attempts FCM push (wrapped in try-catch).</p>
+
+<table>
+<tr><th>#</th><th>Trigger</th><th>Recipient</th><th>Title</th><th>File:Line</th><th>Try-Catch</th></tr>
+<tr><td>1</td><td>User registers</td><td>New user</td><td>Welcome to Blood Network Bangladesh!</td><td><span class="ref">AuthService.cs:103</span></td><td>Yes</td></tr>
+<tr><td>2</td><td>Blood request created</td><td>Requester</td><td>Blood Request Created</td><td><span class="ref">BloodRequestService.cs:134</span></td><td>No*</td></tr>
+<tr><td>3</td><td>Blood request created</td><td>All admins (bulk)</td><td>New Blood Request</td><td><span class="ref">BloodRequestService.cs:145</span></td><td>No*</td></tr>
+<tr><td>4</td><td>Donor matched (score &gt; 60)</td><td>Matched donor</td><td>New Blood Request Match</td><td><span class="ref">MatchingService.cs:134</span></td><td>No*</td></tr>
+<tr><td>5</td><td>Donor accepts match</td><td>Requester</td><td>Donor accepted</td><td><span class="ref">MatchingService.cs:191</span></td><td>No*</td></tr>
+<tr><td>6</td><td>Donor declines match</td><td>Requester</td><td>Donor declined</td><td><span class="ref">MatchingService.cs:191</span></td><td>No*</td></tr>
+<tr><td>7</td><td>Request cancelled</td><td>Each matched donor (not declined)</td><td>Blood Request Cancelled</td><td><span class="ref">BloodRequestService.cs:237</span></td><td>No*</td></tr>
+<tr><td>8</td><td>Request updated</td><td>Requester</td><td>Blood Request Updated</td><td><span class="ref">BloodRequestService.cs:298</span></td><td>No*</td></tr>
+<tr><td>9</td><td>Fully fulfilled</td><td>Requester</td><td>Blood Request Fulfilled</td><td><span class="ref">BloodRequestService.cs:381</span></td><td>No*</td></tr>
+<tr><td>10</td><td>Partially fulfilled</td><td>Requester</td><td>Blood Request Partially Fulfilled</td><td><span class="ref">BloodRequestService.cs:390</span></td><td>No*</td></tr>
+<tr><td>11</td><td>Admin verifies/rejects donor</td><td>Donor</td><td>Donor Verified! / Verification Update</td><td><span class="ref">AdminService.cs:281</span></td><td>No*</td></tr>
+<tr><td>12</td><td>Admin resolves report</td><td>Reporter</td><td>Report Resolved / Dismissed</td><td><span class="ref">AdminService.cs:486</span></td><td>Yes</td></tr>
+<tr><td>13</td><td>Donor becomes available</td><td>Nearby requesters (max 20, 10km)</td><td>A compatible donor is available</td><td><span class="ref">DonorService.cs:438</span></td><td>Yes</td></tr>
+</table>
+<p style="font-size:.85em;opacity:.7">* No try-catch at call site, but FCM push itself is always wrapped in try-catch inside NotificationService.SendPushAsync. Push failure will not crash the request.</p>
+
+<div class="card">
+<h4><span class="chip chip-low">Low</span> ProfileReminder Notification Type Never Fired</h4>
+<p class="impact"><span class="ref">NotificationType.ProfileReminder</span> exists in the enum but no code path ever creates a notification of this type.</p>
+</div>
+</section>
+
+<section id="sensitivity">
+<h2>4. Data Sensitivity Check</h2>
+
+<h3>Cross-User Data Exposure</h3>
+<table>
+<tr><th>Scenario</th><th>Status</th><th>Notes</th></tr>
+<tr><td>User A sees User B eligibility answers</td><td>Safe</td><td>Eligibility state keyed by UserId, returned only to owner (<span class="ref">AIController.cs:60</span>)</td></tr>
+<tr><td>Requester sees donor health details</td><td>Safe</td><td>PublicDonorDto excludes phone, DOB, gender, health data</td></tr>
+<tr><td>Donor sees requester health details</td><td>Safe</td><td>PublicBloodRequestDto excludes patient name, contact phone</td></tr>
+<tr><td>Non-owner gets full request details</td><td>Safe</td><td>Gated at <span class="ref">BloodRequestsController.cs:64-86</span>, non-owner receives PublicBloodRequestDto</td></tr>
+</table>
+
+<h3>Logging and Crash Reports</h3>
+<div class="card">
+<h4><span class="chip chip-critical">Critical</span> Admin Phone Number Logged in Plaintext</h4>
+<p class="impact"><span class="ref">Program.cs:243,257,265,271</span> - Four Log.Information statements include the admin phone number. Depending on log sinks, this is PII in plaintext logs.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-low">Low</span> Eligibility Health Answers Stored as Plaintext JSON</h4>
+<p class="impact"><span class="ref">UserEligibilityState.cs:16</span> - AnswersJson stores health screening responses as unencrypted JSON. Only returned to owning user, but at rest in DB without encryption.</p>
+</div>
+
+<h3>DTO Exposure Analysis</h3>
+<table>
+<tr><th>DTO</th><th>Contains PII</th><th>Exposed To</th><th>Assessment</th></tr>
+<tr><td>BloodRequestMatchDto</td><td>Both parties phone + name</td><td>Donor and Requester</td><td>Intentional for coordination</td></tr>
+<tr><td>BloodRequestDto</td><td>PatientName, ContactPhone</td><td>Owner only</td><td>Properly gated</td></tr>
+<tr><td>PublicBloodRequestDto</td><td>None</td><td>Anonymous search</td><td>Safe</td></tr>
+<tr><td>PublicDonorDto</td><td>None</td><td>Anonymous search</td><td>Safe</td></tr>
+<tr><td>AdminUserDto</td><td>PhoneNumber, Email</td><td>Admin only</td><td>Appropriate</td></tr>
+</table>
+</section>
+
+<section id="config">
+<h2>5. Config Enforcement</h2>
+
+<h3>Core Business Rules</h3>
+<table>
+<tr><th>Config</th><th>Default</th><th>Enforced At</th><th>Config Validation</th><th>Hardcoded Duplicates</th></tr>
+<tr><td>MaxActiveRequestsPerUser</td><td>3</td><td><span class="ref">BloodRequestService.cs:78-82</span></td><td>None - negative breaks logic</td><td>No</td></tr>
+<tr><td>ContactCooldownHours</td><td>24</td><td><span class="ref">BloodRequestService.cs:85-90</span></td><td>None - 0 disables check</td><td>No</td></tr>
+<tr><td>MinimumDonationIntervalDays</td><td>90</td><td><span class="ref">DonorService.cs:65-66</span>, <span class="ref">:236-239</span>, <span class="ref">MatchingService.cs:237</span>, <span class="ref">MatchEnhancementService.cs:169</span>, <span class="ref">DonorEngagementService.cs:112</span></td><td>None</td><td>No</td></tr>
+<tr><td>DonorProfileConfirmationDays</td><td>90</td><td><span class="ref">DonorService.cs:179</span>, <span class="ref">:206</span>, <span class="ref">:243</span>, <span class="ref">DonorEngagementService.cs:158</span></td><td>None</td><td>No</td></tr>
+</table>
+
+<div class="card">
+<h4><span class="chip chip-high">High</span> No Config Validation on Business Rules</h4>
+<p class="impact">AppSettings is a plain POCO with no [Range] attributes. MaxActiveRequestsPerUser = -1 would block all request creation. ContactCooldownHours = -1 would block all requests. No ValidateDataAnnotations() called.</p>
+</div>
+
+<h3>Hardcoded Business Logic Thresholds</h3>
+<table>
+<tr><th>Constant</th><th>Value</th><th>Location</th><th>Configurable?</th></tr>
+<tr><td>notifyThreshold</td><td>60</td><td><span class="ref">MatchingService.cs:131</span></td><td>No</td></tr>
+<tr><td>AvailabilityNotifyRadiusKm</td><td>10</td><td><span class="ref">DonorService.cs:30</span></td><td>No</td></tr>
+<tr><td>AvailabilityNotifyMaxRequesters</td><td>20</td><td><span class="ref">DonorService.cs:31</span></td><td>No</td></tr>
+<tr><td>Match score minimum</td><td>10</td><td><span class="ref">MatchingService.cs:103</span></td><td>No</td></tr>
+<tr><td>Candidate limit</td><td>100</td><td><span class="ref">MatchingService.cs:93</span></td><td>No</td></tr>
+<tr><td>Annual freshness tier</td><td>365 days</td><td><span class="ref">MatchEnhancementService.cs:175</span>, <span class="ref">DonorEngagementService.cs:118</span></td><td>No</td></tr>
+</table>
+
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> Six Business Logic Thresholds Hardcoded, Not Configurable</h4>
+<p class="impact">notifyThreshold, availability radius, max requesters, candidate limit, and annual tier cannot be tuned without code changes and redeployment.</p>
+</div>
+</section>
+
+<section id="tests">
+<h2>6. Test Coverage</h2>
+<p>8 test files total: 5 unit, 3 integration.</p>
+
+<table>
+<tr><th>Flow</th><th>Status</th><th>Tests</th><th>Gap</th></tr>
+<tr><td>Fulfillment (mark fulfilled + LastDonationDate)</td><td><span class="chip chip-medium">Partial</span></td><td>FulfillRequest_AsOwner (RequestAuthorizationTests.cs:118), RequestFulfilled_FiresPush (PushHookIntegrationTests.cs:109)</td><td>LastDonationDate auto-update, DonationRecord creation NOT tested</td></tr>
+<tr><td>Match visibility (non-owner 404/403)</td><td><span class="chip chip-fixed">Tested</span></td><td>MatchesForRequest_AsNonOwner_ReturnsForbidden (RequestAuthorizationTests.cs:95)</td><td></td></tr>
+<tr><td>Eligibility-to-profile handoff</td><td><span class="chip chip-medium">Manual Only</span></td><td>None</td><td>No automated handoff exists in code - manual navigation required</td></tr>
+<tr><td>Report resolution</td><td><span class="chip chip-high">Manual Only</span></td><td>None</td><td>Zero test coverage for AdminService.ResolveReportAsync</td></tr>
+<tr><td>LastDonationDate auto-update</td><td><span class="chip chip-high">Manual Only</span></td><td>None</td><td>BloodRequestService.cs:346-374 side effects untested</td></tr>
+<tr><td>Config enforcement (3 limits)</td><td><span class="chip chip-high">Manual Only</span></td><td>None</td><td>MaxActiveRequestsPerUser, ContactCooldownHours, MinimumDonationIntervalDays all untested</td></tr>
+<tr><td>Authorization - push tokens</td><td><span class="chip chip-fixed">Tested</span></td><td>5 tests in PushTokenIntegrationTests.cs</td><td></td></tr>
+<tr><td>Authorization - eligibility endpoints</td><td><span class="chip chip-medium">Manual Only</span></td><td>None</td><td>No test hits /api/ai/eligibility/*</td></tr>
+<tr><td>FCM push delivery</td><td><span class="chip chip-medium">Partial</span></td><td>3 tests via FakePushSender</td><td>Real FCM error handling + invalid token cleanup untested</td></tr>
+<tr><td>Duplicate phone/email</td><td><span class="chip chip-medium">Partial</span></td><td>Duplicate phone tested (AuthIntegrationTests.cs:60)</td><td>Duplicate email not tested</td></tr>
+<tr><td>Refresh token lifecycle</td><td><span class="chip chip-high">Manual Only</span></td><td>None</td><td>Issue, use, refresh, revoke - zero test coverage</td></tr>
+</table>
+
+<div class="card">
+<h4><span class="chip chip-high">High</span> Five Critical Flows Have Zero Automated Tests</h4>
+<p class="impact">Report resolution, LastDonationDate auto-update, all 3 config enforcement limits, refresh token lifecycle, and eligibility endpoint auth are manual-only verification.</p>
+</div>
+</section>
+
+<section id="findings">
+<h2>7. All Findings by Severity</h2>
+
+<h3>Critical / High</h3>
+
+<div class="card">
+<h4><span class="chip chip-critical">Critical</span> Admin Phone Logged in Plaintext <span class="ref">Program.cs:243,257,265,271</span></h4>
+<p class="impact">Four Log.Information statements include the admin phone number. PII in plaintext logs depending on sink configuration.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-high">High</span> No Config Validation on AppSettings <span class="ref">DependencyInjection.cs:45</span></h4>
+<p class="impact">MaxActiveRequestsPerUser = -1 blocks all request creation. ContactCooldownHours = -1 blocks all requests. No [Range] attributes or ValidateDataAnnotations().</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-high">High</span> Five Critical Flows Have Zero Automated Tests</h4>
+<p class="impact">Report resolution, LastDonationDate update, all config enforcement limits, refresh token lifecycle, and eligibility auth are manual-only. See Test Coverage section for details.</p>
+</div>
+
+<h3>Medium</h3>
+
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> MatchesController.GetUserId() Throws on Malformed JWT <span class="ref">MatchesController.cs:110</span></h4>
+<p class="impact">Uses Guid.Parse instead of Guid.ParseThrowing. All other controllers use TryParse. A corrupted JWT claim will crash the endpoint with FormatException.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> Six Business Logic Thresholds Hardcoded</h4>
+<p class="impact">notifyThreshold=60 (<span class="ref">MatchingService.cs:131</span>), AvailabilityNotifyRadiusKm=10 (<span class="ref">DonorService.cs:30</span>), AvailabilityNotifyMaxRequesters=20 (<span class="ref">DonorService.cs:31</span>), candidate limit=100 (<span class="ref">MatchingService.cs:93</span>), match score minimum=10 (<span class="ref">MatchingService.cs:103</span>), annual tier=365 (<span class="ref">MatchEnhancementService.cs:175</span>). Cannot be tuned without redeployment.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> 10 Notifications Lack Call-Site Try-Catch</h4>
+<p class="impact">Notifications #2-11 (all except Welcome, Report Resolved, Donor Available) have no try-catch at call site. FCM push itself is safe, but any exception in SendNotificationAsync (e.g., DB failure) would propagate up and could fail the parent operation (e.g., creating a blood request).</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> Eligibility-to-Profile Handoff Does Not Exist</h4>
+<p class="impact">After completing eligibility check, user must manually navigate to donor profile creation. No auto-navigation or deep-link from eligibility result to profile form.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> BloodRequestMatchDto Exposes Both Parties' Phone Numbers <span class="ref">MatchDTOs.cs:11,16</span></h4>
+<p class="impact">Donor phone visible to requester and vice versa through match endpoints. Intentional for coordination but no consent mechanism.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> 3 Unused API Definitions in Android Codebase</h4>
+<p class="impact"><span class="ref">BloodNetworkApi.kt:74</span> first-login-change, <span class="ref">BloodNetworkApi.kt:165</span> trigger-match, <span class="ref">BloodNetworkApi.kt:118</span> open blood requests - defined but never called from any ViewModel.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-medium">Medium</span> Eligibility State Stored as Plaintext JSON <span class="ref">UserEligibilityState.cs:16</span></h4>
+<p class="impact">Health screening answers stored as unencrypted JSON in DB. Only returned to owning user, but no encryption at rest.</p>
+</div>
+
+<h3>Low / Info</h3>
+
+<div class="card">
+<h4><span class="chip chip-low">Low</span> ProfileReminder Notification Type Never Fired</h4>
+<p class="impact">Defined in NotificationType enum but no code path ever creates this notification type.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-low">Low</span> TOCTOU Race on Config Enforcement Limits</h4>
+<p class="impact">MaxActiveRequestsPerUser and ContactCooldownHours: count + create are not in a transaction lock. Under extreme concurrency, two requests could both pass the check simultaneously. Acceptable at current scale.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-low">Low</span> BloodRequestsController Returns Guid.Empty on Missing Token <span class="ref">BloodRequestsController.cs:27</span></h4>
+<p class="impact">Uses Guid.TryParse + fallback to Guid.Empty instead of null. Works but inconsistent with other controllers.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-low">Low</span> GroqOptions.ApiKey Defaults to Empty String <span class="ref">GroqOptions.cs:6</span></h4>
+<p class="impact">No startup validation. Will fail at runtime with a confusing error when AI chatbot is used without configuring the API key.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-low">Low</span> Location Loading Errors Silently Ignored <span class="ref">LocationViewModel.kt:28-33</span></h4>
+<p class="impact">If divisions/districts/upazilas fail to load, user sees empty dropdowns with no error message or retry prompt.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-low">Low</span> Pagination Failures Silently Swallowed</h4>
+<p class="impact"><span class="ref">FindBloodViewModel.kt:95</span>, <span class="ref">AdminViewModel.kt:170</span> - When loadMore fails, user does not know more results exist. No error toast or retry indicator.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-low">Low</span> MarkNotificationReadRequest DTO Defined But Unused <span class="ref">NotificationDTOs.cs:18</span></h4>
+<p class="impact">DTO exists but the mark-as-read endpoint takes no body. Dead code.</p>
+</div>
+
+<h3>Fixed (Prior)</h3>
+
+<div class="card">
+<h4><span class="chip chip-fixed">Fixed</span> 19x LocalVmFactory.current!! Force-Unwraps</h4>
+<p class="impact">CompositionLocal changed to non-nullable with error message. All !! removed across 19 screens.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-fixed">Fixed</span> Shimmer Dark Mode Broken</h4>
+<p class="impact">Color.LightGray replaced with MaterialTheme.colorScheme.onSurface. Works in both themes.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-fixed">Fixed</span> Phone Validation Missing on Login</h4>
+<p class="impact">Added Bangladeshi phone regex (^01[3-9]\d{8}$) to both Login and Register screens.</p>
+</div>
+
+<div class="card">
+<h4><span class="chip chip-fixed">Fixed</span> Crashlytics Not Configured</h4>
+<p class="impact">Firebase Crashlytics Gradle plugin + dependency added. Auto-initializes via Firebase BOM.</p>
+</div>
+</section>
+
+</div>
+<div style="text-align:center;padding:2rem;font-size:.8rem;opacity:.5">
+Generated by flow-and-gap audit v2 - Blood Network Bangladesh
+</div>
+</body>
+</html>
