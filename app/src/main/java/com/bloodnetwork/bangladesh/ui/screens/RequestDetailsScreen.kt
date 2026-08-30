@@ -139,6 +139,7 @@ fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
     )
     val keepItLabel = tr("Keep It", "রেখে দিন")
     val requestUpdatedMsg = tr("Request updated", "অনুরোধ হালনাগাদ করা হয়েছে")
+    val requestFulfilledMsg = tr("Request fulfillment recorded", "অনুরোধ পূরণ রেকর্ড করা হয়েছে")
     val urgencyLabels: Map<Urgency, String> = mapOf(
         Urgency.Critical to tr("Critical", "সংকটাপন্ন"),
         Urgency.Urgent to tr("Urgent", "জরুরি"),
@@ -195,7 +196,7 @@ fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
 
     LaunchedEffect(state.fulfilled) {
         if (state.fulfilled) {
-            snackbarHostState.showSnackbar(tr("Request fulfillment recorded", "অনুরোধ পূরণ রেকর্ড করা হয়েছে"))
+            snackbarHostState.showSnackbar(requestFulfilledMsg)
             vm.clearFulfilled()
         }
     }

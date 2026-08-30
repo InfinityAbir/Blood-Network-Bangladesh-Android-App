@@ -56,7 +56,7 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.ChatbotViewModel
 private const val ANIM_DURATION = 300
 
 @Composable
-fun AppRoot(repository: BloodNetworkRepository) {
+fun AppRoot(repository: BloodNetworkRepository, initialDeepLink: String? = null) {
     val navController = rememberNavController()
     val factory = remember(repository) { VmFactory(repository) }
 
@@ -76,6 +76,12 @@ fun AppRoot(repository: BloodNetworkRepository) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val showChatFab = currentRoute != Routes.CHATBOT
+
+    androidx.compose.runtime.LaunchedEffect(initialDeepLink) {
+        if (initialDeepLink != null && repository.isLoggedInSync()) {
+            navController.navigate(initialDeepLink)
+        }
+    }
 
     CompositionLocalProvider(LocalVmFactory provides factory) {
         Scaffold(

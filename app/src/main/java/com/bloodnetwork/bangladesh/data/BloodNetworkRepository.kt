@@ -20,6 +20,7 @@ import com.bloodnetwork.bangladesh.data.model.PagedResult
 import com.bloodnetwork.bangladesh.data.model.PublicBloodRequestDto
 import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
 import com.bloodnetwork.bangladesh.data.model.RefreshTokenRequest
+import com.bloodnetwork.bangladesh.data.model.RegisterPushTokenRequest
 import com.bloodnetwork.bangladesh.data.model.RegisterRequest
 import com.bloodnetwork.bangladesh.data.model.RespondToMatchRequest
 import com.bloodnetwork.bangladesh.data.model.ToggleAvailabilityRequest
@@ -43,10 +44,13 @@ import com.bloodnetwork.bangladesh.data.network.BloodNetworkApi
 import com.bloodnetwork.bangladesh.data.network.NotificationSocket
 import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
 import com.bloodnetwork.bangladesh.data.prefs.EligibilityStore
+import com.bloodnetwork.bangladesh.data.prefs.FcmTokenStore
 import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.data.prefs.TokenStore
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.tasks.await
 
 class BloodNetworkRepository(
     private val api: BloodNetworkApi,
@@ -55,6 +59,7 @@ class BloodNetworkRepository(
     private val registrationStore: RegistrationStore,
     private val donorProfileStore: DonorProfileStore,
     val notificationSocket: NotificationSocket,
+    val fcmTokenStore: FcmTokenStore,
 ) {
 
     val isLoggedIn: Flow<Boolean> = tokenStore.isLoggedIn
@@ -98,6 +103,34 @@ class BloodNetworkRepository(
     }
 
     suspend fun me(): UserDto = api.me()
+
+    // ---- Push tokens (FCM) ----
+    suspend fun registerFcmIfNeeded() {
+        val userId = tokenStore.currentUserId.first()
+        if (userId.isNullOrEmpty()) return
+
+        val stored = fcmTokenStore.getToken()
+        if (stored != null) {
+            if (fcmTokenStore.getRegisteredUserId() != userId) {
+                registerFcmToken(stored, userId)
+            }
+            return
+        }
+
+        val fresh = runCatching { FirebaseMessaging.getInstance().token.await() }.getOrNull() ?: return
+        registerFcmToken(fresh, userId)
+    }
+
+    suspend fun registerFcmToken(token: String, userId: String) {
+        runCatching { api.registerPushToken(RegisterPushTokenRequest(token)) }
+            .onSuccess { fcmTokenStore.setRegistration(token, userId) }
+    }
+
+    suspend fun unregisterFcmToken() {
+        val token = fcmTokenStore.getToken() ?: return
+        runCatching { api.unregisterPushToken(token) }
+        fcmTokenStore.clear()
+    }
 
     // ---- Donors ----
     suspend fun createDonorProfile(request: CreateDonorProfileRequest): DonorProfileDto =

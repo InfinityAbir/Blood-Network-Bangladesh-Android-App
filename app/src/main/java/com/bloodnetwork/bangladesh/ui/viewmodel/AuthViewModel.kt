@@ -58,8 +58,10 @@ class AuthViewModel(
                 if (isLoggedIn) {
                     repository.notificationSocket.start()
                     if (_uiState.value.user == null) loadMe()
+                    registerFcmIfNeeded()
                 } else {
                     repository.notificationSocket.stop()
+                    unregisterFcmToken()
                     _uiState.value = AuthUiState()
                 }
             }
@@ -79,6 +81,14 @@ class AuthViewModel(
                 .onSuccess { user -> _uiState.value = _uiState.value.copy(user = user, isLoggedIn = true, meLoadFailed = false, isProfileRefreshing = false) }
                 .onFailure { _uiState.value = _uiState.value.copy(meLoadFailed = true, isProfileRefreshing = false) }
         }
+    }
+
+    private fun registerFcmIfNeeded() {
+        viewModelScope.launch { runCatching { repository.registerFcmIfNeeded() } }
+    }
+
+    private fun unregisterFcmToken() {
+        viewModelScope.launch { runCatching { repository.unregisterFcmToken() } }
     }
 
     /** Retries fetching the profile after a failed cold-start load (e.g. no network yet). */

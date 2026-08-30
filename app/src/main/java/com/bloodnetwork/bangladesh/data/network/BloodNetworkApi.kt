@@ -24,6 +24,7 @@ import com.bloodnetwork.bangladesh.data.model.NotificationDto
 import com.bloodnetwork.bangladesh.data.model.PagedResult
 import com.bloodnetwork.bangladesh.data.model.PublicBloodRequestDto
 import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
+import com.bloodnetwork.bangladesh.data.model.RegisterPushTokenRequest
 import com.bloodnetwork.bangladesh.data.model.RefreshTokenRequest
 import com.bloodnetwork.bangladesh.data.model.RegisterRequest
 import com.bloodnetwork.bangladesh.data.model.RespondToMatchRequest
@@ -130,6 +131,13 @@ interface BloodNetworkApi {
 
     @PATCH("api/blood-requests/{id}/fulfill")
     suspend fun fulfillBloodRequest(@Path("id") id: String, @Body request: FulfillBloodRequestRequest): BloodRequestDto
+
+    // ---- Push tokens (FCM registration) ----
+    @POST("api/push/tokens")
+    suspend fun registerPushToken(@Body request: RegisterPushTokenRequest)
+
+    @DELETE("api/push/tokens/{token}")
+    suspend fun unregisterPushToken(@Path("token") token: String)
 
     // ---- Locations ----
     @GET("api/locations/divisions")

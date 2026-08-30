@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496044679346",
+    "project_id": "blood-network-bangladesh",
+    "storage_bucket": "blood-network-bangladesh.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496044679346:android:1ab699b241b1b975bde9ab",
+        "android_client_info": {
+          "package_name": "com.bloodnetwork.bangladesh"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZogOAP-7B9HNDo7iBYY_WjKjFx9DNl0U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

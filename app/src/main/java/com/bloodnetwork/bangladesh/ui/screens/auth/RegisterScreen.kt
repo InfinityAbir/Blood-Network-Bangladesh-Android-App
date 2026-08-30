@@ -132,17 +132,15 @@ fun RegisterScreen(
 
             // G7: volunteer role selection
             androidx.compose.material3.Text(tr("Register as", "ভূমিকা নির্বাচন করুন"), style = MaterialTheme.typography.titleSmall)
+            val roleLabels: Map<UserRole, String> = mapOf(
+                UserRole.Requester to tr("Requester", "অনুরোধকারী"),
+                UserRole.Donor to tr("Donor", "রক্তদাতা"),
+                UserRole.Volunteer to tr("Volunteer", "স্বেচ্ছাসেবক"),
+            )
             RowChips(
                 options = listOf(UserRole.Requester, UserRole.Donor, UserRole.Volunteer),
                 selected = selectedRole,
-                labelOf = {
-                    when (it) {
-                        UserRole.Requester -> tr("Requester", "অনুরোধকারী")
-                        UserRole.Donor -> tr("Donor", "রক্তদাতা")
-                        UserRole.Volunteer -> tr("Volunteer", "স্বেচ্ছাসেবক")
-                        else -> it.name
-                    }
-                },
+                labelOf = { roleLabels[it] ?: it.name },
                 onSelect = { selectedRole = it },
             )
 

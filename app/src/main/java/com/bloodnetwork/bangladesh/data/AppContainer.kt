@@ -7,6 +7,7 @@ import com.bloodnetwork.bangladesh.data.network.BloodNetworkApi
 import com.bloodnetwork.bangladesh.data.network.NotificationSocket
 import com.bloodnetwork.bangladesh.data.prefs.DonorProfileStore
 import com.bloodnetwork.bangladesh.data.prefs.EligibilityStore
+import com.bloodnetwork.bangladesh.data.prefs.FcmTokenStore
 import com.bloodnetwork.bangladesh.data.prefs.LanguageStore
 import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.data.prefs.ThemeStore
@@ -21,6 +22,8 @@ class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
     val tokenStore: TokenStore by lazy { TokenStore(appContext) }
+
+    val fcmTokenStore: FcmTokenStore by lazy { FcmTokenStore(appContext) }
 
     val eligibilityStore: EligibilityStore by lazy { EligibilityStore(appContext) }
 
@@ -44,6 +47,6 @@ class AppContainer(context: Context) {
     val notificationSocket: NotificationSocket by lazy { NotificationSocket(baseUrl, tokenStore) }
 
     val repository: BloodNetworkRepository by lazy {
-        BloodNetworkRepository(api, tokenStore, eligibilityStore, registrationStore, donorProfileStore, notificationSocket)
+        BloodNetworkRepository(api, tokenStore, eligibilityStore, registrationStore, donorProfileStore, notificationSocket, fcmTokenStore)
     }
 }

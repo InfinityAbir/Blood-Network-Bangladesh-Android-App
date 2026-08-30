@@ -2,6 +2,7 @@ package com.bloodnetwork.bangladesh
 
 import android.app.Application
 import com.bloodnetwork.bangladesh.data.AppContainer
+import com.bloodnetwork.bangladesh.notifications.PushMessagingService
 
 class BloodNetworkApp : Application() {
 
@@ -11,5 +12,6 @@ class BloodNetworkApp : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        PushMessagingService.ensureChannel(this)
     }
 }
