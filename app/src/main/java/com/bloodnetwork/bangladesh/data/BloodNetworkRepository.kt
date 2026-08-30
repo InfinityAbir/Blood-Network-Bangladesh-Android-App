@@ -124,7 +124,7 @@ class BloodNetworkRepository(
     suspend fun createBloodRequest(request: CreateBloodRequestRequest): BloodRequestDto =
         api.createBloodRequest(request)
 
-    suspend fun getMyBloodRequests(): List<BloodRequestDto> = api.getMyBloodRequests()
+    suspend fun getMyBloodRequests(page: Int = 1, pageSize: Int = 20) = api.getMyBloodRequests(page, pageSize)
 
     suspend fun getBloodRequest(id: String): BloodRequestDto = api.getBloodRequest(id)
 
@@ -263,4 +263,6 @@ class BloodNetworkRepository(
     suspend fun getAdminReports(status: String? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminReports(status, page, pageSize)
     suspend fun resolveReport(reportId: String, status: String, resolution: String? = null): AdminReportDto = api.resolveReport(reportId, ResolveReportRequest(status, resolution))
     suspend fun getAdminAuditLogs(entityType: String? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminAuditLogs(entityType, page, pageSize)
+    suspend fun getAdminMatches(response: String? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminMatches(response, page, pageSize)
+    suspend fun getAdminBloodRequests(status: String? = null, bloodGroup: BloodGroup? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminBloodRequests(status, bloodGroup, page, pageSize)
 }

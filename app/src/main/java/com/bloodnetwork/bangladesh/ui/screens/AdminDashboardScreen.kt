@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonLine
+import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AdminViewModel
@@ -63,7 +64,10 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
     val notifState by notifVm.uiState.collectAsStateWithLifecycle()
     var showNotifSheet by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) { notifVm.loadUnreadCount() }
+    LaunchedEffect(Unit) {
+        vm.loadDashboard()
+        notifVm.loadUnreadCount()
+    }
 
     Scaffold(
         topBar = {
@@ -124,20 +128,20 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
                     item { Text(tr("Overview", "সংক্ষিপ্ত বিবরণ"), style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold) }
                     item {
                         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            StatCard(tr("Total Users", "মোট ব্যবহারকারী"), stats.totalUsers, Modifier.weight(1f).fillMaxHeight())
-                            StatCard(tr("Donors", "দাতা"), stats.totalDonors, Modifier.weight(1f).fillMaxHeight())
+                            StatCard(tr("Total Users", "মোট ব্যবহারকারী"), stats.totalUsers, Modifier.weight(1f).fillMaxHeight(), onClick = { onNavigate(Routes.ADMIN_USERS) })
+                            StatCard(tr("Donors", "দাতা"), stats.totalDonors, Modifier.weight(1f).fillMaxHeight(), onClick = { onNavigate("${Routes.ADMIN_USERS}?role=Donor") })
                         }
                     }
                     item {
                         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            StatCard(tr("Blood Requests", "রক্তের অনুরোধ"), stats.openBloodRequests, Modifier.weight(1f).fillMaxHeight(), tr("open", "খোলা"))
-                            StatCard(tr("Matches", "মিল"), stats.acceptedMatches, Modifier.weight(1f).fillMaxHeight(), tr("accepted", "গৃহীত"))
+                            StatCard(tr("Blood Requests", "রক্তের অনুরোধ"), stats.openBloodRequests, Modifier.weight(1f).fillMaxHeight(), tr("open", "খোলা"), onClick = { onNavigate("${Routes.ADMIN_BLOOD_REQUESTS}?status=Open") })
+                            StatCard(tr("Matches", "মিল"), stats.acceptedMatches, Modifier.weight(1f).fillMaxHeight(), tr("accepted", "গৃহীত"), onClick = { onNavigate("${Routes.ADMIN_MATCHES}?response=Accepted") })
                         }
                     }
                     item {
                         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            StatCard(tr("Reports", "রিপোর্ট"), stats.openReports, Modifier.weight(1f).fillMaxHeight(), tr("open", "খোলা"))
-                            StatCard(tr("Pending Verifications", "মুলতুবি যাচাইকরণ"), stats.pendingVerifications, Modifier.weight(1f).fillMaxHeight())
+                            StatCard(tr("Reports", "রিপোর্ট"), stats.openReports, Modifier.weight(1f).fillMaxHeight(), tr("open", "খোলা"), onClick = { onNavigate("${Routes.ADMIN_REPORTS}?status=Open") })
+                            StatCard(tr("Pending Verifications", "মুলতুবি যাচাইকরণ"), stats.pendingVerifications, Modifier.weight(1f).fillMaxHeight(), onClick = { onNavigate("${Routes.ADMIN_USERS}?role=Donor&verify=Pending") })
                         }
                     }
                 }
@@ -205,8 +209,8 @@ fun ManagementCardSkeleton(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun StatCard(label: String, value: Int, modifier: Modifier = Modifier, subtitle: String = "") {
-    Card(modifier = modifier.heightIn(min = 92.dp)) {
+fun StatCard(label: String, value: Int, modifier: Modifier = Modifier, subtitle: String = "", onClick: (() -> Unit)? = null) {
+    val content: @Composable () -> Unit = {
         Column(modifier = Modifier.padding(16.dp).fillMaxWidth()) {
             Text("$value", style = MaterialTheme.typography.headlineMedium, color = BloodRed)
             Text(label, style = MaterialTheme.typography.bodyMedium, maxLines = 2)
@@ -218,6 +222,11 @@ fun StatCard(label: String, value: Int, modifier: Modifier = Modifier, subtitle:
                 maxLines = 1,
             )
         }
+    }
+    if (onClick != null) {
+        Card(onClick = onClick, modifier = modifier.heightIn(min = 92.dp)) { content() }
+    } else {
+        Card(modifier = modifier.heightIn(min = 92.dp)) { content() }
     }
 }
 

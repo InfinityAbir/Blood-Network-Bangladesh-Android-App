@@ -109,7 +109,10 @@ interface BloodNetworkApi {
     suspend fun getBloodRequest(@Path("id") id: String): BloodRequestDto
 
     @GET("api/blood-requests/my")
-    suspend fun getMyBloodRequests(): List<BloodRequestDto>
+    suspend fun getMyBloodRequests(
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20,
+    ): PagedResult<BloodRequestDto>
 
     @GET("api/blood-requests/open")
     suspend fun getOpenBloodRequests(
@@ -250,6 +253,21 @@ interface BloodNetworkApi {
         @Query("page") page: Int = 1,
         @Query("pageSize") pageSize: Int = 10,
     ): PagedResult<AdminReportDto>
+
+    @GET("api/admin/matches")
+    suspend fun getAdminMatches(
+        @Query("response") response: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 10,
+    ): PagedResult<BloodRequestMatchDto>
+
+    @GET("api/admin/blood-requests")
+    suspend fun getAdminBloodRequests(
+        @Query("status") status: String? = null,
+        @Query("bloodGroup") bloodGroup: BloodGroup? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 10,
+    ): PagedResult<BloodRequestDto>
 
     @POST("api/admin/reports/{reportId}/resolve")
     suspend fun resolveReport(

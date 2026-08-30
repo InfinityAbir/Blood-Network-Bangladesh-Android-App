@@ -15,14 +15,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -67,7 +70,12 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
+fun AdminUserManagementScreen(
+    onNavigate: (String) -> Unit,
+    onBack: () -> Unit,
+    initialRole: String? = null,
+    initialVerification: String? = null,
+) {
     val factory = LocalVmFactory.current!!
     val vm: AdminViewModel = viewModel(factory = factory)
     val authVm: AuthViewModel = viewModel(factory = factory)
@@ -76,14 +84,17 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
     val currentUserId = authState.user?.id
 
     var searchQuery by remember { mutableStateOf("") }
-    var selectedRole by remember { mutableStateOf("") }
+    var selectedRole by remember { mutableStateOf(initialRole.orEmpty()) }
     var selectedStatus by remember { mutableStateOf("") } // All | Active | Deactive
+    var selectedVerification by remember { mutableStateOf(initialVerification.orEmpty()) } // All | Verified | Pending | Rejected | Unverified
 
     fun isActiveFilter(): Boolean? = when (selectedStatus) {
         "Active" -> true
         "Deactive" -> false
         else -> null
     }
+
+    val displayedUsers = if (selectedVerification.isBlank()) state.users else state.users.filter { it.donorVerificationStatus == selectedVerification }
 
     LaunchedEffect(Unit) { vm.loadUsers(searchQuery.ifBlank { null }, selectedRole.ifBlank { null }, isActiveFilter()) }
 
@@ -109,7 +120,7 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 130.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
@@ -184,6 +195,52 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                             )
                         }
                     }
+                    // Verification row - client-side filter over the loaded page (no server-side verification query param)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(tr("Verify", "যাচাই"), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.width(48.dp))
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(end = 8.dp)) {
+                            item {
+                                FilterChip(
+                                    selected = selectedVerification == "", onClick = { selectedVerification = "" },
+                                    label = { Text(tr("All", "সব"), style = MaterialTheme.typography.labelSmall) },
+                                    shape = RoundedCornerShape(50),
+                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White),
+                                )
+                            }
+                            item {
+                                FilterChip(
+                                    selected = selectedVerification == "Verified", onClick = { selectedVerification = "Verified" },
+                                    label = { Text(tr("Verified", "যাচাইকৃত"), style = MaterialTheme.typography.labelSmall) },
+                                    shape = RoundedCornerShape(50),
+                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF2E7D32), selectedLabelColor = Color.White),
+                                )
+                            }
+                            item {
+                                FilterChip(
+                                    selected = selectedVerification == "Pending", onClick = { selectedVerification = "Pending" },
+                                    label = { Text(tr("Pending", "মুলতুবি"), style = MaterialTheme.typography.labelSmall) },
+                                    shape = RoundedCornerShape(50),
+                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFEF6C00), selectedLabelColor = Color.White),
+                                )
+                            }
+                            item {
+                                FilterChip(
+                                    selected = selectedVerification == "Rejected", onClick = { selectedVerification = "Rejected" },
+                                    label = { Text(tr("Rejected", "প্রত্যাখ্যাত"), style = MaterialTheme.typography.labelSmall) },
+                                    shape = RoundedCornerShape(50),
+                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFC62828), selectedLabelColor = Color.White),
+                                )
+                            }
+                            item {
+                                FilterChip(
+                                    selected = selectedVerification == "Unverified", onClick = { selectedVerification = "Unverified" },
+                                    label = { Text(tr("Unverified", "অযাচাইকৃত"), style = MaterialTheme.typography.labelSmall) },
+                                    shape = RoundedCornerShape(50),
+                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF616161), selectedLabelColor = Color.White),
+                                )
+                            }
+                        }
+                    }
                 }
             }
             val errorMsg = state.error
@@ -199,17 +256,21 @@ fun AdminUserManagementScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) 
                         }
                     }
                 }
-            } else if (state.users.isEmpty()) {
+            } else if (displayedUsers.isEmpty()) {
                 item {
-                    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)) {
-                        Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Box(modifier = Modifier.fillMaxWidth().padding(top = 48.dp), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Box(modifier = Modifier.size(64.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.size(28.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Spacer(Modifier.height(4.dp))
                             Text(tr("No users found", "কোনো ব্যবহারকারী পাওয়া যায়নি"), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                            Text(tr("Try a different search or role filter", "ভিন্ন খোঁজ বা ভূমিকা ফিল্টার চেষ্টা করুন"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(tr("Try a different search, role or verification filter", "ভিন্ন খোঁজ, ভূমিকা বা যাচাই ফিল্টার চেষ্টা করুন"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
             } else {
-                items(state.users, key = { it.id }) { user ->
+                items(displayedUsers, key = { it.id }) { user ->
                     Card(
                         modifier = Modifier.fillMaxWidth().animateItem(),
                         shape = RoundedCornerShape(16.dp),

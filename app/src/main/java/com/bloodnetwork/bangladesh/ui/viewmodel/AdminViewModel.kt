@@ -8,6 +8,9 @@ import com.bloodnetwork.bangladesh.data.model.AdminDashboardStats
 import com.bloodnetwork.bangladesh.data.model.AdminUserDto
 import com.bloodnetwork.bangladesh.data.model.AdminReportDto
 import com.bloodnetwork.bangladesh.data.model.AdminAuditLogDto
+import com.bloodnetwork.bangladesh.data.model.BloodGroup
+import com.bloodnetwork.bangladesh.data.model.BloodRequestDto
+import com.bloodnetwork.bangladesh.data.model.BloodRequestMatchDto
 import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +44,14 @@ data class AdminUiState(
     val auditLogsTotalCount: Int = 0,
     val auditLogsHasMore: Boolean = false,
     val auditLogsLoadingMore: Boolean = false,
+    val bloodRequests: List<BloodRequestDto> = emptyList(),
+    val bloodRequestsPage: Int = 1,
+    val bloodRequestsPageSize: Int = PAGE_SIZE,
+    val bloodRequestsTotalCount: Int = 0,
+    val matches: List<BloodRequestMatchDto> = emptyList(),
+    val matchesPage: Int = 1,
+    val matchesPageSize: Int = PAGE_SIZE,
+    val matchesTotalCount: Int = 0,
     val error: String? = null,
     val successMessage: String? = null,
 )
@@ -60,8 +71,11 @@ class AdminViewModel(
     private var reportsPageSize: Int = PAGE_SIZE
     private var auditEntityType: String? = null
     private var auditPageSize: Int = PAGE_SIZE
-
-    init { loadDashboard() }
+    private var bloodRequestsStatus: String? = null
+    private var bloodRequestsGroup: BloodGroup? = null
+    private var bloodRequestsPageSize: Int = PAGE_SIZE
+    private var matchesResponse: String? = null
+    private var matchesPageSize: Int = PAGE_SIZE
 
     fun loadDashboard() {
         _uiState.value = _uiState.value.copy(isLoading = true, error = null)
@@ -157,18 +171,36 @@ class AdminViewModel(
         }
     }
 
-    fun loadReports(status: String? = reportsStatus) {
+    fun loadReports(status: String? = reportsStatus, pageSize: Int? = null) {
         reportsStatus = status
+        if (pageSize != null) reportsPageSize = pageSize
         _uiState.value = _uiState.value.copy(isLoading = true)
         viewModelScope.launch {
-            runCatching { repository.getAdminReports(status, page = 1, pageSize = PAGE_SIZE) }
+            runCatching { repository.getAdminReports(status, page = 1, pageSize = reportsPageSize) }
                 .onSuccess { result ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false, isRefreshing = false, reports = result.items,
-                        reportsPage = 1, reportsHasMore = result.items.size < result.totalCount,
+                        reportsPage = 1, reportsPageSize = reportsPageSize, reportsTotalCount = result.totalCount,
+                        reportsHasMore = result.items.size < result.totalCount,
                     )
                 }
                 .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load reports")) }
+        }
+    }
+
+    fun gotoReportsPage(page: Int, pageSize: Int? = null) {
+        if (pageSize != null) reportsPageSize = pageSize
+        _uiState.value = _uiState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            runCatching { repository.getAdminReports(reportsStatus, page = page, pageSize = reportsPageSize) }
+                .onSuccess { result ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false, reports = result.items,
+                        reportsPage = page, reportsPageSize = reportsPageSize, reportsTotalCount = result.totalCount,
+                        reportsHasMore = result.items.size < result.totalCount,
+                    )
+                }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to load reports")) }
         }
     }
 
@@ -177,36 +209,36 @@ class AdminViewModel(
         loadReports(reportsStatus)
     }
 
-    fun loadMoreReports() {
-        val state = _uiState.value
-        if (!state.reportsHasMore || state.reportsLoadingMore) return
-        val nextPage = state.reportsPage + 1
-        _uiState.value = state.copy(reportsLoadingMore = true)
-        viewModelScope.launch {
-            runCatching { repository.getAdminReports(reportsStatus, page = nextPage, pageSize = PAGE_SIZE) }
-                .onSuccess { result ->
-                    val merged = _uiState.value.reports + result.items
-                    _uiState.value = _uiState.value.copy(
-                        reports = merged, reportsPage = nextPage, reportsLoadingMore = false,
-                        reportsHasMore = merged.size < result.totalCount,
-                    )
-                }
-                .onFailure { _uiState.value = _uiState.value.copy(reportsLoadingMore = false) }
-        }
-    }
-
-    fun loadAuditLogs(entityType: String? = auditEntityType) {
+    fun loadAuditLogs(entityType: String? = auditEntityType, pageSize: Int? = null) {
         auditEntityType = entityType
+        if (pageSize != null) auditPageSize = pageSize
         _uiState.value = _uiState.value.copy(isLoading = true)
         viewModelScope.launch {
-            runCatching { repository.getAdminAuditLogs(entityType, page = 1, pageSize = PAGE_SIZE) }
+            runCatching { repository.getAdminAuditLogs(entityType, page = 1, pageSize = auditPageSize) }
                 .onSuccess { result ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false, isRefreshing = false, auditLogs = result.items,
-                        auditLogsPage = 1, auditLogsHasMore = result.items.size < result.totalCount,
+                        auditLogsPage = 1, auditLogsPageSize = auditPageSize, auditLogsTotalCount = result.totalCount,
+                        auditLogsHasMore = result.items.size < result.totalCount,
                     )
                 }
                 .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load logs")) }
+        }
+    }
+
+    fun gotoAuditLogsPage(page: Int, pageSize: Int? = null) {
+        if (pageSize != null) auditPageSize = pageSize
+        _uiState.value = _uiState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            runCatching { repository.getAdminAuditLogs(auditEntityType, page = page, pageSize = auditPageSize) }
+                .onSuccess { result ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false, auditLogs = result.items,
+                        auditLogsPage = page, auditLogsPageSize = auditPageSize, auditLogsTotalCount = result.totalCount,
+                        auditLogsHasMore = result.items.size < result.totalCount,
+                    )
+                }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to load logs")) }
         }
     }
 
@@ -215,22 +247,77 @@ class AdminViewModel(
         loadAuditLogs(auditEntityType)
     }
 
-    fun loadMoreAuditLogs() {
-        val state = _uiState.value
-        if (!state.auditLogsHasMore || state.auditLogsLoadingMore) return
-        val nextPage = state.auditLogsPage + 1
-        _uiState.value = state.copy(auditLogsLoadingMore = true)
+    fun loadBloodRequests(status: String? = bloodRequestsStatus, bloodGroup: BloodGroup? = bloodRequestsGroup, pageSize: Int? = null) {
+        bloodRequestsStatus = status
+        bloodRequestsGroup = bloodGroup
+        if (pageSize != null) bloodRequestsPageSize = pageSize
+        _uiState.value = _uiState.value.copy(isLoading = true)
         viewModelScope.launch {
-            runCatching { repository.getAdminAuditLogs(auditEntityType, page = nextPage, pageSize = PAGE_SIZE) }
+            runCatching { repository.getAdminBloodRequests(status, bloodGroup, page = 1, pageSize = bloodRequestsPageSize) }
                 .onSuccess { result ->
-                    val merged = _uiState.value.auditLogs + result.items
                     _uiState.value = _uiState.value.copy(
-                        auditLogs = merged, auditLogsPage = nextPage, auditLogsLoadingMore = false,
-                        auditLogsHasMore = merged.size < result.totalCount,
+                        isLoading = false, isRefreshing = false, bloodRequests = result.items,
+                        bloodRequestsPage = 1, bloodRequestsPageSize = bloodRequestsPageSize, bloodRequestsTotalCount = result.totalCount,
                     )
                 }
-                .onFailure { _uiState.value = _uiState.value.copy(auditLogsLoadingMore = false) }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load blood requests")) }
         }
+    }
+
+    fun gotoBloodRequestsPage(page: Int, pageSize: Int? = null) {
+        if (pageSize != null) bloodRequestsPageSize = pageSize
+        _uiState.value = _uiState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            runCatching { repository.getAdminBloodRequests(bloodRequestsStatus, bloodRequestsGroup, page = page, pageSize = bloodRequestsPageSize) }
+                .onSuccess { result ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false, bloodRequests = result.items,
+                        bloodRequestsPage = page, bloodRequestsPageSize = bloodRequestsPageSize, bloodRequestsTotalCount = result.totalCount,
+                    )
+                }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to load blood requests")) }
+        }
+    }
+
+    fun refreshBloodRequests() {
+        _uiState.value = _uiState.value.copy(isRefreshing = true)
+        loadBloodRequests(bloodRequestsStatus, bloodRequestsGroup)
+    }
+
+    fun loadMatches(response: String? = matchesResponse, pageSize: Int? = null) {
+        matchesResponse = response
+        if (pageSize != null) matchesPageSize = pageSize
+        _uiState.value = _uiState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            runCatching { repository.getAdminMatches(response, page = 1, pageSize = matchesPageSize) }
+                .onSuccess { result ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false, isRefreshing = false, matches = result.items,
+                        matchesPage = 1, matchesPageSize = matchesPageSize, matchesTotalCount = result.totalCount,
+                    )
+                }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, isRefreshing = false, error = e.toDisplayMessage("Failed to load matches")) }
+        }
+    }
+
+    fun gotoMatchesPage(page: Int, pageSize: Int? = null) {
+        if (pageSize != null) matchesPageSize = pageSize
+        _uiState.value = _uiState.value.copy(isLoading = true)
+        viewModelScope.launch {
+            runCatching { repository.getAdminMatches(matchesResponse, page = page, pageSize = matchesPageSize) }
+                .onSuccess { result ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false, matches = result.items,
+                        matchesPage = page, matchesPageSize = matchesPageSize, matchesTotalCount = result.totalCount,
+                    )
+                }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to load matches")) }
+        }
+    }
+
+    fun refreshMatches() {
+        _uiState.value = _uiState.value.copy(isRefreshing = true)
+        loadMatches(matchesResponse)
     }
 
     fun toggleActive(userId: String, isActive: Boolean) {

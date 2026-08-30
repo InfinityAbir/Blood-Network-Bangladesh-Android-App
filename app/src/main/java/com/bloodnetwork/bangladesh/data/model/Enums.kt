@@ -42,5 +42,5 @@ enum class NotificationType {
 }
 
 enum class DonorResponse {
-    Pending, Accepted, Declined, Contacted
+    Pending, Accepted, Declined, NoResponse
 }

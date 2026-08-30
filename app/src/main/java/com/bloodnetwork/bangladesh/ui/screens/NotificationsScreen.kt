@@ -138,7 +138,15 @@ fun NotificationsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 items(state.notifications, key = { it.id }) { n ->
                     NotificationCard(n, onClick = {
                         vm.markRead(n.id)
-                        if (n.type == NotificationType.Availability) onNavigate(Routes.FIND_BLOOD)
+                        when (n.type) {
+                            NotificationType.Availability -> onNavigate(Routes.FIND_BLOOD)
+                            // Sent to the donor when a request matches their profile.
+                            NotificationType.BloodRequestMatch -> onNavigate(Routes.MY_MATCHES)
+                            // Sent to the requester when a donor accepts/declines their match.
+                            NotificationType.DonorAccepted, NotificationType.DonorDeclined ->
+                                n.relatedEntityId?.let { onNavigate("${Routes.REQUEST_DETAILS}/$it") }
+                            else -> {}
+                        }
                     })
                 }
             }

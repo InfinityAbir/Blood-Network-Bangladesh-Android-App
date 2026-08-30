@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assignment
+import androidx.compose.material.icons.filled.Bloodtype
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Logout
@@ -71,7 +73,9 @@ private fun dashboardActions(): List<DashboardAction> = listOf(
     DashboardAction(tr("Find Blood", "রক্ত খুঁজুন"), tr("Search for donors by blood group and location", "রক্তের গ্রুপ ও এলাকা অনুযায়ী দাতা খুঁজুন"), Icons.Filled.Search, Routes.FIND_BLOOD),
     DashboardAction(tr("Donate Blood", "রক্ত দিন"), tr("Check eligibility and become a donor", "যোগ্যতা যাচাই করুন এবং দাতা হয়ে উঠুন"), Icons.Filled.WaterDrop, Routes.ELIGIBILITY),
     DashboardAction(tr("Request Blood", "রক্তের অনুরোধ করুন"), tr("Create a new blood request", "নতুন রক্তের অনুরোধ তৈরি করুন"), Icons.Filled.HealthAndSafety, Routes.REQUEST_BLOOD),
+    DashboardAction(tr("My Requests", "আমার অনুরোধসমূহ"), tr("View, edit or cancel your blood requests", "আপনার রক্তের অনুরোধ দেখুন, সম্পাদনা বা বাতিল করুন"), Icons.Filled.Assignment, Routes.MY_REQUESTS),
     DashboardAction(tr("My Donor Profile", "আমার দাতা প্রোফাইল"), tr("Manage your donor profile and availability", "আপনার দাতা প্রোফাইল ও সহজলভ্যতা পরিচালনা করুন"), Icons.Filled.Person, Routes.DONOR_PROFILE),
+    DashboardAction(tr("My Matches", "আমার মিল"), tr("Respond to donor match requests", "দাতা মিলের অনুরোধে সাড়া দিন"), Icons.Filled.Bloodtype, Routes.MY_MATCHES),
     DashboardAction(tr("Edit Profile", "প্রোফাইল সম্পাদনা করুন"), tr("Change your phone, email or password", "আপনার ফোন, ইমেইল বা পাসওয়ার্ড পরিবর্তন করুন"), Icons.Filled.Settings, Routes.EDIT_PROFILE),
     DashboardAction(tr("About", "সম্পর্কে"), tr("Meet the developer behind this app", "এই অ্যাপের পেছনের ডেভেলপারের সাথে পরিচিত হন"), Icons.Filled.Info, Routes.ABOUT),
 )

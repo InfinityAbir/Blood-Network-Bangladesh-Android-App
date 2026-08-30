@@ -78,8 +78,8 @@ class RequestBloodViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(loadingRequests = true)
             runCatching { repository.getMyBloodRequests() }
-                .onSuccess { _uiState.value = _uiState.value.copy(myRequests = it, loadingRequests = false) }
-                .onFailure { _uiState.value = _uiState.value.copy(loadingRequests = false) }
+                .onSuccess { _uiState.value = _uiState.value.copy(myRequests = it.items, loadingRequests = false) }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(loadingRequests = false, error = e.toDisplayMessage("Failed to load your requests")) }
         }
     }
 

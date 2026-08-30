@@ -42,7 +42,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
+import com.bloodnetwork.bangladesh.ui.components.PaginationFooter
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
@@ -86,16 +86,6 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
         },
     ) { padding ->
         val listState = rememberLazyListState()
-        val shouldLoadMore by remember {
-            derivedStateOf {
-                val last = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                val total = listState.layoutInfo.totalItemsCount
-                total > 0 && last >= total - 3
-            }
-        }
-        LaunchedEffect(shouldLoadMore, state.auditLogsHasMore) {
-            if (shouldLoadMore && state.auditLogsHasMore) vm.loadMoreAuditLogs()
-        }
 
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
@@ -105,7 +95,7 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 130.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
@@ -165,8 +155,15 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                         createdAt = log.createdAt,
                     )
                 }
-                if (state.auditLogsLoadingMore) {
-                    item { Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) { SkeletonCard() } }
+                item {
+                    PaginationFooter(
+                        page = state.auditLogsPage,
+                        pageSize = state.auditLogsPageSize,
+                        totalCount = state.auditLogsTotalCount,
+                        label = tr("logs", "লগ"),
+                        onPageChange = { newPage -> vm.gotoAuditLogsPage(newPage) },
+                        onPageSizeChange = { newSize -> vm.loadAuditLogs(entityTypeFilter.ifBlank { null }, newSize) },
+                    )
                 }
             }
         }

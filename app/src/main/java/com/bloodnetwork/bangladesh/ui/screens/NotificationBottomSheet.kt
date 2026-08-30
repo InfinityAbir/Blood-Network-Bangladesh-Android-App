@@ -205,9 +205,24 @@ fun NotificationBottomSheet(
                                         n = n,
                                         onClick = {
                                             vm.markRead(n.id)
-                                            if (n.type == NotificationType.Availability) {
-                                                onDismiss()
-                                                onNavigate(Routes.FIND_BLOOD)
+                                            when (n.type) {
+                                                NotificationType.Availability -> {
+                                                    onDismiss()
+                                                    onNavigate(Routes.FIND_BLOOD)
+                                                }
+                                                // Sent to the donor when a request matches their profile.
+                                                NotificationType.BloodRequestMatch -> {
+                                                    onDismiss()
+                                                    onNavigate(Routes.MY_MATCHES)
+                                                }
+                                                // Sent to the requester when a donor accepts/declines their match.
+                                                NotificationType.DonorAccepted, NotificationType.DonorDeclined -> {
+                                                    n.relatedEntityId?.let {
+                                                        onDismiss()
+                                                        onNavigate("${Routes.REQUEST_DETAILS}/$it")
+                                                    }
+                                                }
+                                                else -> {}
                                             }
                                         },
                                         onDelete = { vm.deleteNotification(n.id) },

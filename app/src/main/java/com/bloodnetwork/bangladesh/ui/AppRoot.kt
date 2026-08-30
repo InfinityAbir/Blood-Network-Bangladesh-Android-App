@@ -34,6 +34,8 @@ import com.bloodnetwork.bangladesh.ui.screens.AdminDashboardScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminEligibilityQuestionsScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminUserManagementScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminReportsScreen
+import com.bloodnetwork.bangladesh.ui.screens.AdminBloodRequestsScreen
+import com.bloodnetwork.bangladesh.ui.screens.AdminMatchesScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminAuditLogsScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminSettingsScreen
 import com.bloodnetwork.bangladesh.ui.screens.EditProfileScreen
@@ -42,6 +44,8 @@ import com.bloodnetwork.bangladesh.ui.screens.FindBloodScreen
 import com.bloodnetwork.bangladesh.ui.screens.LandingScreen
 import com.bloodnetwork.bangladesh.ui.screens.NotificationsScreen
 import com.bloodnetwork.bangladesh.ui.screens.RequestBloodScreen
+import com.bloodnetwork.bangladesh.ui.screens.MyRequestsScreen
+import com.bloodnetwork.bangladesh.ui.screens.DonorMatchesScreen
 import com.bloodnetwork.bangladesh.ui.screens.RequestDetailsScreen
 import com.bloodnetwork.bangladesh.ui.screens.auth.LoginScreen
 import com.bloodnetwork.bangladesh.ui.screens.auth.RegisterScreen
@@ -143,7 +147,13 @@ fun AppRoot(repository: BloodNetworkRepository) {
                     FindBloodScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() }, authVm = authVm)
                 }
                 composable(Routes.REQUEST_BLOOD) {
-                    RequestBloodScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() }, authVm = authVm)
+                    RequestBloodScreen(onBack = { navController.popBackStack() }, authVm = authVm)
+                }
+                composable(Routes.MY_REQUESTS) {
+                    MyRequestsScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                }
+                composable(Routes.MY_MATCHES) {
+                    DonorMatchesScreen(onBack = { navController.popBackStack() })
                 }
                 composable(
                     "${Routes.REQUEST_DETAILS}/{id}",
@@ -195,11 +205,47 @@ fun AppRoot(repository: BloodNetworkRepository) {
                 composable(Routes.ADMIN_ANALYTICS) {
                     AdminAnalyticsScreen(onBack = { navController.popBackStack() })
                 }
-                composable(Routes.ADMIN_USERS) {
-                    AdminUserManagementScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                composable(
+                    "${Routes.ADMIN_USERS}?role={role}&verify={verify}",
+                    arguments = listOf(
+                        navArgument("role") { type = NavType.StringType; nullable = true; defaultValue = null },
+                        navArgument("verify") { type = NavType.StringType; nullable = true; defaultValue = null },
+                    ),
+                ) { backStackEntry ->
+                    AdminUserManagementScreen(
+                        onNavigate = navController::navigate,
+                        onBack = { navController.popBackStack() },
+                        initialRole = backStackEntry.arguments?.getString("role"),
+                        initialVerification = backStackEntry.arguments?.getString("verify"),
+                    )
                 }
-                composable(Routes.ADMIN_REPORTS) {
-                    AdminReportsScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })
+                composable(
+                    "${Routes.ADMIN_REPORTS}?status={status}",
+                    arguments = listOf(navArgument("status") { type = NavType.StringType; nullable = true; defaultValue = null }),
+                ) { backStackEntry ->
+                    AdminReportsScreen(
+                        onNavigate = navController::navigate,
+                        onBack = { navController.popBackStack() },
+                        initialStatus = backStackEntry.arguments?.getString("status"),
+                    )
+                }
+                composable(
+                    "${Routes.ADMIN_BLOOD_REQUESTS}?status={status}",
+                    arguments = listOf(navArgument("status") { type = NavType.StringType; nullable = true; defaultValue = null }),
+                ) { backStackEntry ->
+                    AdminBloodRequestsScreen(
+                        onBack = { navController.popBackStack() },
+                        initialStatus = backStackEntry.arguments?.getString("status"),
+                    )
+                }
+                composable(
+                    "${Routes.ADMIN_MATCHES}?response={response}",
+                    arguments = listOf(navArgument("response") { type = NavType.StringType; nullable = true; defaultValue = null }),
+                ) { backStackEntry ->
+                    AdminMatchesScreen(
+                        onBack = { navController.popBackStack() },
+                        initialResponse = backStackEntry.arguments?.getString("response"),
+                    )
                 }
                 composable(Routes.ADMIN_AUDIT_LOGS) {
                     AdminAuditLogsScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() })

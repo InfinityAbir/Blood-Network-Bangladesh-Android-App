@@ -1,6 +1,5 @@
 package com.bloodnetwork.bangladesh.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +30,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.Urgency
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
@@ -42,16 +42,14 @@ import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.RowChips
-import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.i18n.tr
-import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.RequestBloodViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: AuthViewModel) {
+fun RequestBloodScreen(onBack: () -> Unit, authVm: AuthViewModel) {
     val factory = LocalVmFactory.current!!
     val vm: RequestBloodViewModel = viewModel(factory = factory)
     val locVm: LocationViewModel = viewModel(factory = factory)
@@ -77,6 +75,7 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
     var contactPhone by remember { mutableStateOf("") }
     var additionalInfo by remember { mutableStateOf("") }
     var formError by remember { mutableStateOf<String?>(null) }
+    var justSubmitted by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val requiredFilled = bloodGroup != null && units.toIntOrNull() != null && hospitalName.isNotBlank() && districtId != null && upazilaId != null && requiredBy.isNotBlank() && contactPhone.length >= 10
@@ -100,9 +99,9 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
     val patientRelationLabel = tr("Patient Relation (optional)", "রোগীর সাথে সম্পর্ক (ঐচ্ছিক)")
     val contactPhoneLabel = tr("Contact Phone", "যোগাযোগের ফোন নম্বর")
     val additionalInfoLabel = tr("Additional Info (optional)", "অতিরিক্ত তথ্য (ঐচ্ছিক)")
-    val yourRecentRequestsLabel = tr("Your recent requests", "আপনার সাম্প্রতিক অনুরোধসমূহ")
     val submitRequestLabel = tr("Submit Request", "অনুরোধ জমা দিন")
-    val myRequestsLabel = tr("My Requests", "আমার অনুরোধসমূহ")
+    val requestSubmittedLabel = tr("Request Submitted", "অনুরোধ জমা হয়েছে")
+    val requestSubmittedMsg = tr("Your blood request has been submitted", "আপনার রক্তের অনুরোধ জমা দেওয়া হয়েছে")
     val urgencyLabels: Map<Urgency, String> = mapOf(
         Urgency.Critical to tr("Critical", "সংকটাপন্ন"),
         Urgency.Urgent to tr("Urgent", "জরুরি"),
@@ -119,7 +118,6 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
 
     LaunchedEffect(Unit) {
         locVm.loadDivisions()
-        vm.loadMyRequests()
 
         // Came here from "Request Blood" on a specific donor's card (possibly via a Login
         // detour) — pre-fill their blood group and location instead of opening blank.
@@ -143,6 +141,10 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
             requiredBy = ""
             formError = null
             vm.clearSuccess()
+            justSubmitted = true
+            launch { snackbarHostState.showSnackbar(requestSubmittedMsg) }
+            delay(2000)
+            justSubmitted = false
         }
     }
 
@@ -251,14 +253,10 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
 
             formError?.let { ErrorText(it) }
 
-            if (state.success && state.myRequests.isNotEmpty()) {
-                Text(yourRecentRequestsLabel, style = MaterialTheme.typography.titleMedium)
-            }
-
             PrimaryButton(
-                text = submitRequestLabel,
+                text = if (justSubmitted) requestSubmittedLabel else submitRequestLabel,
                 loading = state.isLoading,
-                enabled = requiredFilled,
+                enabled = requiredFilled && !justSubmitted,
                 onClick = {
                     val group = bloodGroup?.let { label -> BloodGroup.entries.firstOrNull { it.label == label } }
                     formError = when {
@@ -291,38 +289,6 @@ fun RequestBloodScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm:
                     }
                 },
             )
-
-            if (state.loadingRequests && state.myRequests.isEmpty()) {
-                Text(myRequestsLabel, style = MaterialTheme.typography.titleLarge)
-                Card(modifier = Modifier.fillMaxWidth()) { SkeletonCard() }
-            } else if (state.myRequests.isNotEmpty()) {
-                Text(myRequestsLabel, style = MaterialTheme.typography.titleLarge)
-                state.myRequests.forEach { req ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onNavigate("${com.bloodnetwork.bangladesh.ui.navigation.Routes.REQUEST_DETAILS}/${req.id}") },
-                    ) {
-                        androidx.compose.foundation.layout.Column(modifier = Modifier.padding(12.dp)) {
-                            androidx.compose.foundation.layout.Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                            ) {
-                                Text(req.bloodGroup.label, color = BloodRed, style = MaterialTheme.typography.titleMedium)
-                                Text(req.status.name, style = MaterialTheme.typography.labelLarge)
-                            }
-                            Text(
-                                tr(
-                                    "${req.hospitalName} · ${req.unitsRequired} unit(s)",
-                                    "${req.hospitalName} · ${req.unitsRequired} ইউনিট",
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                            Text(req.requiredBy, style = MaterialTheme.typography.bodySmall)
-                        }
-                    }
-                }
-            }
         }
     }
 }
