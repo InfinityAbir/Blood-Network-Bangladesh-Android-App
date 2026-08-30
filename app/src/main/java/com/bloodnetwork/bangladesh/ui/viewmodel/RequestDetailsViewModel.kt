@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.bloodnetwork.bangladesh.data.BloodNetworkRepository
 import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.BloodRequestDto
+import com.bloodnetwork.bangladesh.data.model.BloodRequestMatchDto
 import com.bloodnetwork.bangladesh.data.model.UpdateBloodRequestRequest
 import com.bloodnetwork.bangladesh.data.model.Urgency
 import com.bloodnetwork.bangladesh.data.network.toDisplayMessage
@@ -18,9 +19,14 @@ data class RequestDetailsUiState(
     val request: BloodRequestDto? = null,
     val isSaving: Boolean = false,
     val isCancelling: Boolean = false,
+    val isFulfilling: Boolean = false,
     val error: String? = null,
     val saved: Boolean = false,
     val cancelled: Boolean = false,
+    val fulfilled: Boolean = false,
+    val matches: List<BloodRequestMatchDto> = emptyList(),
+    val isLoadingMatches: Boolean = false,
+    val matchesError: String? = null,
 )
 
 class RequestDetailsViewModel(
@@ -34,8 +40,20 @@ class RequestDetailsViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             runCatching { repository.getBloodRequest(id) }
-                .onSuccess { _uiState.value = _uiState.value.copy(isLoading = false, request = it) }
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(isLoading = false, request = it)
+                    loadMatches(id)
+                }
                 .onFailure { e -> _uiState.value = _uiState.value.copy(isLoading = false, error = e.toDisplayMessage("Failed to load request")) }
+        }
+    }
+
+    fun loadMatches(id: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoadingMatches = true, matchesError = null)
+            runCatching { repository.getMatchesForRequest(id) }
+                .onSuccess { list -> _uiState.value = _uiState.value.copy(isLoadingMatches = false, matches = list) }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isLoadingMatches = false, matchesError = e.toDisplayMessage("Failed to load matches")) }
         }
     }
 
@@ -91,7 +109,24 @@ class RequestDetailsViewModel(
         }
     }
 
+    fun fulfill(id: String, unitsFulfilled: Int, notes: String? = null) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isFulfilling = true, error = null, fulfilled = false)
+            runCatching { repository.fulfillBloodRequest(id, unitsFulfilled, notes) }
+                .onSuccess { updated -> _uiState.value = _uiState.value.copy(isFulfilling = false, request = updated, fulfilled = true) }
+                .onFailure { e -> _uiState.value = _uiState.value.copy(isFulfilling = false, error = e.toDisplayMessage("Failed to fulfill request")) }
+        }
+    }
+
     fun clearSaved() {
         _uiState.value = _uiState.value.copy(saved = false)
+    }
+
+    fun clearFulfilled() {
+        _uiState.value = _uiState.value.copy(fulfilled = false)
+    }
+
+    fun clearError() {
+        _uiState.value = _uiState.value.copy(error = null)
     }
 }

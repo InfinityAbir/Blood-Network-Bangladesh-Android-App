@@ -166,6 +166,7 @@ fun AdminUserManagementScreen(
                             )
                             FilterChip(selected = selectedRole == "Donor", onClick = { selectedRole = "Donor"; vm.loadUsers(searchQuery.ifBlank { null }, "Donor", isActiveFilter()) }, label = { Text(tr("Donor", "রক্তদাতা"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
                             FilterChip(selected = selectedRole == "Requester", onClick = { selectedRole = "Requester"; vm.loadUsers(searchQuery.ifBlank { null }, "Requester", isActiveFilter()) }, label = { Text(tr("Requester", "অনুরোধকারী"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF1565C0), selectedLabelColor = Color.White))
+                            FilterChip(selected = selectedRole == "Volunteer", onClick = { selectedRole = "Volunteer"; vm.loadUsers(searchQuery.ifBlank { null }, "Volunteer", isActiveFilter()) }, label = { Text(tr("Volunteer", "স্বেচ্ছাসেবক"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF2E7D32), selectedLabelColor = Color.White))
                             FilterChip(selected = selectedRole == "Admin", onClick = { selectedRole = "Admin"; vm.loadUsers(searchQuery.ifBlank { null }, "Admin", isActiveFilter()) }, label = { Text(tr("Admin", "অ্যাডমিন"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF7B1FA2), selectedLabelColor = Color.White))
                         }
                     }
@@ -363,17 +364,20 @@ private fun RoleBadge(role: String) {
     val bg = when (role) {
         "Admin" -> Color(0xFF7B1FA2).copy(alpha = 0.1f)
         "Donor" -> BloodRed.copy(alpha = 0.1f)
+        "Volunteer" -> Color(0xFF2E7D32).copy(alpha = 0.1f)
         else -> Color(0xFF1565C0).copy(alpha = 0.1f)
     }
     val fg = when (role) {
         "Admin" -> Color(0xFF7B1FA2)
         "Donor" -> BloodRed
+        "Volunteer" -> Color(0xFF2E7D32)
         else -> Color(0xFF1565C0)
     }
     val displayText = when (role) {
         "Admin" -> tr("Admin", "অ্যাডমিন")
         "Donor" -> tr("Donor", "রক্তদাতা")
         "Requester" -> tr("Requester", "অনুরোধকারী")
+        "Volunteer" -> tr("Volunteer", "স্বেচ্ছাসেবক")
         else -> role
     }
     Box(modifier = Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 10.dp, vertical = 5.dp)) {

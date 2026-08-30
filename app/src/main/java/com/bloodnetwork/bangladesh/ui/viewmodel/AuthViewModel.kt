@@ -113,7 +113,7 @@ class AuthViewModel(
         }
     }
 
-    fun register(firstName: String, lastName: String, phone: String, password: String, email: String) {
+    fun register(firstName: String, lastName: String, phone: String, password: String, email: String, role: com.bloodnetwork.bangladesh.data.model.UserRole = com.bloodnetwork.bangladesh.data.model.UserRole.Requester) {
         _uiState.value = AuthUiState(isLoading = true)
         viewModelScope.launch {
             val request = com.bloodnetwork.bangladesh.data.model.RegisterRequest(
@@ -122,6 +122,7 @@ class AuthViewModel(
                 phoneNumber = phone.trim(),
                 password = password,
                 email = email.trim().ifBlank { null },
+                role = role,
             )
             runCatching { repository.register(request) }
                 .onSuccess { auth ->

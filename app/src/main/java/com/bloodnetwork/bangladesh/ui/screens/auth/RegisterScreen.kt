@@ -31,10 +31,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bloodnetwork.bangladesh.data.model.UserRole
 import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.ui.components.ErrorText
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
+import com.bloodnetwork.bangladesh.ui.components.RowChips
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
@@ -56,6 +58,7 @@ fun RegisterScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
+    var selectedRole by remember { mutableStateOf(UserRole.Requester) }
     var localError by remember { mutableStateOf<String?>(null) }
     var phoneError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
@@ -127,6 +130,22 @@ fun RegisterScreen(
             LabeledTextField(confirm, { confirm = it }, tr("Confirm Password", "পাসওয়ার্ড নিশ্চিত করুন"),
                 isPassword = true)
 
+            // G7: volunteer role selection
+            androidx.compose.material3.Text(tr("Register as", "ভূমিকা নির্বাচন করুন"), style = MaterialTheme.typography.titleSmall)
+            RowChips(
+                options = listOf(UserRole.Requester, UserRole.Donor, UserRole.Volunteer),
+                selected = selectedRole,
+                labelOf = {
+                    when (it) {
+                        UserRole.Requester -> tr("Requester", "অনুরোধকারী")
+                        UserRole.Donor -> tr("Donor", "রক্তদাতা")
+                        UserRole.Volunteer -> tr("Volunteer", "স্বেচ্ছাসেবক")
+                        else -> it.name
+                    }
+                },
+                onSelect = { selectedRole = it },
+            )
+
             localError?.let { ErrorText(it) }
             state.error?.let { ErrorText(it) }
 
@@ -144,7 +163,7 @@ fun RegisterScreen(
                         password != confirm -> passwordsMismatchMsg
                         else -> null
                     }
-                    if (localError == null) vm.register(firstName, lastName, phone, password, email)
+                    if (localError == null) vm.register(firstName, lastName, phone, password, email, selectedRole)
                 },
             )
             TextButton(onClick = { onNavigate(Routes.LOGIN) }) {

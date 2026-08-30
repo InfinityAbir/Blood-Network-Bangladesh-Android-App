@@ -44,8 +44,10 @@ import com.bloodnetwork.bangladesh.ui.components.RowChips
 import com.bloodnetwork.bangladesh.ui.components.FormFieldSkeleton
 import com.bloodnetwork.bangladesh.ui.i18n.LocalAppLanguage
 import com.bloodnetwork.bangladesh.ui.i18n.tr
+import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.theme.AvailableGreen
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.EligibilityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +55,9 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.EligibilityViewModel
 fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     val factory = LocalVmFactory.current!!
     val vm: EligibilityViewModel = viewModel(factory = factory)
+    val authVm: AuthViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
+    val authState by authVm.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { vm.loadQuestions() }
 
@@ -123,7 +127,15 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 }
                 state.result?.let { result ->
                     item {
-                        ResultCard(result)
+                        ResultCard(result, onBecomeDonor = {
+                            val isLoggedIn = authState.isLoggedIn || authState.user != null
+                            if (isLoggedIn) {
+                                onNavigate(Routes.DONOR_PROFILE)
+                            } else {
+                                authVm.pendingRedirectRoute = Routes.DONOR_PROFILE
+                                onNavigate(Routes.LOGIN)
+                            }
+                        })
                     }
                     // Keep result visible; allow re-check without requiring a change.
                     // Show a subtle hint only when answers have changed since last check.
@@ -208,11 +220,11 @@ fun QuestionCard(q: EligibilityQuestionDto, current: String?, onAnswer: (String)
 }
 
 @Composable
-fun ResultCard(result: com.bloodnetwork.bangladesh.data.model.EligibilityResultDto) {
+fun ResultCard(result: com.bloodnetwork.bangladesh.data.model.EligibilityResultDto, onBecomeDonor: (() -> Unit)? = null) {
     val language = LocalAppLanguage.current
     val recommendation = if (language == AppLanguage.Bangla && result.recommendationBn.isNotBlank()) result.recommendationBn else result.recommendationEn
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
                 text = if (result.isEligible) tr("You are eligible to donate", "আপনি রক্ত দেওয়ার যোগ্য") else tr("Not eligible right now", "এই মুহূর্তে যোগ্য নন"),
                 style = MaterialTheme.typography.titleMedium,
@@ -221,6 +233,12 @@ fun ResultCard(result: com.bloodnetwork.bangladesh.data.model.EligibilityResultD
             Text("${tr("Score", "স্কোর")}: ${result.score}", style = MaterialTheme.typography.bodyMedium)
             if (recommendation.isNotBlank()) {
                 Text(recommendation, style = MaterialTheme.typography.bodyMedium)
+            }
+            if (result.isEligible && onBecomeDonor != null) {
+                PrimaryButton(
+                    text = tr("Create My Donor Profile", "আমার ডোনার প্রোফাইল তৈরি করুন"),
+                    onClick = onBecomeDonor,
+                )
             }
         }
     }
