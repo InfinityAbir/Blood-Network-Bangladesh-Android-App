@@ -17,12 +17,10 @@ import com.bloodnetwork.bangladesh.data.model.EligibilityAnswerDto
 import com.bloodnetwork.bangladesh.data.model.EligibilityQuestionDto
 import com.bloodnetwork.bangladesh.data.model.EligibilityResultDto
 import com.bloodnetwork.bangladesh.data.model.EligibilityStateDto
-import com.bloodnetwork.bangladesh.data.model.FirstLoginChangeRequest
 import com.bloodnetwork.bangladesh.data.model.LoginRequest
 import com.bloodnetwork.bangladesh.data.model.MarkNotificationReadRequest
 import com.bloodnetwork.bangladesh.data.model.NotificationDto
 import com.bloodnetwork.bangladesh.data.model.PagedResult
-import com.bloodnetwork.bangladesh.data.model.PublicBloodRequestDto
 import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
 import com.bloodnetwork.bangladesh.data.model.RegisterPushTokenRequest
 import com.bloodnetwork.bangladesh.data.model.RefreshTokenRequest
@@ -71,9 +69,6 @@ interface BloodNetworkApi {
     @POST("api/auth/logout")
     suspend fun logout(@Body request: RefreshTokenRequest): Unit
 
-    @POST("api/auth/first-login-change")
-    suspend fun firstLoginChange(@Body request: FirstLoginChangeRequest): Unit
-
     @PUT("api/auth/profile")
     suspend fun updateProfile(@Body request: UpdateProfileRequest): UserDto
 
@@ -115,14 +110,6 @@ interface BloodNetworkApi {
         @Query("pageSize") pageSize: Int = 20,
     ): PagedResult<BloodRequestDto>
 
-    @GET("api/blood-requests/open")
-    suspend fun getOpenBloodRequests(
-        @Query("bloodGroup") bloodGroup: BloodGroup? = null,
-        @Query("districtId") districtId: String? = null,
-        @Query("page") page: Int = 1,
-        @Query("pageSize") pageSize: Int = 20,
-    ): PagedResult<PublicBloodRequestDto>
-
     @PATCH("api/blood-requests/{id}")
     suspend fun updateBloodRequest(@Path("id") id: String, @Body request: UpdateBloodRequestRequest): BloodRequestDto
 
@@ -161,9 +148,6 @@ interface BloodNetworkApi {
         @Path("matchId") matchId: String,
         @Body request: RespondToMatchRequest,
     ): BloodRequestMatchDto
-
-    @POST("api/matches/request/{requestId}/trigger-match")
-    suspend fun triggerMatch(@Path("requestId") requestId: String): Unit
 
     // ---- Notifications ----
     @GET("api/notifications")

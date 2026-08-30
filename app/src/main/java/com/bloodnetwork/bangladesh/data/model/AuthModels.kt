@@ -48,13 +48,6 @@ data class UserDto(
 }
 
 @Serializable
-data class FirstLoginChangeRequest(
-    @SerialName("newEmail") val newEmail: String,
-    @SerialName("newPassword") val newPassword: String,
-    @SerialName("currentPassword") val currentPassword: String,
-)
-
-@Serializable
 data class UpdateProfileRequest(
     @SerialName("currentPassword") val currentPassword: String,
     @SerialName("newEmail") val newEmail: String? = null,

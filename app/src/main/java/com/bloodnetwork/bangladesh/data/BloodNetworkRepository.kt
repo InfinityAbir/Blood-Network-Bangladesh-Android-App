@@ -17,7 +17,6 @@ import com.bloodnetwork.bangladesh.data.model.LoginRequest
 import com.bloodnetwork.bangladesh.data.model.NotificationDto
 import com.bloodnetwork.bangladesh.data.model.NotificationType
 import com.bloodnetwork.bangladesh.data.model.PagedResult
-import com.bloodnetwork.bangladesh.data.model.PublicBloodRequestDto
 import com.bloodnetwork.bangladesh.data.model.PublicDonorDto
 import com.bloodnetwork.bangladesh.data.model.RefreshTokenRequest
 import com.bloodnetwork.bangladesh.data.model.RegisterPushTokenRequest
@@ -168,14 +167,6 @@ class BloodNetworkRepository(
 
     suspend fun fulfillBloodRequest(id: String, unitsFulfilled: Int, notes: String? = null): BloodRequestDto =
         api.fulfillBloodRequest(id, com.bloodnetwork.bangladesh.data.model.FulfillBloodRequestRequest(unitsFulfilled, notes))
-
-    suspend fun getOpenBloodRequests(
-        bloodGroup: BloodGroup? = null,
-        districtId: String? = null,
-        page: Int = 1,
-        pageSize: Int = 20,
-    ): PagedResult<PublicBloodRequestDto> =
-        api.getOpenBloodRequests(bloodGroup, districtId, page, pageSize)
 
     suspend fun getMatchesForRequest(requestId: String): List<BloodRequestMatchDto> =
         api.getMatchesForRequest(requestId)
