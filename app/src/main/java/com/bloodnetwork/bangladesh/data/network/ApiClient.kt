@@ -34,9 +34,14 @@ object ApiClient {
         }
 
         val okHttp = OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
-            .writeTimeout(60, TimeUnit.SECONDS)
+            // Render's free-tier backend spins down when idle and can take 50s+ to wake
+            // back up on the first request after a period of inactivity - timeouts below
+            // that threshold cause the client to give up mid cold-start (server-side logs
+            // show it as "canceled by client") even though the request would have
+            // succeeded had it waited a few more seconds.
+            .connectTimeout(75, TimeUnit.SECONDS)
+            .readTimeout(75, TimeUnit.SECONDS)
+            .writeTimeout(75, TimeUnit.SECONDS)
             .addInterceptor(authInterceptor)
             .addInterceptor(TokenRefreshInterceptor(tokenStore, baseUrl))
             .addInterceptor(ApiErrorInterceptor(json))

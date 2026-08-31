@@ -53,6 +53,7 @@ import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 import com.bloodnetwork.bangladesh.ui.theme.BloodPink
 import com.bloodnetwork.bangladesh.ui.theme.GrayMid
 import com.bloodnetwork.bangladesh.ui.theme.RecentlyDonatedAmber
+import com.bloodnetwork.bangladesh.ui.util.formatDateTime
 import com.bloodnetwork.bangladesh.ui.viewmodel.NotificationsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -177,7 +178,7 @@ fun NotificationCard(n: NotificationDto, onClick: () -> Unit = {}) {
             }
             Text(n.message, style = MaterialTheme.typography.bodyMedium)
             if (n.createdAt.isNotBlank()) {
-                Text(n.createdAt, style = MaterialTheme.typography.bodySmall)
+                Text(formatDateTime(n.createdAt), style = MaterialTheme.typography.bodySmall)
             }
         }
     }

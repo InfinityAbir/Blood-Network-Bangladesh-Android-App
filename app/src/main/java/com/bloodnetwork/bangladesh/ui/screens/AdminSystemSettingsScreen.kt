@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import com.bloodnetwork.bangladesh.ui.util.formatDateTime
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -132,7 +133,7 @@ fun AdminSystemSettingsScreen(onBack: () -> Unit) {
                     ) {
                         if (state.isSaving) CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp), color = androidx.compose.ui.graphics.Color.White) else Text(tr("Save Settings", "সেটিংস সংরক্ষণ করুন"))
                     }
-                    state.settings?.updatedAt?.let { Text(tr("Last updated: $it", "শেষ আপডেট: $it"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                    state.settings?.updatedAt?.let { Text(tr("Last updated: ${formatDateTime(it)}", "শেষ আপডেট: ${formatDateTime(it)}"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
             }
         }

@@ -23,8 +23,10 @@ class TokenRefreshInterceptor(
     private val refreshLock = Any()
 
     private val plainClient = OkHttpClient.Builder()
-        .connectTimeout(15, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
+        // Matches ApiClient's timeouts - the backend can be cold-starting (Render free
+        // tier) on this call just as easily as on the request that triggered the 401.
+        .connectTimeout(75, TimeUnit.SECONDS)
+        .readTimeout(75, TimeUnit.SECONDS)
         .build()
 
     override fun intercept(chain: Interceptor.Chain): Response {
