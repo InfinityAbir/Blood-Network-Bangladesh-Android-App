@@ -24,8 +24,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bloodtype
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Route
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -38,11 +40,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -149,6 +155,7 @@ private fun MatchCard(
     modifier: Modifier = Modifier,
 ) {
     val accent = responseAccentColor(match.donorResponse)
+    var showScoreInfo by remember { mutableStateOf(false) }
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -165,10 +172,23 @@ private fun MatchCard(
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(match.requesterName.ifBlank { tr("Unknown requester", "অজানা অনুরোধকারী") }, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1)
-                            Text(tr("Score ${match.matchScore}/100", "স্কোর ${match.matchScore}/১০০"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(tr("Score ${match.matchScore}/100", "স্কোর ${match.matchScore}/১০০"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                IconButton(onClick = { showScoreInfo = true }, modifier = Modifier.size(16.dp)) {
+                                    Icon(Icons.Filled.Info, contentDescription = tr("What is this score?", "এই স্কোর কী?"), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
                         }
                     }
                     ResponsePill(match.donorResponse)
+                }
+                if (showScoreInfo) {
+                    AlertDialog(
+                        onDismissRequest = { showScoreInfo = false },
+                        confirmButton = { TextButton(onClick = { showScoreInfo = false }) { Text(tr("Got it", "বুঝেছি")) } },
+                        title = { Text(tr("Match score", "ম্যাচ স্কোর")) },
+                        text = { Text(tr("This score (0-100) shows how good a match you are for this request, based on blood type compatibility, distance, your availability, and verification status. A higher score means a better match.", "এই স্কোর (০-১০০) দেখায় আপনি এই অনুরোধের জন্য কতটা উপযুক্ত — রক্তের গ্রুপ সামঞ্জস্য, দূরত্ব, আপনার প্রাপ্যতা ও ভেরিফিকেশন অবস্থার উপর ভিত্তি করে। স্কোর যত বেশি, মিল তত ভালো।")) },
+                    )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Icon(Icons.Filled.LocalHospital, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)

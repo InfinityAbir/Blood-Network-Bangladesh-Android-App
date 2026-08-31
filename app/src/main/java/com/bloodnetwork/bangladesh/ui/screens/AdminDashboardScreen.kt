@@ -154,7 +154,7 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
                     item {
                         Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             StatCard(tr("Reports", "রিপোর্ট"), stats.openReports, Modifier.weight(1f).fillMaxHeight(), tr("open", "খোলা"), onClick = { onNavigate("${Routes.ADMIN_REPORTS}?status=Open") })
-                            StatCard(tr("Pending Verifications", "মুলতুবি যাচাইকরণ"), stats.pendingVerifications, Modifier.weight(1f).fillMaxHeight(), onClick = { onNavigate("${Routes.ADMIN_USERS}?role=Donor&verify=Pending") })
+                            StatCard(tr("Unverified Donors", "অযাচাইকৃত দাতা"), stats.pendingVerifications, Modifier.weight(1f).fillMaxHeight(), tr("awaiting verification", "যাচাইয়ের অপেক্ষায়"), onClick = { onNavigate("${Routes.ADMIN_USERS}?role=Donor&verify=Unverified") })
                         }
                     }
                 }

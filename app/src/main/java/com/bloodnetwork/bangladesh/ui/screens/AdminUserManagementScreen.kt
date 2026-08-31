@@ -86,7 +86,7 @@ fun AdminUserManagementScreen(
     var searchQuery by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf(initialRole.orEmpty()) }
     var selectedStatus by remember { mutableStateOf("") } // All | Active | Deactive
-    var selectedVerification by remember { mutableStateOf(initialVerification.orEmpty()) } // All | Verified | Pending | Rejected | Unverified
+    var selectedVerification by remember { mutableStateOf(initialVerification.orEmpty()) } // All | Verified | Rejected | Unverified
 
     fun isActiveFilter(): Boolean? = when (selectedStatus) {
         "Active" -> true
@@ -166,7 +166,6 @@ fun AdminUserManagementScreen(
                             )
                             FilterChip(selected = selectedRole == "Donor", onClick = { selectedRole = "Donor"; vm.loadUsers(searchQuery.ifBlank { null }, "Donor", isActiveFilter()) }, label = { Text(tr("Donor", "রক্তদাতা"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = BloodRed, selectedLabelColor = Color.White))
                             FilterChip(selected = selectedRole == "Requester", onClick = { selectedRole = "Requester"; vm.loadUsers(searchQuery.ifBlank { null }, "Requester", isActiveFilter()) }, label = { Text(tr("Requester", "অনুরোধকারী"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF1565C0), selectedLabelColor = Color.White))
-                            FilterChip(selected = selectedRole == "Volunteer", onClick = { selectedRole = "Volunteer"; vm.loadUsers(searchQuery.ifBlank { null }, "Volunteer", isActiveFilter()) }, label = { Text(tr("Volunteer", "স্বেচ্ছাসেবক"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF2E7D32), selectedLabelColor = Color.White))
                             FilterChip(selected = selectedRole == "Admin", onClick = { selectedRole = "Admin"; vm.loadUsers(searchQuery.ifBlank { null }, "Admin", isActiveFilter()) }, label = { Text(tr("Admin", "অ্যাডমিন"), style = MaterialTheme.typography.labelSmall) }, shape = RoundedCornerShape(50), colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF7B1FA2), selectedLabelColor = Color.White))
                         }
                     }
@@ -218,10 +217,10 @@ fun AdminUserManagementScreen(
                             }
                             item {
                                 FilterChip(
-                                    selected = selectedVerification == "Pending", onClick = { selectedVerification = "Pending" },
-                                    label = { Text(tr("Pending", "মুলতুবি"), style = MaterialTheme.typography.labelSmall) },
+                                    selected = selectedVerification == "Unverified", onClick = { selectedVerification = "Unverified" },
+                                    label = { Text(tr("Unverified", "অযাচাইকৃত"), style = MaterialTheme.typography.labelSmall) },
                                     shape = RoundedCornerShape(50),
-                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFEF6C00), selectedLabelColor = Color.White),
+                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF616161), selectedLabelColor = Color.White),
                                 )
                             }
                             item {
@@ -230,14 +229,6 @@ fun AdminUserManagementScreen(
                                     label = { Text(tr("Rejected", "প্রত্যাখ্যাত"), style = MaterialTheme.typography.labelSmall) },
                                     shape = RoundedCornerShape(50),
                                     colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFFC62828), selectedLabelColor = Color.White),
-                                )
-                            }
-                            item {
-                                FilterChip(
-                                    selected = selectedVerification == "Unverified", onClick = { selectedVerification = "Unverified" },
-                                    label = { Text(tr("Unverified", "অযাচাইকৃত"), style = MaterialTheme.typography.labelSmall) },
-                                    shape = RoundedCornerShape(50),
-                                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color(0xFF616161), selectedLabelColor = Color.White),
                                 )
                             }
                         }
@@ -281,7 +272,7 @@ fun AdminUserManagementScreen(
                         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                 Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = user.photoUrl, size = 36.dp)
+                                    com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = user.photoUrl, donorName = "${user.firstName} ${user.lastName}", size = 36.dp)
                                     Column {
                                         Text("${user.firstName} ${user.lastName}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1)
                                         Spacer(Modifier.height(2.dp))
@@ -314,10 +305,6 @@ fun AdminUserManagementScreen(
                                                 CompactFilledButton(tr("Verify", "যাচাই করুন"), onClick = { vm.verifyDonor(user.id, "Verified") })
                                             }
                                             "Verified" -> {
-                                                CompactOutlinedButton(tr("Reject", "প্রত্যাখ্যান করুন"), onClick = { vm.verifyDonor(user.id, "Rejected") })
-                                            }
-                                            "Pending" -> {
-                                                CompactFilledButton(tr("Verify", "যাচাই করুন"), onClick = { vm.verifyDonor(user.id, "Verified") })
                                                 CompactOutlinedButton(tr("Reject", "প্রত্যাখ্যান করুন"), onClick = { vm.verifyDonor(user.id, "Rejected") })
                                             }
                                         }
@@ -364,20 +351,17 @@ private fun RoleBadge(role: String) {
     val bg = when (role) {
         "Admin" -> Color(0xFF7B1FA2).copy(alpha = 0.1f)
         "Donor" -> BloodRed.copy(alpha = 0.1f)
-        "Volunteer" -> Color(0xFF2E7D32).copy(alpha = 0.1f)
         else -> Color(0xFF1565C0).copy(alpha = 0.1f)
     }
     val fg = when (role) {
         "Admin" -> Color(0xFF7B1FA2)
         "Donor" -> BloodRed
-        "Volunteer" -> Color(0xFF2E7D32)
         else -> Color(0xFF1565C0)
     }
     val displayText = when (role) {
         "Admin" -> tr("Admin", "অ্যাডমিন")
         "Donor" -> tr("Donor", "রক্তদাতা")
         "Requester" -> tr("Requester", "অনুরোধকারী")
-        "Volunteer" -> tr("Volunteer", "স্বেচ্ছাসেবক")
         else -> role
     }
     Box(modifier = Modifier.clip(RoundedCornerShape(50)).background(bg).padding(horizontal = 10.dp, vertical = 5.dp)) {
@@ -398,13 +382,11 @@ private fun StatusPill(text: String, active: Boolean) {
 private fun VerifyPill(status: String) {
     val (bg, fg) = when (status) {
         "Verified" -> Color(0xFF2E7D32).copy(alpha = 0.1f) to Color(0xFF2E7D32)
-        "Pending" -> Color(0xFFEF6C00).copy(alpha = 0.12f) to Color(0xFFEF6C00)
         "Rejected" -> Color(0xFFC62828).copy(alpha = 0.1f) to Color(0xFFC62828)
         else -> Color(0xFF616161).copy(alpha = 0.1f) to Color(0xFF616161)
     }
     val displayText = when (status) {
         "Verified" -> tr("Verified", "যাচাইকৃত")
-        "Pending" -> tr("Pending", "মুলতুবি")
         "Rejected" -> tr("Rejected", "প্রত্যাখ্যাত")
         "Unverified" -> tr("Unverified", "অযাচাইকৃত")
         else -> status

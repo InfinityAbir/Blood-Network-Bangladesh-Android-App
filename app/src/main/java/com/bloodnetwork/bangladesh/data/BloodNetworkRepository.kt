@@ -48,6 +48,9 @@ import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.data.prefs.TokenStore
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 
@@ -67,6 +70,12 @@ class BloodNetworkRepository(
     fun isLoggedInSync(): Boolean = tokenStore.isLoggedInSync()
     fun currentUserRoleSync(): com.bloodnetwork.bangladesh.data.model.UserRole? = tokenStore.currentUserRoleSync()
 
+    /// Shared, in-memory copy of the signed-in donor's server profile (last known). Any call that
+    /// returns a fresh DonorProfileDto refreshes it; screens read it so availability changes
+    /// (e.g. auto-flip to Unavailable after accepting an urgent match) show up immediately.
+    private val _currentDonorProfile = MutableStateFlow<DonorProfileDto?>(null)
+    val currentDonorProfile: StateFlow<DonorProfileDto?> = _currentDonorProfile.asStateFlow()
+
     // ---- Auth ----
     suspend fun login(phone: String, password: String): AuthResponse {
         val auth = api.login(LoginRequest(phoneNumber = phone, password = password))
@@ -76,6 +85,7 @@ class BloodNetworkRepository(
         // a user's own answers+result across logout/login while still isolating from other users.
         registrationStore.clear()
         donorProfileStore.clear()
+        _currentDonorProfile.value = null
         return auth
     }
 
@@ -84,6 +94,7 @@ class BloodNetworkRepository(
         tokenStore.saveSession(auth)
         registrationStore.clear()
         donorProfileStore.clear()
+        _currentDonorProfile.value = null
         return auth
     }
 
@@ -99,6 +110,7 @@ class BloodNetworkRepository(
         // Eligibility is per-user (guest vs userId) so we KEEP it — same user logging back in will find their own bundle.
         registrationStore.clear()
         donorProfileStore.clear()
+        _currentDonorProfile.value = null
     }
 
     suspend fun me(): UserDto = api.me()
@@ -133,15 +145,16 @@ class BloodNetworkRepository(
 
     // ---- Donors ----
     suspend fun createDonorProfile(request: CreateDonorProfileRequest): DonorProfileDto =
-        api.createDonorProfile(request)
+        api.createDonorProfile(request).also { _currentDonorProfile.value = it }
 
-    suspend fun getMyDonorProfile(): DonorProfileDto = api.getMyDonorProfile()
+    suspend fun getMyDonorProfile(): DonorProfileDto =
+        api.getMyDonorProfile().also { _currentDonorProfile.value = it }
 
     suspend fun updateDonorProfile(request: UpdateDonorProfileRequest): DonorProfileDto =
-        api.updateDonorProfile(request)
+        api.updateDonorProfile(request).also { _currentDonorProfile.value = it }
 
     suspend fun toggleAvailability(status: ToggleAvailabilityRequest): DonorProfileDto =
-        api.toggleAvailability(status)
+        api.toggleAvailability(status).also { _currentDonorProfile.value = it }
 
     suspend fun searchDonors(
         bloodGroup: BloodGroup? = null,

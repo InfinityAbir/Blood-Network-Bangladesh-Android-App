@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Handshake
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material3.AlertDialog
@@ -333,6 +334,7 @@ fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
 
             // G2: matched donors for this request (requester view)
             val context = LocalContext.current
+            var showScoreInfo by remember { mutableStateOf(false) }
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -371,23 +373,14 @@ fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
                                         Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.weight(1f)) {
-                                                    if (!match.donorPhotoUrl.isNullOrBlank()) {
-                                                        com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = match.donorPhotoUrl, size = 32.dp)
-                                                    } else {
-                                                        Box(modifier = Modifier.size(32.dp).clip(CircleShape).background(BloodRed.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
-                                                            Text(
-                                                                text = match.donorBloodGroup.take(3),
-                                                                style = MaterialTheme.typography.labelSmall,
-                                                                color = BloodRed,
-                                                                fontWeight = FontWeight.Bold,
-                                                                maxLines = 1,
-                                                                overflow = TextOverflow.Ellipsis,
-                                                                textAlign = TextAlign.Center,
-                                                            )
-                                                        }
-                                                    }
+                                                    com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = match.donorPhotoUrl, donorName = match.donorName, size = 32.dp)
                                                     Column(modifier = Modifier.weight(1f)) {
-                                                        Text(match.donorName.ifBlank { tr("Unknown donor", "অজানা দাতা") }, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                            Text(match.donorName.ifBlank { tr("Unknown donor", "অজানা দাতা") }, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                                                            Box(modifier = Modifier.clip(RoundedCornerShape(4.dp)).background(BloodRed.copy(alpha = 0.12f)).padding(horizontal = 5.dp, vertical = 1.dp)) {
+                                                                Text(formatBloodGroupLabel(match.donorBloodGroup), style = MaterialTheme.typography.labelSmall, color = BloodRed, fontWeight = FontWeight.Bold, maxLines = 1)
+                                                            }
+                                                        }
                                                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                                             Icon(Icons.Filled.LocalHospital, contentDescription = null, modifier = Modifier.size(12.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                                             Text(match.hospitalName.ifBlank { tr("Unknown hospital", "অজানা হাসপাতাল") }, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
@@ -404,7 +397,12 @@ fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
                                                         Text("%.1f km".format(km), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                                     }
                                                 }
-                                                Text(tr("Score ${match.matchScore}", "স্কোর ${match.matchScore}"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                                                    Text(tr("Score ${match.matchScore}", "স্কোর ${match.matchScore}"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                    IconButton(onClick = { showScoreInfo = true }, modifier = Modifier.size(16.dp)) {
+                                                        Icon(Icons.Filled.Info, contentDescription = tr("What is this score?", "এই স্কোর কী?"), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                    }
+                                                }
                                             }
                                             if (match.donorPhone.isNotBlank() && match.donorResponse == DonorResponse.Accepted) {
                                                 Button(
@@ -426,6 +424,14 @@ fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
                         }
                     }
                 }
+            }
+            if (showScoreInfo) {
+                AlertDialog(
+                    onDismissRequest = { showScoreInfo = false },
+                    confirmButton = { TextButton(onClick = { showScoreInfo = false }) { Text(tr("Got it", "বুঝেছি")) } },
+                    title = { Text(tr("Match score", "ম্যাচ স্কোর")) },
+                    text = { Text(tr("This score (0-100) shows how good a match a donor is for this request, based on blood type compatibility, distance, donor availability, and verification status. A higher score means a better match.", "এই স্কোর (০-১০০) দেখায় একজন দাতা এই অনুরোধের জন্য কতটা উপযুক্ত — রক্তের গ্রুপ সামঞ্জস্য, দূরত্ব, দাতার প্রাপ্যতা ও ভেরিফিকেশন অবস্থার উপর ভিত্তি করে। স্কোর যত বেশি, মিল তত ভালো।")) },
+                )
             }
 
             if (!editable) {

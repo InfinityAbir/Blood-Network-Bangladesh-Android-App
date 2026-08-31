@@ -29,11 +29,15 @@ enum class RequestStatus {
 }
 
 enum class UserRole {
-    Admin, Donor, Requester, Volunteer
+    Admin, Donor, Requester,
+    @Deprecated("Volunteer removed - legacy DB rows only")
+    Volunteer
 }
 
 enum class VerificationStatus {
-    Unverified, Pending, Verified, Rejected
+    Unverified, Verified, Rejected,
+    @Deprecated("Pending removed - was dead state")
+    Pending
 }
 
 /** Must match the backend's `NotificationType` enum values exactly (string-serialized). */

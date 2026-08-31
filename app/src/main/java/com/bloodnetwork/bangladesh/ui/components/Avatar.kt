@@ -7,6 +7,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,11 +21,12 @@ import coil.compose.AsyncImage
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 
-/** Circular avatar showing [photoUrl] when set. Falls back to a person-icon placeholder
+/** Circular avatar showing [photoUrl] when set. Falls back to donor initials
  * when there's no URL, while it's loading, and if the load fails — never a broken-image glyph. */
 @Composable
-fun Avatar(photoUrl: String?, modifier: Modifier = Modifier, size: Dp = 64.dp) {
+fun Avatar(photoUrl: String?, donorName: String? = null, modifier: Modifier = Modifier, size: Dp = 64.dp) {
     val fallback = rememberVectorPainter(Icons.Filled.Person)
+    val initials = donorName?.take(1)?.uppercase() ?: ""
     Box(
         modifier = modifier
             .size(size)
@@ -40,6 +43,12 @@ fun Avatar(photoUrl: String?, modifier: Modifier = Modifier, size: Dp = 64.dp) {
                 placeholder = fallback,
                 error = fallback,
                 colorFilter = null,
+            )
+        } else if (donorName?.isNotEmpty() == true) {
+            Text(
+                text = initials,
+                style = MaterialTheme.typography.titleLarge,
+                color = BloodRed,
             )
         } else {
             Icon(

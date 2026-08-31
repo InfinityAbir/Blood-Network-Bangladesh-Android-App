@@ -217,7 +217,6 @@ private fun urgencyColor(urgency: String): Color = when (urgency) {
 
 private fun verificationColor(status: String): Color = when (status) {
     "Verified" -> AvailableGreen
-    "Pending" -> RecentlyDonatedAmber
     "Rejected" -> Color(0xFFC62828)
     else -> GrayMid
 }

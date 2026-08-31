@@ -239,7 +239,7 @@ fun DonorCard(donor: PublicDonorDto, modifier: Modifier = Modifier, onRequest: (
     Card(modifier = modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = donor.photoUrl, size = 44.dp)
+                com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = donor.photoUrl, donorName = donor.firstName, size = 44.dp)
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),

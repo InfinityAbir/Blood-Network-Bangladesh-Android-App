@@ -104,7 +104,7 @@ fun EditProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, authVm: 
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(tr("Profile Photo", "প্রোফাইল ছবি"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Avatar(photoUrl = photoUrlInput.ifBlank { authState.user?.photoUrl }, size = 64.dp)
+                        Avatar(photoUrl = photoUrlInput.ifBlank { authState.user?.photoUrl }, donorName = "", size = 64.dp)
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             LabeledTextField(photoUrlInput, { photoUrlInput = it; photoError = null }, tr("Photo URL", "ছবির ইউআরএল"))
                             photoError?.let { ErrorText(it) }

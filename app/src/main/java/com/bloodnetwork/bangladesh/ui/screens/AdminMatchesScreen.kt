@@ -180,23 +180,14 @@ fun AdminMatchesScreen(onBack: () -> Unit, initialResponse: String? = null) {
                             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.weight(1f)) {
-                                        if (!match.donorPhotoUrl.isNullOrBlank()) {
-                                            Avatar(photoUrl = match.donorPhotoUrl, size = 36.dp)
-                                        } else {
-                                            Box(modifier = Modifier.size(36.dp).clip(CircleShape).background(BloodRed.copy(alpha = 0.12f)), contentAlignment = Alignment.Center) {
-                                                Text(
-                                                    text = formatBloodGroupLabel(match.donorBloodGroup),
-                                                    style = MaterialTheme.typography.labelMedium,
-                                                    color = BloodRed,
-                                                    fontWeight = FontWeight.Bold,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                    textAlign = TextAlign.Center,
-                                                )
-                                            }
-                                        }
+                                        Avatar(photoUrl = match.donorPhotoUrl, donorName = match.donorName, size = 36.dp)
                                         Column(modifier = Modifier.weight(1f)) {
-                                            Text(match.donorName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                Text(match.donorName, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, maxLines = 1, modifier = Modifier.weight(1f, fill = false))
+                                                Box(modifier = Modifier.clip(RoundedCornerShape(4.dp)).background(BloodRed.copy(alpha = 0.12f)).padding(horizontal = 5.dp, vertical = 1.dp)) {
+                                                    Text(formatBloodGroupLabel(match.donorBloodGroup), style = MaterialTheme.typography.labelSmall, color = BloodRed, fontWeight = FontWeight.Bold, maxLines = 1)
+                                                }
+                                            }
                                             Text(
                                                 tr("for ${match.requesterName.ifBlank { "Unknown requester" }}", "${match.requesterName.ifBlank { "অজানা অনুরোধকারী" }} এর জন্য"),
                                                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1,
@@ -254,7 +245,7 @@ fun AdminMatchesScreen(onBack: () -> Unit, initialResponse: String? = null) {
     }
 }
 
-private fun formatBloodGroupLabel(raw: String): String {
+internal fun formatBloodGroupLabel(raw: String): String {
     if (raw.isBlank()) return "?"
     val trimmed = raw.trim()
     // Direct label match (A+, AB-, etc.) - already compact

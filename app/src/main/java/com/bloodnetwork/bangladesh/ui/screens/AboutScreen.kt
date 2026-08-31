@@ -148,7 +148,7 @@ private fun AboutContent(
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = info.photoUrl, size = 72.dp)
+            com.bloodnetwork.bangladesh.ui.components.Avatar(photoUrl = info.photoUrl, donorName = info.name, size = 72.dp)
             Spacer(Modifier.height(4.dp))
             Text(info.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Text(info.role, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

@@ -41,6 +41,16 @@ class DonorViewModel(
                 _draftData.value = saved
             }
         }
+        // Track the shared donor-profile state so availability changes made elsewhere
+        // (e.g. accepting an urgent match in the matches screen) flip this screen's
+        // toggle immediately without a manual refresh.
+        viewModelScope.launch {
+            repository.currentDonorProfile.collect { profile ->
+                if (profile != null) {
+                    _uiState.value = _uiState.value.copy(profile = profile, hasProfile = true)
+                }
+            }
+        }
     }
 
     fun saveDraftData(data: DonorProfileStore.DonorProfileData) {

@@ -52,6 +52,13 @@ class DonorMatchesViewModel(
                         respondingMatchId = null,
                         matches = _uiState.value.matches.map { if (it.id == updated.id) updated else it },
                     )
+                    // Accepting commits the donor (the backend flips availability to Unavailable for
+                    // urgent requests), so reload the profile and push it into the shared donor-profile
+                    // state — the availability toggle on the dashboard/profile screens flips off
+                    // right away instead of waiting for a manual refresh.
+                    if (updated.donorResponse == DonorResponse.Accepted) {
+                        runCatching { repository.getMyDonorProfile() }
+                    }
                 }
                 .onFailure { e -> _uiState.value = _uiState.value.copy(respondingMatchId = null, error = e.toDisplayMessage("Failed to respond")) }
         }
