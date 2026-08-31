@@ -118,3 +118,23 @@ data class ResolveReportRequest(
     @SerialName("status") val status: String,
     @SerialName("resolution") val resolution: String? = null,
 )
+
+@Serializable
+data class SystemSettingsDto(
+    @SerialName("minimumDonationIntervalDays") val minimumDonationIntervalDays: Int = 90,
+    @SerialName("donorProfileConfirmationDays") val donorProfileConfirmationDays: Int = 90,
+    @SerialName("maxActiveRequestsPerUser") val maxActiveRequestsPerUser: Int = 3,
+    @SerialName("contactCooldownHours") val contactCooldownHours: Int = 24,
+    @SerialName("exactBloodGroupWeight") val exactBloodGroupWeight: Int = 30,
+    @SerialName("compatibleBloodGroupWeight") val compatibleBloodGroupWeight: Int = 0,
+    @SerialName("availableWeight") val availableWeight: Int = 30,
+    @SerialName("unknownWeight") val unknownWeight: Int = 0,
+    @SerialName("verifiedWeight") val verifiedWeight: Int = 15,
+    @SerialName("unverifiedWeight") val unverifiedWeight: Int = 0,
+    @SerialName("profileFreshnessWeight") val profileFreshnessWeight: Int = 10,
+    @SerialName("distance0to3kmWeight") val distance0to3kmWeight: Int = 15,
+    @SerialName("distance3to10kmWeight") val distance3to10kmWeight: Int = 10,
+    @SerialName("distance10to25kmWeight") val distance10to25kmWeight: Int = 5,
+    @SerialName("distanceOver25kmWeight") val distanceOver25kmWeight: Int = 0,
+    @SerialName("updatedAt") val updatedAt: String? = null,
+)

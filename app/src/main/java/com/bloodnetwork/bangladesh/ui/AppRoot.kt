@@ -32,6 +32,7 @@ import com.bloodnetwork.bangladesh.ui.screens.AboutScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminAnalyticsScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminDashboardScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminEligibilityQuestionsScreen
+import com.bloodnetwork.bangladesh.ui.screens.AdminSystemSettingsScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminUserManagementScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminReportsScreen
 import com.bloodnetwork.bangladesh.ui.screens.AdminBloodRequestsScreen
@@ -261,6 +262,9 @@ fun AppRoot(repository: BloodNetworkRepository, initialDeepLink: String? = null)
                 }
                 composable(Routes.ADMIN_ELIGIBILITY_QUESTIONS) {
                     AdminEligibilityQuestionsScreen(onBack = { navController.popBackStack() })
+                }
+                composable(Routes.ADMIN_SYSTEM_SETTINGS) {
+                    AdminSystemSettingsScreen(onBack = { navController.popBackStack() })
                 }
                 composable(Routes.ABOUT) {
                     val authState by authVm.uiState.collectAsStateWithLifecycle()

@@ -181,6 +181,7 @@ fun AdminDashboardScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, onLog
                 item {
                     Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         ManagementCard(tr("Eligibility Questions", "যোগ্যতার প্রশ্নাবলী"), tr("Edit the donor eligibility questionnaire", "দাতার যোগ্যতা প্রশ্নাবলী সম্পাদনা করুন"), Icons.Filled.FactCheck, Modifier.weight(1f).fillMaxHeight()) { onNavigate(com.bloodnetwork.bangladesh.ui.navigation.Routes.ADMIN_ELIGIBILITY_QUESTIONS) }
+                        ManagementCard(tr("System Settings", "সিস্টেম সেটিংস"), tr("Tune match weights & business rules", "ম্যাচ ওজন ও ব্যবসায়িক নিয়ম পরিবর্তন করুন"), Icons.Filled.Settings, Modifier.weight(1f).fillMaxHeight()) { onNavigate(com.bloodnetwork.bangladesh.ui.navigation.Routes.ADMIN_SYSTEM_SETTINGS) }
                     }
                 }
             }

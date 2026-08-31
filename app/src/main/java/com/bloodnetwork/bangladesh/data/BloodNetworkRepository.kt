@@ -302,4 +302,6 @@ class BloodNetworkRepository(
     suspend fun getAdminAuditLogs(entityType: String? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminAuditLogs(entityType, page, pageSize)
     suspend fun getAdminMatches(response: String? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminMatches(response, page, pageSize)
     suspend fun getAdminBloodRequests(status: String? = null, bloodGroup: BloodGroup? = null, page: Int = 1, pageSize: Int = 10) = api.getAdminBloodRequests(status, bloodGroup, page, pageSize)
+    suspend fun getSystemSettings() = api.getSystemSettings()
+    suspend fun updateSystemSettings(settings: com.bloodnetwork.bangladesh.data.model.SystemSettingsDto) = api.updateSystemSettings(settings)
 }

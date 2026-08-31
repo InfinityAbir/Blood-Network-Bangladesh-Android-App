@@ -42,6 +42,7 @@ import com.bloodnetwork.bangladesh.data.model.AdminDashboardStats
 import com.bloodnetwork.bangladesh.data.model.AdminUserDto
 import com.bloodnetwork.bangladesh.data.model.AdminReportDto
 import com.bloodnetwork.bangladesh.data.model.AdminAuditLogDto
+import com.bloodnetwork.bangladesh.data.model.SystemSettingsDto
 import com.bloodnetwork.bangladesh.data.model.ToggleUserActiveRequest
 import com.bloodnetwork.bangladesh.data.model.VerifyDonorRequest
 import com.bloodnetwork.bangladesh.data.model.ResolveReportRequest
@@ -273,4 +274,10 @@ interface BloodNetworkApi {
         @Query("page") page: Int = 1,
         @Query("pageSize") pageSize: Int = 10,
     ): PagedResult<AdminAuditLogDto>
+
+    @GET("api/admin/system-settings")
+    suspend fun getSystemSettings(): SystemSettingsDto
+
+    @PUT("api/admin/system-settings")
+    suspend fun updateSystemSettings(@Body request: SystemSettingsDto): SystemSettingsDto
 }
