@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import com.bloodnetwork.bangladesh.BloodNetworkApp
 import com.bloodnetwork.bangladesh.MainActivity
 import com.bloodnetwork.bangladesh.R
@@ -26,6 +27,7 @@ class PushMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        Log.i(TAG, "FCM issued new token ...${token.takeLast(8)}")
         val app = application as? BloodNetworkApp ?: return
         app.container.fcmTokenStore.setToken(token)
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
@@ -38,8 +40,16 @@ class PushMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        val notification = message.notification ?: return
-        showNotification(notification.title ?: getString(R.string.app_name), notification.body ?: "")
+        Log.i(TAG, "FCM message received: id=${message.messageId} notification=${message.notification != null} data=${message.data.keys}")
+        // Fall back to the data payload when there's no notification block: a data-only
+        // message (or one the system tray didn't render) still deserves to be shown.
+        val title = message.notification?.title ?: message.data["title"] ?: getString(R.string.app_name)
+        val body = message.notification?.body ?: message.data["message"] ?: ""
+        if (title.isEmpty() && body.isEmpty()) {
+            Log.w(TAG, "FCM message had no renderable title/body — dropping")
+            return
+        }
+        showNotification(title, body)
     }
 
     private fun showNotification(title: String, body: String) {
@@ -65,10 +75,13 @@ class PushMessagingService : FirebaseMessagingService() {
             .setColor(0xFFD32F2F.toInt())
 
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        ensureChannel(this)
         manager.notify(NOTIFICATION_ID, builder.build())
+        Log.i(TAG, "Posted notification to channel $CHANNEL_ID: $title")
     }
 
     companion object {
+        private const val TAG = "PushMessaging"
         const val CHANNEL_ID = "blood_updates"
         const val ACTION_OPEN_NOTIFICATIONS = "com.bloodnetwork.bangladesh.OPEN_NOTIFICATIONS"
         private const val NOTIFICATION_ID = 1001

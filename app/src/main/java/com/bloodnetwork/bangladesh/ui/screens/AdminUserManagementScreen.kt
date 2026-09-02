@@ -22,9 +22,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bloodtype
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
@@ -60,11 +62,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.bloodnetwork.bangladesh.data.model.AdminUserDto
 import com.bloodnetwork.bangladesh.data.model.UserRole
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+import com.bloodnetwork.bangladesh.ui.util.formatDate
 import com.bloodnetwork.bangladesh.ui.viewmodel.AdminViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.AuthViewModel
 
@@ -290,6 +294,9 @@ fun AdminUserManagementScreen(
                                     Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                                 }
                             }
+                            if (user.role == UserRole.Donor) {
+                                DonorInfoRow(user)
+                            }
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                                 StatusPill(text = if (user.isActive) tr("Active", "সক্রিয়") else tr("Inactive", "নিষ্ক্রিয়"), active = user.isActive)
                                 user.donorVerificationStatus?.let {
@@ -342,6 +349,34 @@ fun AdminUserManagementScreen(
                 }
             }
         }
+        }
+    }
+}
+
+@Composable
+private fun DonorInfoRow(user: AdminUserDto) {
+    val location = listOfNotNull(user.upazilaName, user.districtName).joinToString(", ").ifBlank { null }
+    if (user.bloodGroup == null && location == null && user.totalDonationCount == null && user.lastDonationDate == null) return
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            user.bloodGroup?.let {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Icon(Icons.Filled.Bloodtype, contentDescription = null, modifier = Modifier.size(14.dp), tint = BloodRed)
+                    Text(it.label, style = MaterialTheme.typography.labelMedium, color = BloodRed, fontWeight = FontWeight.Bold)
+                }
+            }
+            user.totalDonationCount?.let {
+                Text(tr("$it donations", "$it বার দান"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        location?.let {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Icon(Icons.Filled.LocationOn, contentDescription = null, modifier = Modifier.width(12.dp).height(12.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
+            }
+        }
+        user.lastDonationDate?.let {
+            Text(tr("Last donation: ${formatDate(it)}", "সর্বশেষ দান: ${formatDate(it)}"), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

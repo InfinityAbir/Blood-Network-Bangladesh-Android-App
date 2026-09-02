@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.bloodnetwork.bangladesh.notifications.PushMessagingService
 import com.bloodnetwork.bangladesh.ui.AppRoot
 import com.bloodnetwork.bangladesh.ui.LocalLanguageStore
@@ -23,6 +24,7 @@ import com.bloodnetwork.bangladesh.ui.LocalThemeStore
 import com.bloodnetwork.bangladesh.ui.i18n.LocalAppLanguage
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
 import com.bloodnetwork.bangladesh.ui.theme.BloodNetworkTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val container by lazy { (application as BloodNetworkApp).container }
@@ -74,6 +76,11 @@ class MainActivity : ComponentActivity() {
         // after the app sat backgrounded long enough for Android to kill the socket).
         if (container.tokenStore.isLoggedInSync()) {
             container.notificationSocket.start()
+            // Same self-heal as the socket above: re-upsert the FCM token on every
+            // foreground so a registration that silently failed at cold start (e.g. a
+            // transient DNS blip before the network stack is ready) or a backend token
+            // that got dropped isn't stuck until the next logout/login.
+            lifecycleScope.launch { container.repository.registerFcmIfNeeded() }
         }
     }
 }

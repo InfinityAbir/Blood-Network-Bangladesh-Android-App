@@ -1,5 +1,6 @@
 package com.bloodnetwork.bangladesh.data
 
+import android.util.Log
 import com.bloodnetwork.bangladesh.data.model.AuthResponse
 import com.bloodnetwork.bangladesh.data.model.BloodGroup
 import com.bloodnetwork.bangladesh.data.model.BloodRequestDto
@@ -53,6 +54,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class BloodNetworkRepository(
     private val api: BloodNetworkApi,
@@ -63,6 +66,11 @@ class BloodNetworkRepository(
     val notificationSocket: NotificationSocket,
     val fcmTokenStore: FcmTokenStore,
 ) {
+
+    // Login-state collection and MainActivity.onStart can both request registration during
+    // app launch. Serialize the upsert so the backend never has to guess whether a duplicate
+    // insert is a genuine failure or two lifecycle callbacks racing each other.
+    private val fcmRegistrationMutex = Mutex()
 
     val isLoggedIn: Flow<Boolean> = tokenStore.isLoggedIn
     val currentUserId: Flow<String?> = tokenStore.currentUserId
@@ -116,25 +124,35 @@ class BloodNetworkRepository(
     suspend fun me(): UserDto = api.me()
 
     // ---- Push tokens (FCM) ----
+    // Always re-upserts against the backend rather than trusting the local "already
+    // registered" cache: that cache only reflects a past successful call, and can go stale
+    // (backend DB reset/redeployed, or the original registration silently failed after
+    // FCM already handed us a token via onNewToken). The endpoint is a cheap idempotent
+    // upsert, so re-posting on every login-state activation is the self-healing default.
     suspend fun registerFcmIfNeeded() {
         val userId = tokenStore.currentUserId.first()
         if (userId.isNullOrEmpty()) return
 
-        val stored = fcmTokenStore.getToken()
-        if (stored != null) {
-            if (fcmTokenStore.getRegisteredUserId() != userId) {
-                registerFcmToken(stored, userId)
-            }
-            return
-        }
-
-        val fresh = runCatching { FirebaseMessaging.getInstance().token.await() }.getOrNull() ?: return
-        registerFcmToken(fresh, userId)
+        // Ask FCM for the live token rather than trusting the cached copy as the source of
+        // truth: the cache can hold a token FCM has since rotated (app data cleared, the
+        // Firebase installation reset, a rotation that landed while the app wasn't running).
+        // Re-posting a dead token is invisible from the server side — FCM accepts the send
+        // and the device simply never receives anything. Cache is only the offline fallback.
+        val token = runCatching { FirebaseMessaging.getInstance().token.await() }.getOrNull()
+            ?: fcmTokenStore.getToken()
+            ?: return
+        registerFcmToken(token, userId)
     }
 
     suspend fun registerFcmToken(token: String, userId: String) {
-        runCatching { api.registerPushToken(RegisterPushTokenRequest(token)) }
-            .onSuccess { fcmTokenStore.setRegistration(token, userId) }
+        fcmRegistrationMutex.withLock {
+            runCatching { api.registerPushToken(RegisterPushTokenRequest(token)) }
+                .onSuccess {
+                    fcmTokenStore.setRegistration(token, userId)
+                    Log.i("FcmRegistration", "Registered token ...${token.takeLast(8)} for user $userId")
+                }
+                .onFailure { Log.w("FcmRegistration", "Push token registration failed for user $userId", it) }
+        }
     }
 
     suspend fun unregisterFcmToken() {

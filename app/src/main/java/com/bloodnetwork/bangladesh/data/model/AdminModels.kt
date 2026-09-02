@@ -33,6 +33,11 @@ data class AdminUserDto(
     @SerialName("lastLoginAt") val lastLoginAt: String? = null,
     @SerialName("createdAt") val createdAt: String = "",
     @SerialName("photoUrl") val photoUrl: String? = null,
+    @SerialName("bloodGroup") val bloodGroup: BloodGroup? = null,
+    @SerialName("districtName") val districtName: String? = null,
+    @SerialName("upazilaName") val upazilaName: String? = null,
+    @SerialName("totalDonationCount") val totalDonationCount: Int? = null,
+    @SerialName("lastDonationDate") val lastDonationDate: String? = null,
 )
 
 @Serializable
