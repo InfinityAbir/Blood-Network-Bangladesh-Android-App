@@ -51,21 +51,44 @@ class TokenRefreshInterceptor(
             val refreshToken = runBlocking { tokenStore.refreshToken.first() }
             if (refreshToken.isNullOrEmpty()) return chain.proceed(request)
 
-            val auth = runBlocking { doRefresh(refreshToken) }
-            if (auth != null) {
-                runBlocking { tokenStore.saveSession(auth) }
-                val newRequest = request.newBuilder()
-                    .header("Authorization", "Bearer ${auth.accessToken}")
-                    .build()
-                return chain.proceed(newRequest)
-            }
+            return when (val result = runBlocking { doRefresh(refreshToken) }) {
+                is RefreshResult.Success -> {
+                    runBlocking { tokenStore.saveSession(result.auth) }
+                    val newRequest = request.newBuilder()
+                        .header("Authorization", "Bearer ${result.auth.accessToken}")
+                        .build()
+                    chain.proceed(newRequest)
+                }
 
-            runBlocking { tokenStore.clear() }
-            return chain.proceed(request)
+                // The server actively rejected the refresh token (expired, revoked, reused).
+                // This is the only case where the session is genuinely unrecoverable, so it's
+                // the only case that may sign the user out.
+                RefreshResult.Rejected -> {
+                    runBlocking { tokenStore.clear() }
+                    chain.proceed(request)
+                }
+
+                // Couldn't reach the server, or it failed on its own account (cold start on
+                // Render's free tier, 5xx, rate limit). Saying nothing about the refresh
+                // token's validity — keep the session and let this one call fail. Wiping it
+                // here is what used to log people out over a transient network blip.
+                RefreshResult.Transient -> chain.proceed(request)
+            }
         }
     }
 
-    private suspend fun doRefresh(refreshToken: String): com.bloodnetwork.bangladesh.data.model.AuthResponse? {
+    /**
+     * Outcome of a refresh attempt. The distinction matters: only [Rejected] means the
+     * refresh token itself is no longer good. Collapsing every failure into "signed out"
+     * is what made a flaky network look like an expired session.
+     */
+    private sealed interface RefreshResult {
+        data class Success(val auth: com.bloodnetwork.bangladesh.data.model.AuthResponse) : RefreshResult
+        data object Rejected : RefreshResult
+        data object Transient : RefreshResult
+    }
+
+    private suspend fun doRefresh(refreshToken: String): RefreshResult {
         return try {
             val body = """{"refreshToken":"$refreshToken"}"""
                 .toRequestBody("application/json".toMediaType())
@@ -73,17 +96,37 @@ class TokenRefreshInterceptor(
                 .url("${baseUrl}api/auth/refresh")
                 .post(body)
                 .build()
-            val response = plainClient.newCall(request).execute()
-            if (response.isSuccessful) {
-                val text = response.body?.string() ?: return null
-                val json = kotlinx.serialization.json.Json {
-                    ignoreUnknownKeys = true
-                    explicitNulls = false
+            plainClient.newCall(request).execute().use { response ->
+                when {
+                    response.isSuccessful -> {
+                        val text = response.body?.string()
+                        if (text.isNullOrEmpty()) {
+                            RefreshResult.Transient
+                        } else {
+                            val json = kotlinx.serialization.json.Json {
+                                ignoreUnknownKeys = true
+                                explicitNulls = false
+                            }
+                            runCatching {
+                                json.decodeFromString<com.bloodnetwork.bangladesh.data.model.AuthResponse>(text)
+                            }.fold(
+                                onSuccess = { RefreshResult.Success(it) },
+                                // A success status we couldn't parse says nothing about the
+                                // token — don't sign the user out over a parse failure.
+                                onFailure = { RefreshResult.Transient },
+                            )
+                        }
+                    }
+                    // The refresh endpoint answers 401 (and only 401) when the token is
+                    // expired, revoked, or reused. Everything else — 429 from the auth
+                    // rate limiter, 5xx, a proxy error — is not the token's fault.
+                    response.code == 401 -> RefreshResult.Rejected
+                    else -> RefreshResult.Transient
                 }
-                json.decodeFromString<com.bloodnetwork.bangladesh.data.model.AuthResponse>(text)
-            } else null
+            }
         } catch (_: Exception) {
-            null
+            // Timeout, DNS failure, connection reset, cold-starting backend.
+            RefreshResult.Transient
         }
     }
 }
