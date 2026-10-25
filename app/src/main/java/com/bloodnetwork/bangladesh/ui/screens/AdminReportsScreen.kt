@@ -291,7 +291,7 @@ fun AdminReportsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit, initial
                     value = resolutionNote,
                     onValueChange = { resolutionNote = it },
                     label = { Text(tr("Resolution notes (optional)", "সমাধানের নোট (ঐচ্ছিক)"), style = MaterialTheme.typography.bodySmall) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     shape = RoundedCornerShape(12.dp),
                     minLines = 2,
                 )

@@ -133,7 +133,7 @@ fun AdminUserManagementScreen(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
                         placeholder = { Text(tr("Search name, phone, email", "নাম, ফোন, ইমেইল খুঁজুন"), style = MaterialTheme.typography.bodySmall) },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).padding(vertical = 4.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
                         trailingIcon = {

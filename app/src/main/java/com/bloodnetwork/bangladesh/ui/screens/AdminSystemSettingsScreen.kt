@@ -159,7 +159,7 @@ private fun NumberField(label: String, value: Int, onChange: (Int) -> Unit) {
         label = { Text(label, style = MaterialTheme.typography.labelSmall) },
         singleLine = true,
         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
         shape = RoundedCornerShape(10.dp)
     )
 }

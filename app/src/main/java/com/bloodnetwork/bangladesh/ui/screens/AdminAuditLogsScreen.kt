@@ -106,7 +106,7 @@ fun AdminAuditLogsScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                         onValueChange = { entityTypeFilter = it },
                         placeholder = { Text(tr("Entity Type (User, BloodRequest)", "এন্টিটি টাইপ (User, BloodRequest)"), style = MaterialTheme.typography.bodySmall) },
                         label = { Text(tr("Entity Type", "এন্টিটি টাইপ"), style = MaterialTheme.typography.bodySmall) },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).padding(vertical = 4.dp),
                         singleLine = true,
                         shape = RoundedCornerShape(12.dp),
                     )

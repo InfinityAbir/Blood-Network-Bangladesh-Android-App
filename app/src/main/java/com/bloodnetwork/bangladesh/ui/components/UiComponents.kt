@@ -170,7 +170,7 @@ fun LabeledTextField(
         visualTransformation
     }
 
-OutlinedTextField(
+    OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
@@ -301,7 +301,7 @@ fun PickerField(
     val filtered = if (query.isBlank()) emptyList()
     else options.filter { it.contains(query, ignoreCase = true) }.take(5)
 
-Column(modifier = Modifier.padding(vertical = 4.dp)) {
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
         OutlinedTextField(
             value = if (focused) query else selected,
             onValueChange = { query = it },
@@ -382,7 +382,7 @@ fun DatePickerField(
     val month = (parts.getOrNull(1)?.toIntOrNull() ?: (today.get(java.util.Calendar.MONTH) + 1)) - 1
     val day = parts.getOrNull(2)?.toIntOrNull() ?: today.get(java.util.Calendar.DAY_OF_MONTH)
 
-Box(modifier = modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    Box(modifier = modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,

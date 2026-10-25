@@ -78,7 +78,7 @@ fun ChatbotScreen(
                 OutlinedTextField(
                     value = input,
                     onValueChange = { input = it },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).padding(vertical = 4.dp),
                     placeholder = { Text(tr("Ask about blood donation...", "রক্তদান সম্পর্কে জিজ্ঞাসা করুন...")) },
                     keyboardOptions = KeyboardOptions.Default,
                     maxLines = 4,

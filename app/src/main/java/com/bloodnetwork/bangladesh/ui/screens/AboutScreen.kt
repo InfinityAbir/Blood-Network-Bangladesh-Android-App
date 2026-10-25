@@ -243,13 +243,13 @@ private fun EditDeveloperInfoDialog(
                 saveError?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 }
-                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(tr("Name", "নাম")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = role, onValueChange = { role = it }, label = { Text(tr("Role", "পদবি")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text(tr("Email", "ইমেইল")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text(tr("Phone", "ফোন")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = linkedIn, onValueChange = { linkedIn = it }, label = { Text(tr("LinkedIn URL", "লিংকডইন ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = github, onValueChange = { github = it }, label = { Text(tr("GitHub URL", "গিটহাব ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                OutlinedTextField(value = photoUrl, onValueChange = { photoUrl = it }, label = { Text(tr("Photo URL", "ছবির ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(tr("Name", "নাম")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+                OutlinedTextField(value = role, onValueChange = { role = it }, label = { Text(tr("Role", "পদবি")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+                OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text(tr("Email", "ইমেইল")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+                OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text(tr("Phone", "ফোন")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+                OutlinedTextField(value = linkedIn, onValueChange = { linkedIn = it }, label = { Text(tr("LinkedIn URL", "লিংকডইন ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+                OutlinedTextField(value = github, onValueChange = { github = it }, label = { Text(tr("GitHub URL", "গিটহাব ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+                OutlinedTextField(value = photoUrl, onValueChange = { photoUrl = it }, label = { Text(tr("Photo URL", "ছবির ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
             }
         },
         confirmButton = {
