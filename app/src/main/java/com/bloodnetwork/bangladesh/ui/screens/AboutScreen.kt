@@ -174,6 +174,9 @@ private fun AboutContent(
             info.githubUrl?.takeIf { it.isNotBlank() }?.let {
                 ContactRow(Icons.Filled.Code, tr("GitHub", "গিটহাব"), it) { onOpenUrl(it) }
             }
+            info.portfolioUrl?.takeIf { it.isNotBlank() }?.let {
+                ContactRow(Icons.Filled.Language, tr("Portfolio", "পোর্টফোলিও"), it) { onOpenUrl(it) }
+            }
         }
     }
 
@@ -230,6 +233,7 @@ private fun EditDeveloperInfoDialog(
     var phone by remember { mutableStateOf(info.phone ?: "") }
     var linkedIn by remember { mutableStateOf(info.linkedInUrl ?: "") }
     var github by remember { mutableStateOf(info.githubUrl ?: "") }
+    var portfolio by remember { mutableStateOf(info.portfolioUrl ?: "") }
     var photoUrl by remember { mutableStateOf(info.photoUrl ?: "") }
 
     AlertDialog(
@@ -249,6 +253,7 @@ private fun EditDeveloperInfoDialog(
                 OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text(tr("Phone", "ফোন")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
                 OutlinedTextField(value = linkedIn, onValueChange = { linkedIn = it }, label = { Text(tr("LinkedIn URL", "লিংকডইন ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
                 OutlinedTextField(value = github, onValueChange = { github = it }, label = { Text(tr("GitHub URL", "গিটহাব ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
+                OutlinedTextField(value = portfolio, onValueChange = { portfolio = it }, label = { Text(tr("Portfolio URL", "পোর্টফোলিও ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
                 OutlinedTextField(value = photoUrl, onValueChange = { photoUrl = it }, label = { Text(tr("Photo URL", "ছবির ইউআরএল")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
             }
         },
@@ -261,6 +266,7 @@ private fun EditDeveloperInfoDialog(
                             name = name.trim(), role = role.trim(),
                             email = email.ifBlank { null }, phone = phone.ifBlank { null },
                             linkedInUrl = linkedIn.ifBlank { null }, githubUrl = github.ifBlank { null },
+                            portfolioUrl = portfolio.ifBlank { null },
                             photoUrl = photoUrl.ifBlank { null },
                         ),
                     )

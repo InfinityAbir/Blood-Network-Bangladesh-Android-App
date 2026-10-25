@@ -11,6 +11,7 @@ data class DeveloperInfoDto(
     @SerialName("phone") val phone: String? = null,
     @SerialName("linkedInUrl") val linkedInUrl: String? = null,
     @SerialName("githubUrl") val githubUrl: String? = null,
+    @SerialName("portfolioUrl") val portfolioUrl: String? = null,
     @SerialName("photoUrl") val photoUrl: String? = null,
 )
 
@@ -22,5 +23,6 @@ data class UpdateDeveloperInfoRequest(
     @SerialName("phone") val phone: String? = null,
     @SerialName("linkedInUrl") val linkedInUrl: String? = null,
     @SerialName("githubUrl") val githubUrl: String? = null,
+    @SerialName("portfolioUrl") val portfolioUrl: String? = null,
     @SerialName("photoUrl") val photoUrl: String? = null,
 )
