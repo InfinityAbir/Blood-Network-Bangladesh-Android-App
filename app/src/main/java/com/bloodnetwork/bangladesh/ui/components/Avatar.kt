@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+import com.bloodnetwork.bangladesh.ui.util.AppLinks
 
 /** Circular avatar showing [photoUrl] when set. Falls back to donor initials
  * when there's no URL, while it's loading, and if the load fails — never a broken-image glyph. */
@@ -27,6 +28,10 @@ import com.bloodnetwork.bangladesh.ui.theme.BloodRed
 fun Avatar(photoUrl: String?, donorName: String? = null, modifier: Modifier = Modifier, size: Dp = 64.dp) {
     val fallback = rememberVectorPainter(Icons.Filled.Person)
     val initials = donorName?.take(1)?.uppercase() ?: ""
+    // Photo URLs are user-controlled: only well-formed https URLs are ever fetched, so a
+    // profile can't make other users' devices hit an arbitrary scheme or host-with-credentials.
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val safePhotoUrl = AppLinks.resolveImageUrl(context, photoUrl)
     Box(
         modifier = modifier
             .size(size)
@@ -34,9 +39,9 @@ fun Avatar(photoUrl: String?, donorName: String? = null, modifier: Modifier = Mo
             .background(BloodRed.copy(alpha = 0.12f)),
         contentAlignment = Alignment.Center,
     ) {
-        if (!photoUrl.isNullOrBlank()) {
+        if (safePhotoUrl != null) {
             AsyncImage(
-                model = photoUrl,
+                model = safePhotoUrl,
                 contentDescription = tr("Profile photo", "প্রোফাইল ছবি"),
                 modifier = Modifier.size(size).clip(CircleShape),
                 contentScale = ContentScale.Crop,

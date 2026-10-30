@@ -21,12 +21,12 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "com.bloodnetwork.bangladesh"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.bloodnetwork.bangladesh"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
 
@@ -61,6 +61,14 @@ android {
         }
         debug {
             isMinifyEnabled = false
+        }
+        // Debug build that talks to a backend on the dev machine over plain HTTP
+        // (adb reverse tcp:8080 tcp:8080), for testing push/FCM end to end without touching
+        // production. Same applicationId as the real app so google-services.json / FCM match.
+        // Its overrides live in src/localtest; release and debug builds never see them.
+        create("localtest") {
+            initWith(getByName("debug"))
+            matchingFallbacks += "debug"
         }
     }
 
@@ -98,6 +106,10 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons)
     implementation(libs.androidx.navigation.compose)
+    // Pulled in transitively at an old version by Firebase; the activity-result APIs need >= 1.3.0.
+    implementation(libs.androidx.fragment)
+    // Reads the camera's rotation flag so picked profile photos aren't sideways.
+    implementation(libs.androidx.exifinterface)
 
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.kotlinx)

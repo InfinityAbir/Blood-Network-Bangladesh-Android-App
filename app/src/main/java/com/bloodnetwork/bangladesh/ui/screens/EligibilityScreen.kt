@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +59,7 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     val authVm: AuthViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
     val authState by authVm.uiState.collectAsStateWithLifecycle()
+    val showStepBanner = authState.user?.role == com.bloodnetwork.bangladesh.data.model.UserRole.Donor
 
     LaunchedEffect(Unit) { vm.loadQuestions() }
 
@@ -76,7 +78,7 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
     LaunchedEffect(state.result) {
         if (state.result != null) {
             // Result card lands right after the instruction line, disclaimer, questions, and button.
-            listState.animateScrollToItem(state.questions.size + 3)
+            listState.animateScrollToItem(state.questions.size + 3 + if (showStepBanner) 1 else 0)
         }
     }
 
@@ -110,6 +112,16 @@ fun EligibilityScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
+                if (showStepBanner) {
+                    item {
+                        Text(
+                            tr("Step 1 of 3 · Eligibility check", "ধাপ ১ / ৩ · যোগ্যতা যাচাই"),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
                 item {
                     Text(
                         tr("Answer these questions to check if you can donate blood.", "আপনি রক্ত দিতে পারবেন কিনা তা যাচাই করতে এই প্রশ্নগুলোর উত্তর দিন।"),

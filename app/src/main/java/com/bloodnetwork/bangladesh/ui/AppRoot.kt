@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SmartToy
@@ -14,7 +16,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -57,7 +61,11 @@ import com.bloodnetwork.bangladesh.ui.viewmodel.ChatbotViewModel
 private const val ANIM_DURATION = 300
 
 @Composable
-fun AppRoot(repository: BloodNetworkRepository, initialDeepLink: String? = null) {
+fun AppRoot(
+    repository: BloodNetworkRepository,
+    initialDeepLink: String? = null,
+    onDeepLinkConsumed: () -> Unit = {},
+) {
     val navController = rememberNavController()
     val factory = remember(repository) { VmFactory(repository) }
 
@@ -76,11 +84,49 @@ fun AppRoot(repository: BloodNetworkRepository, initialDeepLink: String? = null)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val showChatFab = currentRoute != Routes.CHATBOT
+    // The assistant button floats over content, so keep it off screens where it would sit on
+    // top of form fields / submit buttons, and off admin screens (the assistant is for members).
+    val chatFabHiddenRoutes = setOf(
+        Routes.CHATBOT, Routes.LOGIN, Routes.REGISTER, Routes.EDIT_PROFILE,
+        Routes.REQUEST_BLOOD, Routes.DONOR_PROFILE, Routes.ELIGIBILITY,
+    )
+    val showChatFab = currentRoute != null &&
+        currentRoute !in chatFabHiddenRoutes &&
+        !currentRoute.startsWith("admin_") &&
+        !currentRoute.startsWith(Routes.REQUEST_DETAILS)
+
+    // A refresh token the server rejected (expired, revoked by a sign-in elsewhere, account
+    // deleted) clears the stored session. Without this the user stayed on a stale signed-in
+    // screen showing "Session expired" with a Retry button that could never work.
+    val signedIn by repository.isLoggedIn.collectAsStateWithLifecycle(initialValue = repository.isLoggedInSync())
+    var wasSignedIn by remember { mutableStateOf(signedIn) }
+    var sessionLost by remember { mutableStateOf(false) }
+    androidx.compose.runtime.LaunchedEffect(signedIn) {
+        if (wasSignedIn && !signedIn) sessionLost = true
+        if (signedIn) sessionLost = false
+        wasSignedIn = signedIn
+    }
+    // Kept separate from the effect above on purpose: on a cold start the session can be lost
+    // (refresh rejected) before NavHost has produced a route, and a one-shot check at that moment
+    // would find no route and never redirect. Waiting for a route makes it reliable.
+    androidx.compose.runtime.LaunchedEffect(sessionLost, currentRoute) {
+        if (sessionLost && currentRoute != null) {
+            val publicRoutes = setOf(
+                Routes.LANDING, Routes.LOGIN, Routes.REGISTER, Routes.FIND_BLOOD,
+                Routes.ELIGIBILITY, Routes.CHATBOT, Routes.ABOUT,
+            )
+            if (currentRoute !in publicRoutes) {
+                navController.navigate(Routes.LOGIN) { popUpTo(0) { inclusive = true } }
+            }
+            sessionLost = false
+        }
+    }
 
     androidx.compose.runtime.LaunchedEffect(initialDeepLink) {
-        if (initialDeepLink != null && repository.isLoggedInSync()) {
-            navController.navigate(initialDeepLink)
+        if (initialDeepLink != null) {
+            if (repository.isLoggedInSync()) navController.navigate(initialDeepLink)
+            // Consumed either way, so a later tap on the same notification type navigates again.
+            onDeepLinkConsumed()
         }
     }
 
@@ -101,7 +147,18 @@ fun AppRoot(repository: BloodNetworkRepository, initialDeepLink: String? = null)
             NavHost(
                 navController = navController,
                 startDestination = start,
-                modifier = androidx.compose.ui.Modifier.padding(innerPadding),
+                // Insets are handled once, here, for every screen:
+                //  - consumeWindowInsets(innerPadding): the status/navigation bar space is already applied as
+                //    padding, so each screen's own Scaffold/TopAppBar must not add it a second time (that
+                //    double padding left a large empty gap above every title).
+                //  - imePadding(): shrinks the visible area by the keyboard's height, so the focused field -
+                //    and the suggestion list under a dropdown - can be scrolled into view above the keyboard
+                //    instead of being drawn behind it. It must wrap the screens (not sit after a screen's
+                //    verticalScroll, where it only pads the content and leaves the viewport under the keyboard).
+                modifier = androidx.compose.ui.Modifier
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+                    .imePadding(),
                 enterTransition = { fadeIn(tween(ANIM_DURATION)) + slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Start, tween(ANIM_DURATION)) },
                 exitTransition = { fadeOut(tween(ANIM_DURATION)) },
                 popEnterTransition = { fadeIn(tween(ANIM_DURATION)) },
@@ -192,10 +249,21 @@ fun AppRoot(repository: BloodNetworkRepository, initialDeepLink: String? = null)
                 }
                 composable(Routes.CHATBOT) {
                     val vm: ChatbotViewModel = viewModel(factory = factory)
-                    ChatbotScreen(onBack = { navController.popBackStack() }, vm = vm)
+                    ChatbotScreen(
+                        onBack = { navController.popBackStack() },
+                        vm = vm,
+                        onSignIn = { navController.navigate(Routes.LOGIN) },
+                    )
                 }
                 composable(Routes.EDIT_PROFILE) {
-                    EditProfileScreen(onNavigate = navController::navigate, onBack = { navController.popBackStack() }, authVm = authVm)
+                    EditProfileScreen(
+                        onNavigate = navController::navigate,
+                        onBack = { navController.popBackStack() },
+                        authVm = authVm,
+                        onAccountDeleted = {
+                            navController.navigate(Routes.LANDING) { popUpTo(0) { inclusive = true } }
+                        },
+                    )
                 }
                 composable(Routes.ADMIN_DASHBOARD) {
                     AdminDashboardScreen(

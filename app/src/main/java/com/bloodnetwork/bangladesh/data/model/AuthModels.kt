@@ -56,6 +56,28 @@ data class UpdateProfileRequest(
     @SerialName("newPhotoUrl") val newPhotoUrl: String? = null,
 )
 
+/** Permanent account + data deletion (Play "account deletion" policy). Password re-confirms the user. */
+@Serializable
+data class DeleteAccountRequest(
+    @SerialName("currentPassword") val currentPassword: String,
+)
+
+/** User-submitted abuse report; the backend's POST api/reports contract. */
+@Serializable
+data class CreateReportRequest(
+    /** Omitted when only [bloodRequestId] is known (a donor isn't given the requester's user id). */
+    @SerialName("reportedUserId") val reportedUserId: String? = null,
+    @SerialName("bloodRequestId") val bloodRequestId: String? = null,
+    @SerialName("reason") val reason: String,
+    @SerialName("description") val description: String? = null,
+)
+
+/** Reply to PUT api/photos/me: the address the new picture is served from. */
+@Serializable
+data class PhotoUploadResponse(
+    @SerialName("photoUrl") val photoUrl: String? = null,
+)
+
 @Serializable
 data class ApiError(
     @SerialName("message") val message: String? = null,

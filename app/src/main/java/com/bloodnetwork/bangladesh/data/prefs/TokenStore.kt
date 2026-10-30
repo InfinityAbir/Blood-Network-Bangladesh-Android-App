@@ -2,8 +2,6 @@ package com.bloodnetwork.bangladesh.data.prefs
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import com.bloodnetwork.bangladesh.data.model.AuthResponse
 import com.bloodnetwork.bangladesh.data.model.UserRole
 import kotlinx.coroutines.flow.Flow
@@ -37,18 +35,8 @@ class TokenStore(context: Context) {
         // One-time cleanup: earlier versions kept tokens in a plaintext DataStore file
         // named "auth". Remove it so upgrading installs don't leave stale plaintext
         // tokens on disk alongside the new encrypted store.
-        runCatching { java.io.File(context.filesDir, "datastore/auth.preferences_pb").delete() }
-
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-        EncryptedSharedPreferences.create(
-            context,
-            "auth_secure",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-        )
+        SecurePrefs.deleteLegacyDataStore(context, "auth")
+        SecurePrefs.create(context, "auth_secure")
     }
 
     private val state = MutableStateFlow(

@@ -42,9 +42,14 @@ object ApiClient {
             .connectTimeout(75, TimeUnit.SECONDS)
             .readTimeout(75, TimeUnit.SECONDS)
             .writeTimeout(75, TimeUnit.SECONDS)
+            // Order matters: the first interceptor added is the OUTERMOST. ApiErrorInterceptor turns
+            // any non-2xx response into an exception, so it must sit outside TokenRefreshInterceptor;
+            // with the old order (refresh outside error) the refresh logic never saw a 401 - the
+            // exception flew straight past it - and every user was told "Session expired" as soon as
+            // the 15-minute access token ran out, with a perfectly valid refresh token on disk.
+            .addInterceptor(ApiErrorInterceptor(json))
             .addInterceptor(authInterceptor)
             .addInterceptor(TokenRefreshInterceptor(tokenStore, baseUrl))
-            .addInterceptor(ApiErrorInterceptor(json))
             .addInterceptor(logging)
             .build()
 

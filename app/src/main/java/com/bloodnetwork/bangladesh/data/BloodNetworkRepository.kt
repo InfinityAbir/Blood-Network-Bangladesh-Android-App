@@ -48,6 +48,8 @@ import com.bloodnetwork.bangladesh.data.prefs.FcmTokenStore
 import com.bloodnetwork.bangladesh.data.prefs.RegistrationStore
 import com.bloodnetwork.bangladesh.data.prefs.TokenStore
 import com.google.firebase.messaging.FirebaseMessaging
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -123,6 +125,55 @@ class BloodNetworkRepository(
 
     suspend fun me(): UserDto = api.me()
 
+    /**
+     * Asks the server to permanently delete this account and its data, then wipes every local
+     * trace. Local state is only cleared once the server confirmed — a failed request must
+     * leave the user signed in so they can retry.
+     */
+    suspend fun deleteAccount(currentPassword: String) {
+        api.deleteAccount(com.bloodnetwork.bangladesh.data.model.DeleteAccountRequest(currentPassword))
+        tokenStore.clear()
+        registrationStore.clear()
+        donorProfileStore.clear()
+        eligibilityStore.clearAll()
+        fcmTokenStore.clear()
+        _currentDonorProfile.value = null
+    }
+
+    // ---- Profile picture ----
+    suspend fun uploadPhoto(jpeg: ByteArray) {
+        api.uploadPhoto(jpeg.toRequestBody("image/jpeg".toMediaType()))
+    }
+
+    suspend fun removePhoto() = api.removePhoto()
+
+    // ---- Abuse reports ----
+    suspend fun reportUser(reportedUserId: String, bloodRequestId: String?, reason: String, description: String?) {
+        api.createReport(
+            com.bloodnetwork.bangladesh.data.model.CreateReportRequest(
+                reportedUserId = reportedUserId,
+                bloodRequestId = bloodRequestId,
+                reason = reason,
+                description = description?.trim()?.ifBlank { null },
+            ),
+        )
+    }
+
+    /**
+     * Donor-side report. A donor only sees the public view of a request (no requester user id),
+     * so the server resolves the reported user from the request id.
+     */
+    suspend fun reportRequester(bloodRequestId: String, reason: String, description: String?) {
+        api.createReport(
+            com.bloodnetwork.bangladesh.data.model.CreateReportRequest(
+                reportedUserId = null,
+                bloodRequestId = bloodRequestId,
+                reason = reason,
+                description = description?.trim()?.ifBlank { null },
+            ),
+        )
+    }
+
     // ---- Push tokens (FCM) ----
     // Always re-upserts against the backend rather than trusting the local "already
     // registered" cache: that cache only reflects a past successful call, and can go stale
@@ -149,9 +200,9 @@ class BloodNetworkRepository(
             runCatching { api.registerPushToken(RegisterPushTokenRequest(token)) }
                 .onSuccess {
                     fcmTokenStore.setRegistration(token, userId)
-                    Log.i("FcmRegistration", "Registered token ...${token.takeLast(8)} for user $userId")
+                    Log.i("FcmRegistration", "Registered push token")
                 }
-                .onFailure { Log.w("FcmRegistration", "Push token registration failed for user $userId", it) }
+                .onFailure { Log.w("FcmRegistration", "Push token registration failed", it) }
         }
     }
 

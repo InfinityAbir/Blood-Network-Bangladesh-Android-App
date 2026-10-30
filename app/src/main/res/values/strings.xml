@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Blood Network BD</string>
     <string name="base_api_url">https://blood-network-api.onrender.com/</string>
+
+    <!-- Public legal pages live in the portfolio site repo (abir-hasan-portfolio/public). The same two
+         URLs must be entered in the Play Console (privacy policy + Data safety "delete account" link). -->
+    <string name="privacy_policy_url" translatable="false">https://infinityabir.github.io/abir-hasan-portfolio/bloodnetwork-privacy-policy.html</string>
+    <string name="account_deletion_url" translatable="false">https://infinityabir.github.io/abir-hasan-portfolio/bloodnetwork-delete-account.html</string>
+    <string name="support_email" translatable="false">abirha3896@gmail.com</string>
 </resources>

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Bloodtype
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,6 +42,8 @@ import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
 import com.bloodnetwork.bangladesh.ui.components.SecondaryButton
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.navigation.Routes
+import com.bloodnetwork.bangladesh.ui.util.AppLinks
+import com.bloodnetwork.bangladesh.ui.util.openHttpsUrl
 
 @Composable
 fun LandingScreen(onNavigate: (String) -> Unit) {
@@ -122,6 +126,15 @@ fun LandingScreen(onNavigate: (String) -> Unit) {
         Spacer(Modifier.height(12.dp))
         AnimatedSlideIn(visible = contentVisible, delay = 900) {
             SecondaryButton(tr("Create Account", "অ্যাকাউন্ট তৈরি করুন"), onClick = { onNavigate(Routes.REGISTER) })
+        }
+        Spacer(Modifier.height(8.dp))
+        val context = LocalContext.current
+        TextButton(onClick = { context.openHttpsUrl(AppLinks.privacyPolicyUrl(context)) }) {
+            Text(
+                tr("Privacy Policy", "গোপনীয়তা নীতি"),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         }
         Row(

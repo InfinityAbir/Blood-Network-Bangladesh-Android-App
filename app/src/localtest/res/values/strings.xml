@@ -1,0 +1,4 @@
+<resources>
+    <!-- Local test backend (it listens on 8080), reached through `adb reverse tcp:8080 tcp:8080`. -->
+    <string name="base_api_url">http://localhost:8080/</string>
+</resources>

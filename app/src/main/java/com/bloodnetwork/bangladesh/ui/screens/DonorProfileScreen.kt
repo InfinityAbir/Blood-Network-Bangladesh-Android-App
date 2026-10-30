@@ -257,7 +257,7 @@ fun DonorProfileScreen(onNavigate: (String) -> Unit, onBack: () -> Unit) {
                 onSelect = { gender = it; saveDraft() },
             )
 
-            DatePickerField(dateOfBirth, { dateOfBirth = it; saveDraft() }, tr("Date of Birth", "জন্ম তারিখ"))
+            DatePickerField(dateOfBirth, { dateOfBirth = it; saveDraft() }, tr("Date of Birth", "জন্ম তারিখ"), defaultYearsAgo = 25)
 
             Text(tr("Division", "বিভাগ"), style = MaterialTheme.typography.titleMedium)
             PickerField(

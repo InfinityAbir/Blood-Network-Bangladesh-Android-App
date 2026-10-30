@@ -1,7 +1,6 @@
 package com.bloodnetwork.bangladesh.ui.screens
 
-import android.content.Intent
-import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +25,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -61,6 +61,11 @@ import com.bloodnetwork.bangladesh.ui.LocalVmFactory
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+import com.bloodnetwork.bangladesh.ui.util.AppLinks
+import com.bloodnetwork.bangladesh.ui.util.SafeLinks
+import com.bloodnetwork.bangladesh.ui.util.openDialer
+import com.bloodnetwork.bangladesh.ui.util.openEmail
+import com.bloodnetwork.bangladesh.ui.util.openHttpsUrl
 import com.bloodnetwork.bangladesh.ui.viewmodel.AboutViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,6 +76,7 @@ fun AboutScreen(onBack: () -> Unit, isAdmin: Boolean) {
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showEditDialog by remember { mutableStateOf(false) }
+    val cantOpenMsg = tr("No app found to open this link", "এই লিংকটি খোলার মতো অ্যাপ পাওয়া যায়নি")
 
     LaunchedEffect(Unit) { vm.load() }
 
@@ -113,11 +119,13 @@ fun AboutScreen(onBack: () -> Unit, isAdmin: Boolean) {
                     }
                 }
                 state.info != null -> AboutContent(state.info!!, onEmail = { email ->
-                    context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:$email")))
+                    if (!context.openEmail(email)) Toast.makeText(context, cantOpenMsg, Toast.LENGTH_SHORT).show()
                 }, onCall = { phone ->
-                    context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phone")))
+                    if (!context.openDialer(phone)) Toast.makeText(context, cantOpenMsg, Toast.LENGTH_SHORT).show()
                 }, onOpenUrl = { url ->
-                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    if (!context.openHttpsUrl(url)) Toast.makeText(context, cantOpenMsg, Toast.LENGTH_SHORT).show()
+                }, onOpenPrivacy = {
+                    if (!context.openHttpsUrl(AppLinks.privacyPolicyUrl(context))) Toast.makeText(context, cantOpenMsg, Toast.LENGTH_SHORT).show()
                 })
             }
         }
@@ -140,6 +148,7 @@ private fun AboutContent(
     onEmail: (String) -> Unit,
     onCall: (String) -> Unit,
     onOpenUrl: (String) -> Unit,
+    onOpenPrivacy: () -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -177,6 +186,7 @@ private fun AboutContent(
             info.portfolioUrl?.takeIf { it.isNotBlank() }?.let {
                 ContactRow(Icons.Filled.Language, tr("Portfolio", "পোর্টফোলিও"), it) { onOpenUrl(it) }
             }
+            ContactRow(Icons.Filled.PrivacyTip, tr("Privacy Policy", "গোপনীয়তা নীতি"), tr("How we use and protect your data", "আমরা আপনার তথ্য কীভাবে ব্যবহার ও সুরক্ষিত রাখি")) { onOpenPrivacy() }
         }
     }
 
@@ -235,6 +245,9 @@ private fun EditDeveloperInfoDialog(
     var github by remember { mutableStateOf(info.githubUrl ?: "") }
     var portfolio by remember { mutableStateOf(info.portfolioUrl ?: "") }
     var photoUrl by remember { mutableStateOf(info.photoUrl ?: "") }
+    var validationError by remember { mutableStateOf<String?>(null) }
+    val badLinkMsg = tr("Links must be full https:// URLs", "লিংক অবশ্যই পূর্ণ https:// ইউআরএল হতে হবে")
+    val badContactMsg = tr("Enter a valid email address and phone number", "সঠিক ইমেইল ও ফোন নম্বর দিন")
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -244,7 +257,7 @@ private fun EditDeveloperInfoDialog(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                saveError?.let {
+                (validationError ?: saveError)?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
                 }
                 OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text(tr("Name", "নাম")) }, singleLine = true, modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp))
@@ -261,13 +274,23 @@ private fun EditDeveloperInfoDialog(
             Button(
                 enabled = !isSaving && name.isNotBlank() && role.isNotBlank(),
                 onClick = {
+                    val urlsOk = listOf(linkedIn, github, portfolio, photoUrl)
+                        .all { it.isBlank() || SafeLinks.httpsUrlOrNull(it) != null }
+                    val contactOk = (email.isBlank() || SafeLinks.emailOrNull(email) != null) &&
+                        (phone.isBlank() || SafeLinks.dialableOrNull(phone) != null)
+                    validationError = when {
+                        !urlsOk -> badLinkMsg
+                        !contactOk -> badContactMsg
+                        else -> null
+                    }
+                    if (validationError != null) return@Button
                     onSave(
                         UpdateDeveloperInfoRequest(
                             name = name.trim(), role = role.trim(),
-                            email = email.ifBlank { null }, phone = phone.ifBlank { null },
-                            linkedInUrl = linkedIn.ifBlank { null }, githubUrl = github.ifBlank { null },
-                            portfolioUrl = portfolio.ifBlank { null },
-                            photoUrl = photoUrl.ifBlank { null },
+                            email = email.trim().ifBlank { null }, phone = phone.trim().ifBlank { null },
+                            linkedInUrl = linkedIn.trim().ifBlank { null }, githubUrl = github.trim().ifBlank { null },
+                            portfolioUrl = portfolio.trim().ifBlank { null },
+                            photoUrl = photoUrl.trim().ifBlank { null },
                         ),
                     )
                 },

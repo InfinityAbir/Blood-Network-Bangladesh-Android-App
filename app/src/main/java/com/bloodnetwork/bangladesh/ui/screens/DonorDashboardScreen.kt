@@ -1,7 +1,13 @@
 package com.bloodnetwork.bangladesh.ui.screens
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.bloodnetwork.bangladesh.data.model.UserRole
+import com.bloodnetwork.bangladesh.ui.components.DonorOnboardingCard
+import com.bloodnetwork.bangladesh.ui.viewmodel.DonorOnboardingViewModel
+import com.bloodnetwork.bangladesh.ui.viewmodel.OnboardingStep
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -94,7 +100,22 @@ fun DonorDashboardScreen(
     var showNotifSheet by remember { mutableStateOf(false) }
     val actions = dashboardActions()
 
+    // New donors are walked through eligibility -> profile -> availability. Only people who
+    // registered as donors see it, and it disappears once all three are done.
+    val onboardingVm: DonorOnboardingViewModel = viewModel(factory = factory)
+    val onboarding by onboardingVm.state.collectAsStateWithLifecycle()
+    val isDonor = state.user?.role == UserRole.Donor
+    val showOnboarding = isDonor && (onboarding.loading || (onboarding.known && onboarding.step != OnboardingStep.Done))
+    val highlightedRoute = if (showOnboarding && onboarding.known) {
+        if (onboarding.step == OnboardingStep.Eligibility) Routes.ELIGIBILITY else Routes.DONOR_PROFILE
+    } else null
+
     LaunchedEffect(Unit) { notifVm.loadUnreadCount() }
+    // Coming back from the eligibility / profile screens: re-read progress so the next step shows.
+    LifecycleResumeEffect(isDonor) {
+        if (isDonor) onboardingVm.refresh()
+        onPauseOrDispose { }
+    }
 
     Scaffold(
         topBar = {
@@ -130,6 +151,7 @@ fun DonorDashboardScreen(
             onRefresh = {
                 vm.refreshProfile()
                 notifVm.loadUnreadCount()
+                if (isDonor) onboardingVm.refresh()
             },
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
@@ -154,8 +176,13 @@ fun DonorDashboardScreen(
                     style = MaterialTheme.typography.headlineSmall,
                 )
             }
+            if (showOnboarding) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    DonorOnboardingCard(state = onboarding, onNavigate = onNavigate)
+                }
+            }
             items(actions) { action ->
-                ActionCard(action, onNavigate)
+                ActionCard(action, onNavigate, highlight = action.route == highlightedRoute)
             }
         }
         }
@@ -174,7 +201,7 @@ fun DonorDashboardScreen(
 }
 
 @Composable
-fun ActionCard(action: DashboardAction, onNavigate: (String) -> Unit) {
+fun ActionCard(action: DashboardAction, onNavigate: (String) -> Unit, highlight: Boolean = false) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val containerColor by animateColorAsState(
@@ -190,6 +217,7 @@ fun ActionCard(action: DashboardAction, onNavigate: (String) -> Unit) {
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp, pressedElevation = 4.dp),
+        border = if (highlight) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
         interactionSource = interactionSource,
     ) {
         Column(
@@ -198,6 +226,16 @@ fun ActionCard(action: DashboardAction, onNavigate: (String) -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
+            if (highlight) {
+                Text(
+                    tr("NEXT STEP", "পরবর্তী ধাপ"),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50))
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                )
+            }
             Box(
                 modifier = Modifier
                     .size(44.dp)

@@ -27,6 +27,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.foundation.layout.fillMaxWidth
+import com.bloodnetwork.bangladesh.ui.util.AppLinks
+import com.bloodnetwork.bangladesh.ui.util.openHttpsUrl
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -110,25 +115,33 @@ fun RegisterScreen(
                 .verticalScroll(rememberScrollState())
                 .imePadding()
                 .padding(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 88.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
                 text = tr("Register to donate or request blood", "রক্তদান বা রক্তের জন্য অনুরোধ করতে রেজিস্টার করুন"),
                 style = MaterialTheme.typography.titleLarge,
             )
             LabeledTextField(firstName, { firstName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = it, lastName = lastName, phoneNumber = phone)) }, tr("First Name", "প্রথম নাম"),
+                capitalization = KeyboardCapitalization.Words,
                 leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) })
-            LabeledTextField(lastName, { lastName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = it, phoneNumber = phone)) }, tr("Last Name", "শেষ নাম"))
+            LabeledTextField(lastName, { lastName = it; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = it, phoneNumber = phone)) }, tr("Last Name", "শেষ নাম"),
+                capitalization = KeyboardCapitalization.Words,
+                leadingIcon = { Icon(Icons.Filled.Person, contentDescription = null) })
             LabeledTextField(phone, { phone = it; phoneError = false; localError = null; vm.saveRegistrationData(RegistrationStore.RegistrationData(firstName = firstName, lastName = lastName, phoneNumber = it)) }, tr("Phone Number", "ফোন নম্বর"),
                 keyboardType = KeyboardType.Phone, isError = phoneError,
+                supportingText = tr("e.g. 017XXXXXXXX", "যেমন 017XXXXXXXX"),
                 leadingIcon = { Icon(Icons.Filled.Phone, contentDescription = null) })
             LabeledTextField(email, { email = it; emailError = false; localError = null }, tr("Email (optional)", "ইমেইল (ঐচ্ছিক)"),
-                keyboardType = KeyboardType.Email, isError = emailError)
+                keyboardType = KeyboardType.Email, isError = emailError,
+                leadingIcon = { Icon(Icons.Filled.Email, contentDescription = null) })
             LabeledTextField(password, { password = it }, tr("Password", "পাসওয়ার্ড"),
                 isPassword = true,
+                supportingText = tr("At least 8 characters with upper & lower case letters and a number", "কমপক্ষে ৮ অক্ষর, বড় ও ছোট হাতের অক্ষর এবং একটি সংখ্যা"),
                 leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) })
             LabeledTextField(confirm, { confirm = it }, tr("Confirm Password", "পাসওয়ার্ড নিশ্চিত করুন"),
-                isPassword = true)
+                isPassword = true,
+                imeAction = androidx.compose.ui.text.input.ImeAction.Done,
+                leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null) })
 
             androidx.compose.material3.Text(tr("Register as", "ভূমিকা নির্বাচন করুন"), style = MaterialTheme.typography.titleSmall)
             val roleLabels: Map<UserRole, String> = mapOf(
@@ -141,9 +154,31 @@ fun RegisterScreen(
                 labelOf = { roleLabels[it] ?: it.name },
                 onSelect = { selectedRole = it },
             )
+            if (selectedRole == UserRole.Donor) {
+                Text(
+                    tr(
+                        "Next: you'll check your eligibility, then create your donor profile so people can find you.",
+                        "এরপর: আপনি যোগ্যতা যাচাই করবেন, তারপর দাতা প্রোফাইল তৈরি করবেন, যাতে মানুষ আপনাকে খুঁজে পায়।",
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
 
             localError?.let { ErrorText(it) }
             state.error?.let { ErrorText(it) }
+
+            val context = androidx.compose.ui.platform.LocalContext.current
+            TextButton(
+                onClick = { context.openHttpsUrl(AppLinks.privacyPolicyUrl(context)) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    tr("By registering you agree to our Privacy Policy", "রেজিস্টার করে আপনি আমাদের গোপনীয়তা নীতিতে সম্মত হচ্ছেন"),
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+            }
 
             PrimaryButton(
                 text = tr("Register", "রেজিস্টার করুন"),

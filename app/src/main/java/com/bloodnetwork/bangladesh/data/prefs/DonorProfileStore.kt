@@ -1,29 +1,30 @@
 package com.bloodnetwork.bangladesh.data.prefs
 
 import android.content.Context
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-private val Context.donorProfileDataStore by preferencesDataStore(name = "donor_profile")
+/**
+ * Draft copy of the donor profile form (date of birth, address, last donation date...).
+ * Health/personal data, so it lives in Keystore-encrypted storage rather than plain DataStore.
+ */
+class DonorProfileStore(context: Context) {
 
-class DonorProfileStore(private val context: Context) {
+    private val store = SecureStringStore(context, "donor_profile_secure", legacyDataStoreName = "donor_profile")
 
     private object Keys {
-        val BLOOD_GROUP = stringPreferencesKey("blood_group")
-        val GENDER = stringPreferencesKey("gender")
-        val DATE_OF_BIRTH = stringPreferencesKey("date_of_birth")
-        val DIVISION_ID = stringPreferencesKey("division_id")
-        val DIVISION_NAME = stringPreferencesKey("division_name")
-        val DISTRICT_ID = stringPreferencesKey("district_id")
-        val DISTRICT_NAME = stringPreferencesKey("district_name")
-        val UPAZILA_ID = stringPreferencesKey("upazila_id")
-        val UPAZILA_NAME = stringPreferencesKey("upazila_name")
-        val AREA = stringPreferencesKey("area")
-        val CUSTOM_ADDRESS = stringPreferencesKey("custom_address")
-        val LAST_DONATION_DATE = stringPreferencesKey("last_donation_date")
+        const val BLOOD_GROUP = "blood_group"
+        const val GENDER = "gender"
+        const val DATE_OF_BIRTH = "date_of_birth"
+        const val DIVISION_ID = "division_id"
+        const val DIVISION_NAME = "division_name"
+        const val DISTRICT_ID = "district_id"
+        const val DISTRICT_NAME = "district_name"
+        const val UPAZILA_ID = "upazila_id"
+        const val UPAZILA_NAME = "upazila_name"
+        const val AREA = "area"
+        const val CUSTOM_ADDRESS = "custom_address"
+        const val LAST_DONATION_DATE = "last_donation_date"
     }
 
     data class DonorProfileData(
@@ -41,7 +42,7 @@ class DonorProfileStore(private val context: Context) {
         val lastDonationDate: String = "",
     )
 
-    val data: Flow<DonorProfileData> = context.donorProfileDataStore.data.map { prefs ->
+    val data: Flow<DonorProfileData> = store.data.map { prefs ->
         DonorProfileData(
             bloodGroup = prefs[Keys.BLOOD_GROUP] ?: "",
             gender = prefs[Keys.GENDER] ?: "",
@@ -59,7 +60,7 @@ class DonorProfileStore(private val context: Context) {
     }
 
     suspend fun save(data: DonorProfileData) {
-        context.donorProfileDataStore.edit { prefs ->
+        store.edit { prefs ->
             prefs[Keys.BLOOD_GROUP] = data.bloodGroup
             prefs[Keys.GENDER] = data.gender
             prefs[Keys.DATE_OF_BIRTH] = data.dateOfBirth
@@ -76,6 +77,6 @@ class DonorProfileStore(private val context: Context) {
     }
 
     suspend fun clear() {
-        context.donorProfileDataStore.edit { it.clear() }
+        store.edit { it.clear() }
     }
 }

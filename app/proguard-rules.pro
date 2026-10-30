@@ -31,6 +31,24 @@
 
 # Media/ICU online resources are not used.
 
+# ---------- ViewModels ----------
+# VmFactory builds every ViewModel reflectively via getConstructor(BloodNetworkRepository).
+# Nothing calls those constructors statically, so R8 would strip/alter them and release
+# builds would crash on the first screen with NoSuchMethodException.
+-keepclassmembers class * extends androidx.lifecycle.ViewModel {
+    <init>(...);
+}
+
+# ---------- Logging ----------
+# Release builds must not write to Logcat (user ids, push/hub state). Strips every
+# android.util.Log call; the verbose/debug/info/warn variants have no return-value use.
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int d(...);
+    public static int i(...);
+    public static int w(...);
+}
+
 # ---------- kotlinx.coroutines ----------
 -dontwarn kotlinx.coroutines.**
 
@@ -38,5 +56,7 @@
 # Ships its own consumer rules; these are defensive in case R8 strips reflectively-used
 # Gson/RxJava2 pieces it depends on internally.
 -dontwarn com.microsoft.signalr.**
+# SignalR logs through slf4j-api but ships no binding; R8 flags the missing StaticLoggerBinder.
+-dontwarn org.slf4j.**
 -dontwarn io.reactivex.**
 -keep class com.microsoft.signalr.** { *; }

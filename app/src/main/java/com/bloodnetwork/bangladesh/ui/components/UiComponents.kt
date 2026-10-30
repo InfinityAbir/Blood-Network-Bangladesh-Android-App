@@ -1,6 +1,10 @@
 package com.bloodnetwork.bangladesh.ui.components
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -161,6 +165,8 @@ fun LabeledTextField(
     isPassword: Boolean = false,
     leadingIcon: (@Composable () -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
+    supportingText: String? = null,
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -179,12 +185,13 @@ fun LabeledTextField(
         keyboardOptions = KeyboardOptions(
             keyboardType = if (isPassword) KeyboardType.Password else keyboardType,
             imeAction = imeAction,
-            capitalization = KeyboardCapitalization.None,
+            capitalization = capitalization,
         ),
         singleLine = singleLine,
         maxLines = maxLines,
         isError = isError,
         leadingIcon = leadingIcon,
+        supportingText = supportingText?.let { { Text(it) } },
         trailingIcon = if (isPassword) {
             {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -285,7 +292,7 @@ fun RoleBadge(status: String, modifier: Modifier = Modifier) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PickerField(
     label: String,
@@ -295,13 +302,24 @@ fun PickerField(
     var query by remember { mutableStateOf("") }
     var selected by remember { mutableStateOf(label) }
     var focused by remember { mutableStateOf(false) }
+    val bringIntoView = remember { BringIntoViewRequester() }
 
     LaunchedEffect(label) { selected = label }
 
     val filtered = if (query.isBlank()) emptyList()
     else options.filter { it.contains(query, ignoreCase = true) }.take(5)
 
-    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+    // The suggestion list grows below the field, which is exactly where the keyboard is. Once there
+    // are suggestions, scroll the whole field + list group into view (after the keyboard has finished
+    // shrinking the visible area).
+    LaunchedEffect(focused, filtered.size) {
+        if (focused && filtered.isNotEmpty()) {
+            delay(150)
+            bringIntoView.bringIntoView()
+        }
+    }
+
+    Column(modifier = Modifier.padding(vertical = 4.dp).bringIntoViewRequester(bringIntoView)) {
         OutlinedTextField(
             value = if (focused) query else selected,
             onValueChange = { query = it },
@@ -367,20 +385,10 @@ fun DatePickerField(
     modifier: Modifier = Modifier,
     placeholder: String = "YYYY-MM-DD",
     minDateMillis: Long? = null,
+    // Where an empty field opens: a date of birth should open near adulthood, not on today.
+    defaultYearsAgo: Int = 0,
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    val today = remember {
-        java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.HOUR_OF_DAY, 12)
-            set(java.util.Calendar.MINUTE, 0)
-            set(java.util.Calendar.SECOND, 0)
-            set(java.util.Calendar.MILLISECOND, 0)
-        }
-    }
-    val parts = value.split("-")
-    val year = parts.getOrNull(0)?.toIntOrNull() ?: today.get(java.util.Calendar.YEAR)
-    val month = (parts.getOrNull(1)?.toIntOrNull() ?: (today.get(java.util.Calendar.MONTH) + 1)) - 1
-    val day = parts.getOrNull(2)?.toIntOrNull() ?: today.get(java.util.Calendar.DAY_OF_MONTH)
 
     Box(modifier = modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         OutlinedTextField(
@@ -408,11 +416,12 @@ fun DatePickerField(
 
     if (showDialog) {
         val state = rememberDatePickerState(
-            initialSelectedDateMillis = remember(year, month, day) {
-                java.util.Calendar.getInstance().apply {
-                    set(year, month, day, 0, 0, 0)
-                    set(java.util.Calendar.MILLISECOND, 0)
-                }.timeInMillis
+            // Material's picker works in UTC midnights. Building this from the local calendar showed
+            // the previous day east of UTC (Bangladesh) and silently shifted a saved date by one.
+            initialSelectedDateMillis = remember(value) {
+                val date = runCatching { java.time.LocalDate.parse(value) }.getOrNull()
+                    ?: java.time.LocalDate.now().minusYears(defaultYearsAgo.toLong())
+                date.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
             },
             selectableDates = remember(minDateMillis) {
                 object : SelectableDates {
@@ -426,11 +435,9 @@ fun DatePickerField(
             confirmButton = {
                 TextButton(onClick = {
                     state.selectedDateMillis?.let { millis ->
-                        val cal = java.util.Calendar.getInstance().apply { timeInMillis = millis }
-                        val y = cal.get(java.util.Calendar.YEAR)
-                        val m = cal.get(java.util.Calendar.MONTH) + 1
-                        val d = cal.get(java.util.Calendar.DAY_OF_MONTH)
-                        onValueChange("%04d-%02d-%02d".format(y, m, d))
+                        onValueChange(
+                            java.time.Instant.ofEpochMilli(millis).atZone(java.time.ZoneOffset.UTC).toLocalDate().toString(),
+                        )
                     }
                     showDialog = false
                 }) { Text(tr("OK", "ঠিক আছে")) }

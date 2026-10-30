@@ -1,7 +1,5 @@
 package com.bloodnetwork.bangladesh.ui.screens
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bloodtype
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.Route
@@ -61,9 +60,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.bloodnetwork.bangladesh.data.model.BloodRequestMatchDto
 import com.bloodnetwork.bangladesh.data.model.DonorResponse
 import com.bloodnetwork.bangladesh.ui.LocalVmFactory
+import com.bloodnetwork.bangladesh.ui.components.ReportDialog
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+import com.bloodnetwork.bangladesh.ui.util.openDialer
 import com.bloodnetwork.bangladesh.ui.viewmodel.DonorMatchesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -73,6 +74,16 @@ fun DonorMatchesScreen(onBack: () -> Unit) {
     val vm: DonorMatchesViewModel = viewModel(factory = factory)
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var reportTarget by remember { mutableStateOf<BloodRequestMatchDto?>(null) }
+    val cantCallMsg = tr("Couldn't open the phone app", "ফোন অ্যাপ খোলা যায়নি")
+
+    reportTarget?.let { target ->
+        ReportDialog(
+            subjectName = target.requesterName.ifBlank { tr("this requester", "এই অনুরোধকারী") },
+            onDismiss = { reportTarget = null },
+            onSubmit = { reason, details -> vm.reportRequester(target.bloodRequestId, reason, details) },
+        )
+    }
 
     LaunchedEffect(Unit) { vm.loadMatches() }
 
@@ -135,7 +146,12 @@ fun DonorMatchesScreen(onBack: () -> Unit) {
                         isResponding = state.respondingMatchId == match.id,
                         onAccept = { vm.respond(match.id, DonorResponse.Accepted) },
                         onDecline = { vm.respond(match.id, DonorResponse.Declined) },
-                        onCall = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${match.requesterPhone}"))) },
+                        onCall = {
+                            if (!context.openDialer(match.requesterPhone)) {
+                                android.widget.Toast.makeText(context, cantCallMsg, android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onReport = { reportTarget = match },
                         modifier = Modifier.animateItem(),
                     )
                 }
@@ -152,6 +168,7 @@ private fun MatchCard(
     onAccept: () -> Unit,
     onDecline: () -> Unit,
     onCall: () -> Unit,
+    onReport: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val accent = responseAccentColor(match.donorResponse)
@@ -225,6 +242,15 @@ private fun MatchCard(
                         }
                     }
                     else -> {}
+                }
+                TextButton(
+                    onClick = onReport,
+                    modifier = Modifier.align(Alignment.End).height(32.dp),
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                ) {
+                    Icon(Icons.Filled.Flag, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.width(4.dp))
+                    Text(tr("Report", "রিপোর্ট"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

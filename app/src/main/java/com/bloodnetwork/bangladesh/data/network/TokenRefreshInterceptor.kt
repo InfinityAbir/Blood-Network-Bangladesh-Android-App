@@ -1,8 +1,10 @@
 package com.bloodnetwork.bangladesh.data.network
 
+import com.bloodnetwork.bangladesh.data.model.RefreshTokenRequest
 import com.bloodnetwork.bangladesh.data.prefs.TokenStore
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -22,6 +24,11 @@ class TokenRefreshInterceptor(
     // every other thread that was waiting simply retries with the token it produced.
     private val refreshLock = Any()
 
+    private val json = kotlinx.serialization.json.Json {
+        ignoreUnknownKeys = true
+        explicitNulls = false
+    }
+
     private val plainClient = OkHttpClient.Builder()
         // Matches ApiClient's timeouts - the backend can be cold-starting (Render free
         // tier) on this call just as easily as on the request that triggered the 401.
@@ -33,6 +40,11 @@ class TokenRefreshInterceptor(
         val request = chain.request()
         val response = chain.proceed(request)
         if (response.code != 401) return response
+        // A 401 from login/register/refresh means bad credentials / a rejected token, not an
+        // expired access token - refreshing (or retrying) would be wrong and could loop.
+        if (isAuthEndpoint(request)) return response
+        // No bearer token was sent (guest browsing a protected endpoint): there is no session to refresh.
+        if (request.header("Authorization") == null) return response
         response.close()
 
         synchronized(refreshLock) {
@@ -77,6 +89,13 @@ class TokenRefreshInterceptor(
         }
     }
 
+    private fun isAuthEndpoint(request: okhttp3.Request): Boolean {
+        val path = request.url.encodedPath
+        return path.endsWith("/api/auth/login") ||
+            path.endsWith("/api/auth/register") ||
+            path.endsWith("/api/auth/refresh")
+    }
+
     /**
      * Outcome of a refresh attempt. The distinction matters: only [Rejected] means the
      * refresh token itself is no longer good. Collapsing every failure into "signed out"
@@ -90,7 +109,7 @@ class TokenRefreshInterceptor(
 
     private suspend fun doRefresh(refreshToken: String): RefreshResult {
         return try {
-            val body = """{"refreshToken":"$refreshToken"}"""
+            val body = json.encodeToString(RefreshTokenRequest(refreshToken))
                 .toRequestBody("application/json".toMediaType())
             val request = okhttp3.Request.Builder()
                 .url("${baseUrl}api/auth/refresh")
@@ -103,10 +122,6 @@ class TokenRefreshInterceptor(
                         if (text.isNullOrEmpty()) {
                             RefreshResult.Transient
                         } else {
-                            val json = kotlinx.serialization.json.Json {
-                                ignoreUnknownKeys = true
-                                explicitNulls = false
-                            }
                             runCatching {
                                 json.decodeFromString<com.bloodnetwork.bangladesh.data.model.AuthResponse>(text)
                             }.fold(

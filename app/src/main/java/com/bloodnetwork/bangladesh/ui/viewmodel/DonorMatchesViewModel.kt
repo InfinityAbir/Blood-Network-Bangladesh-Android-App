@@ -63,4 +63,8 @@ class DonorMatchesViewModel(
                 .onFailure { e -> _uiState.value = _uiState.value.copy(respondingMatchId = null, error = e.toDisplayMessage("Failed to respond")) }
         }
     }
+
+    /** Report the requester behind a match (the repository looks the requester up from the blood request). */
+    suspend fun reportRequester(bloodRequestId: String, reason: String, details: String?) =
+        repository.reportRequester(bloodRequestId, reason, details)
 }

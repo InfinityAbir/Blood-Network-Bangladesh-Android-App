@@ -55,9 +55,12 @@ documentation you'd rather skip for v1 — Medical is the more accurate fit).
 **Contact details:** developer email/phone/website are on the in-app About screen
 (Settings → About) — pull the current values from there since an admin can edit them.
 
-**Privacy policy URL:** the drafted policy is at the Artifact link shared alongside this
-file. **You must open it and use its share menu to make it public first** — Claude
-Artifacts are private by default, and Play's reviewers can't access a private link.
+**Privacy policy URL:** `https://infinityabir.github.io/abir-hasan-portfolio/bloodnetwork-privacy-policy.html`
+(source: `public/bloodnetwork-privacy-policy.html` in the `abir-hasan-portfolio` repo, deployed by its GitHub Pages workflow). Review the text before submitting.
+The same URL is linked inside the app (Landing, Register, About, Edit Profile).
+
+**Account deletion URL** (Data safety form): `https://infinityabir.github.io/abir-hasan-portfolio/bloodnetwork-delete-account.html`
+(source: `public/bloodnetwork-delete-account.html` in the `abir-hasan-portfolio` repo).
 
 ---
 
@@ -72,17 +75,18 @@ but this reflects what the app actually collects (see the privacy policy for ful
 | Phone number | Yes | Yes (with a matched requester/donor only) | Account functionality, communications | Required |
 | Email address | Yes | No | Account functionality | Optional |
 | Approximate location (district/upazila) | Yes | Yes (visible in donor search results) | App functionality (matching) | Required for donors |
-| Precise location (lat/long) | Yes | No (used only to compute a distance figure) | App functionality | Optional |
+| Photos (optional profile picture, uploaded by the user) | Yes | Yes (visible in donor search and request cards) | App functionality | Optional |
+| Precise location (lat/long) | **No** — the app has no location permission and never sends coordinates | — | — | — |
 | Health info (blood group, donation history, availability) | Yes | Yes (blood group + availability visible in search) | App functionality (matching) | Required for donors |
 | In-app messages (AI chatbot) | Yes | Yes (sent to Groq to generate a reply) | App functionality | Optional (only if you use the chatbot) |
 | App activity / diagnostics (IP, request logs) | Yes | No | Security, abuse prevention, debugging | N/A (automatic) |
 
 **Is all user data encrypted in transit?** Yes — HTTPS only, enforced at the OS level.
 
-**Do you provide a way for users to request data deletion?** Yes, but not self-service
-in-app yet — via the contact email on the About screen / privacy policy. Answer the Play
-form's "account deletion" question honestly: no in-app deletion flow, deletion is
-handled manually by request.
+**Do you provide a way for users to request data deletion?** Yes. In-app: Edit Profile →
+Delete my account (password-confirmed), plus the web page above. **Requires the backend
+endpoint `POST /api/auth/delete-account` (body `{"currentPassword": "..."}`) to exist** — until
+it does, the app falls back to an email request. Don't ship before the endpoint is live.
 
 **Data collected is NOT used for:** advertising or marketing purposes (there's no ad SDK
 in the app), and is not sold to third parties.

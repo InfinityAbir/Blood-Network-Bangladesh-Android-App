@@ -196,17 +196,21 @@ class AuthViewModel(
         }
     }
 
-    /** Photo-only update — doesn't require the current password (see backend AuthService). */
-    fun updatePhoto(photoUrl: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        updateProfile(
-            currentPassword = "",
-            newEmail = null,
-            newPhoneNumber = null,
-            newPassword = null,
-            newPhotoUrl = photoUrl,
-            onSuccess = onSuccess,
-            onError = onError,
-        )
+    /** Uploads a (already resized) JPEG as the profile picture, then reloads the user so every avatar updates. */
+    fun uploadPhoto(jpeg: ByteArray, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            runCatching { repository.uploadPhoto(jpeg) }
+                .onSuccess { refreshProfile(); onSuccess() }
+                .onFailure { e -> onError(e.toDisplayMessage("Couldn't upload the photo. Please try again.")) }
+        }
+    }
+
+    fun removePhoto(onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            runCatching { repository.removePhoto() }
+                .onSuccess { refreshProfile(); onSuccess() }
+                .onFailure { e -> onError(e.toDisplayMessage("Couldn't remove the photo. Please try again.")) }
+        }
     }
 
     private fun Throwable.toUserMessage(): String {

@@ -1,6 +1,10 @@
 package com.bloodnetwork.bangladesh.ui.theme
 
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -57,6 +61,19 @@ fun BloodNetworkTheme(
     darkTheme: Boolean = themeMode?.let { it == com.bloodnetwork.bangladesh.data.prefs.ThemeMode.Dark } ?: isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
+    // The in-app theme toggle can differ from the system theme, and edge-to-edge (enforced
+    // from targetSdk 35) lets the app background show behind the system bars. Keep the bar
+    // icons readable by matching their tint to the app's own light/dark choice.
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window ?: return@SideEffect
+            WindowCompat.getInsetsController(window, view).apply {
+                isAppearanceLightStatusBars = !darkTheme
+                isAppearanceLightNavigationBars = !darkTheme
+            }
+        }
+    }
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
         typography = AppTypography,

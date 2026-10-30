@@ -8,6 +8,8 @@ import com.bloodnetwork.bangladesh.data.model.ChatResponse
 import com.bloodnetwork.bangladesh.data.model.BloodRequestDto
 import com.bloodnetwork.bangladesh.data.model.BloodRequestMatchDto
 import com.bloodnetwork.bangladesh.data.model.CreateBloodRequestRequest
+import com.bloodnetwork.bangladesh.data.model.CreateReportRequest
+import com.bloodnetwork.bangladesh.data.model.DeleteAccountRequest
 import com.bloodnetwork.bangladesh.data.model.CreateDonorProfileRequest
 import com.bloodnetwork.bangladesh.data.model.FulfillBloodRequestRequest
 import com.bloodnetwork.bangladesh.data.model.DistrictDto
@@ -46,6 +48,8 @@ import com.bloodnetwork.bangladesh.data.model.SystemSettingsDto
 import com.bloodnetwork.bangladesh.data.model.ToggleUserActiveRequest
 import com.bloodnetwork.bangladesh.data.model.VerifyDonorRequest
 import com.bloodnetwork.bangladesh.data.model.ResolveReportRequest
+import com.bloodnetwork.bangladesh.data.model.PhotoUploadResponse
+import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -75,6 +79,20 @@ interface BloodNetworkApi {
 
     @GET("api/auth/me")
     suspend fun me(): UserDto
+
+    @POST("api/auth/delete-account")
+    suspend fun deleteAccount(@Body request: DeleteAccountRequest): Unit
+
+    // ---- Profile picture (raw JPEG body; the app converts whatever the user picked) ----
+    @PUT("api/photos/me")
+    suspend fun uploadPhoto(@Body body: RequestBody): PhotoUploadResponse
+
+    @DELETE("api/photos/me")
+    suspend fun removePhoto(): Unit
+
+    // ---- Abuse reports (any signed-in user) ----
+    @POST("api/reports")
+    suspend fun createReport(@Body request: CreateReportRequest): Unit
 
     // ---- Donors ----
     @POST("api/donors/me/profile")

@@ -43,6 +43,10 @@ class NotificationSocket(
     private val _unreadCount = MutableSharedFlow<Int>(replay = 1, extraBufferCapacity = 1)
     val unreadCount = _unreadCount.asSharedFlow()
 
+    /** True while the live hub connection is up (used to avoid duplicating its alerts as push). */
+    val isConnected: Boolean
+        get() = connection?.connectionState == HubConnectionState.CONNECTED
+
     fun start() {
         if (connection?.connectionState == HubConnectionState.CONNECTED) return
 

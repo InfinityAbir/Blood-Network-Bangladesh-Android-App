@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Handshake
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalHospital
@@ -72,10 +73,12 @@ import com.bloodnetwork.bangladesh.ui.components.ErrorText
 import com.bloodnetwork.bangladesh.ui.components.LabeledTextField
 import com.bloodnetwork.bangladesh.ui.components.PickerField
 import com.bloodnetwork.bangladesh.ui.components.PrimaryButton
+import com.bloodnetwork.bangladesh.ui.components.ReportDialog
 import com.bloodnetwork.bangladesh.ui.components.RowChips
 import com.bloodnetwork.bangladesh.ui.components.SkeletonCard
 import com.bloodnetwork.bangladesh.ui.i18n.tr
 import com.bloodnetwork.bangladesh.ui.theme.BloodRed
+import com.bloodnetwork.bangladesh.ui.util.openDialer
 import com.bloodnetwork.bangladesh.ui.viewmodel.LocationViewModel
 import com.bloodnetwork.bangladesh.ui.viewmodel.RequestDetailsViewModel
 
@@ -335,6 +338,14 @@ fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
             // G2: matched donors for this request (requester view)
             val context = LocalContext.current
             var showScoreInfo by remember { mutableStateOf(false) }
+            var reportDonorTarget by remember { mutableStateOf<com.bloodnetwork.bangladesh.data.model.BloodRequestMatchDto?>(null) }
+            reportDonorTarget?.let { target ->
+                ReportDialog(
+                    subjectName = target.donorName.ifBlank { tr("this donor", "এই দাতা") },
+                    onDismiss = { reportDonorTarget = null },
+                    onSubmit = { reason, details -> vm.reportDonor(target.donorId, target.bloodRequestId, reason, details) },
+                )
+            }
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -406,7 +417,7 @@ fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
                                             }
                                             if (match.donorPhone.isNotBlank() && match.donorResponse == DonorResponse.Accepted) {
                                                 Button(
-                                                    onClick = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${match.donorPhone}"))) },
+                                                    onClick = { context.openDialer(match.donorPhone) },
                                                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                                                     shape = RoundedCornerShape(50),
                                                     contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 0.dp),
@@ -415,6 +426,17 @@ fun RequestDetailsScreen(requestId: String, onBack: () -> Unit) {
                                                     Icon(Icons.Filled.Call, contentDescription = null, modifier = Modifier.size(14.dp))
                                                     Spacer(Modifier.width(6.dp))
                                                     Text(tr("Call ${match.donorName}", "${match.donorName} কে কল করুন"), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                                                }
+                                            }
+                                            if (match.donorId.isNotBlank()) {
+                                                TextButton(
+                                                    onClick = { reportDonorTarget = match },
+                                                    modifier = Modifier.align(Alignment.End).height(32.dp),
+                                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                                                ) {
+                                                    Icon(Icons.Filled.Flag, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                    Spacer(Modifier.width(4.dp))
+                                                    Text(tr("Report", "রিপোর্ট"), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                                 }
                                             }
                                         }

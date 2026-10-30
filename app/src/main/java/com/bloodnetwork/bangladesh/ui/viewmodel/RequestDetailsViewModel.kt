@@ -129,4 +129,8 @@ class RequestDetailsViewModel(
     fun clearError() {
         _uiState.value = _uiState.value.copy(error = null)
     }
+
+    /** Report a matched donor. [donorUserId] is the match's donorId (a user id). */
+    suspend fun reportDonor(donorUserId: String, bloodRequestId: String, reason: String, details: String?) =
+        repository.reportUser(donorUserId, bloodRequestId, reason, details)
 }
